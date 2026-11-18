@@ -94,7 +94,7 @@ their source.
 
 <table>
 <tr>
-<td width="25%"><a href="https://github.com/KitionAI/kition-showcase/tree/main/note/mandarin-study-notes"><img src="assets/readme/made-1.png" alt="Chinese vocabulary notes with characters, pinyin and meanings in a table and example sentences in callouts." /></a></td>
+<td width="25%"><a href="https://github.com/KitionAI/kition-showcase/tree/main/note/lakeside-camping-checklist"><img src="assets/readme/made-1.png" alt="A camping trip packing checklist with tasks nested under each bag and half of them ticked off." /></a></td>
 <td width="25%"><a href="https://github.com/KitionAI/kition-showcase/tree/main/note/mechanics-revision-formulas"><img src="assets/readme/made-2.png" alt="A revision sheet of mechanics formulas set as display and inline math, with a worked example." /></a></td>
 <td width="25%"><a href="https://github.com/KitionAI/kition-showcase/tree/main/note/parcel-tracking-api-reference"><img src="assets/readme/made-3.png" alt="Developer documentation for a small REST API, with request and response code blocks and parameter tables." /></a></td>
 <td width="25%"><a href="https://github.com/KitionAI/kition-showcase/tree/main/note/sourdough-starter-guide"><img src="assets/readme/made-4.png" alt="A sourdough starter guide with wikilinks, tag chips and tip and warning callouts." /></a></td>

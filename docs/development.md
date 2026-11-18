@@ -137,7 +137,7 @@ sources in place. The linked install rewrites `web/pnpm-lock.yaml`; do not commi
 
 The README's screenshots are taken by [`web/scripts/readme-shots.mjs`](../web/scripts/readme-shots.mjs)
 from the development host; it is a tool, not a test. `assets/readme/made-1.png` … `made-4.png` are
-the `thumb.png` of four kition-showcase samples (`note/mandarin-study-notes`,
+the `thumb.png` of four kition-showcase samples (`note/lakeside-camping-checklist`,
 `note/mechanics-revision-formulas`, `note/parcel-tracking-api-reference`,
 `note/sourdough-starter-guide`), copied as they are.
 
