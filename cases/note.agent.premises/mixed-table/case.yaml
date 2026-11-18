@@ -1,0 +1,21 @@
+format: 1
+id: note.agent.premises/mixed-table
+feature: note.agent.premises
+intent: >-
+  Seeded rounds of a colleague's changes against writes by id, by index, by name, by point and
+  structural writes, and every pairing once; each outcome is checked against a rule per write
+  form: no write applies where its rule needs a refusal and none is refused that its rule does
+  not need refused.
+layer: gate
+dimension: ai
+source:
+  kind: synthetic
+  from: bindings/headless/tests/mixed.rs
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note, test: mixed }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

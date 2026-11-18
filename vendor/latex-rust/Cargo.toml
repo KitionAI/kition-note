@@ -1,0 +1,27 @@
+[package]
+name = "latex-rust"
+version = "2.1.1"
+edition = "2021"
+rust-version = "1.76"
+authors = ["Jeffrey S Carr <jscarr1964@gmail.com>"]
+license = "MIT OR Apache-2.0"
+description = "latex-rust 2.1.1 as the Kition Note kit links it: its own named-color table in place of the dvips data file (see NOTICE)."
+repository = "https://github.com/jscarr64/LaTeX-Rust"
+publish = false
+
+[lib]
+name = "latex_rust"
+path = "src/lib.rs"
+
+[features]
+default = ["std"]
+std = []
+# PNG raster backend (`src/render/png`).
+png = ["dep:tiny-skia"]
+# egui Shape backend (`src/render/egui`).
+egui = ["dep:egui"]
+
+[dependencies]
+ttf-parser = "0.25"
+tiny-skia = { version = "0.11", optional = true }
+egui = { version = "0.28", optional = true }

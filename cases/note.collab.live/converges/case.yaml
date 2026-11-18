@@ -1,0 +1,21 @@
+format: 1
+id: note.collab.live/converges
+feature: note.collab.live
+intent: >-
+  Two to five replicas of a note, edited at once through the engine's own commands (typing in the
+  same paragraph, splitting and joining paragraphs, moving sections, line endings, comment
+  threads), offline and then merged in any order, end equal, save the same bytes and match a
+  fresh replica (kition-sdk's platform convergence suite, L6).
+layer: gate
+dimension: collab
+source:
+  kind: synthetic
+  from: bindings/wasm/tests/convergence.rs
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: convergence }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

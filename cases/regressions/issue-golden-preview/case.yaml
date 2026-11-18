@@ -1,0 +1,22 @@
+format: 1
+id: regressions/issue-golden-preview
+feature: note.agent.preview
+intent: >-
+  The preview an agent gets of `conformance/basic.md` (KHP A39) is the expected preview
+  `conformance/golden/basic.png`, within `conformance/golden/tolerance.json`, compared as `khp check`
+  compares them: drawn by the kit's own engine with the fonts it ships, through the same
+  `view.screenshot` a kits server asks for. Before, conformance/ had no golden previews and no
+  tolerance, so the agent-ready self-test stopped at the package check.
+layer: gate
+source:
+  kind: probe
+  from: "agent readiness review, 2026-11-11 (no golden previews and tolerance.json)"
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note, test: preview }
+expected:
+  - actual: out:cargo-test
+    compare: exit
+    value: 0
+since: "2026-11-11"

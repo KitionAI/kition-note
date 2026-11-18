@@ -1,0 +1,11 @@
+[package]
+name = "kition-note-markdown-file"
+description = "The Note kit's file: Markdown bytes to the replica's text and back, byte for byte; the external-change merge."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true

@@ -1,0 +1,25 @@
+format: 1
+id: regressions/issue-table-menu-outside-click
+feature: note.tables
+intent: >-
+  The table's column and row menu closes when the person clicks anywhere else, including elsewhere
+  in the note's canvas, not only outside the frame. The canvas cancels its pointer presses, so no
+  mousedown follows them; the menu watches pointer presses. The person reported that clicking
+  elsewhere left the menu open.
+layer: unit
+dimension: fidelity
+source:
+  kind: issue
+  from: owner report (clicking elsewhere did not close the table menu)
+  license: owned
+input: []
+steps:
+  - flow:
+      spec: web/tests/table.mjs
+      scenario: a click elsewhere in the note closes the menu
+      browsers: [chromium, webkit]
+expected:
+  - actual: out:flow
+    compare: exit
+since: "2026-11-16"
+requires: [chromium, webkit]

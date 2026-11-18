@@ -1,0 +1,21 @@
+format: 1
+id: regressions/issue-editor-local-date
+feature: note.insert
+intent: >-
+  Insert date and Insert date and time wrote the UTC date and time, a day off near midnight for
+  anyone outside UTC. They write the local time now: the time zone of the page the engine runs in,
+  or the offset in minutes a caller gives in utcOffset (the headless kit, with no time zone to
+  read, keeps UTC unless one is given).
+layer: gate
+dimension: function
+source:
+  kind: probe
+  from: bindings/wasm/tests/edit_regressions.rs (insert_date_uses_the_local_time)
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: edit_regressions, filter: insert_date_uses_the_local_time }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

@@ -1,0 +1,21 @@
+format: 1
+id: note.agent.premises/independent-reading
+feature: note.agent.premises
+intent: >-
+  Every write command's handler and engine operation, one row per code path, is compared with
+  what the command's declarations hold on the same note; each command offered to agents that
+  holds less than its handler reads is listed with why the guard does not let it land wrongly and
+  the behaviour test that shows it.
+layer: gate
+dimension: ai
+source:
+  kind: synthetic
+  from: bindings/wasm/tests/declarations_independent.rs
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: declarations_independent }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

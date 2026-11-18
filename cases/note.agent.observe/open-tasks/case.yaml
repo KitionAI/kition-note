@@ -1,0 +1,40 @@
+format: 1
+id: note.agent.observe/open-tasks
+feature: note.agent.observe
+intent: >-
+  The agent counts the note's open tasks through the kit and writes the answer as the note's last
+  line, leaving everything else as it was.
+layer: eval
+source:
+  kind: synthetic
+  from: repo:conformance/basic.md
+  license: Apache-2.0
+  note: A copy of the conformance note the note kit tests check clean.
+input: [input/plan.md]
+steps:
+  - task:
+      prompt: >-
+        How many tasks in plan.md are still open? Add one line at the very end of the note that
+        says exactly "Open tasks: N", with N the number. Change nothing else.
+      max_turns: 20
+  - file: { path: plan.md, as: text }
+  - inspect: { path: plan.md, as: after }
+expected:
+  - actual: out:text
+    compare: text
+    value:
+      matches: ["^Open tasks: 1\\s*(?![\\s\\S])"]
+      contains: ["- [x] Draft the announcement", "- [ ] Book the review meeting", "| 2 | Feedback round |"]
+  - actual: out:after
+    compare: values
+    collateral: true
+    value:
+      details.tasks.done: 1
+      details.tasks.open: 1
+      details.properties: { count: 3 }
+      details.tables: { count: 1 }
+solution:
+  - tool: note_run
+    args: { path: plan.md, steps: [{ command: text.insert, params: { at: 456, text: "\nOpen tasks: 1\n" } }] }
+since: "2026-11-16"
+timeout_s: 600

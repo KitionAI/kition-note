@@ -1,0 +1,21 @@
+format: 1
+id: regressions/issue-task-box-cursor
+feature: note.tasks
+intent: >-
+  The pointer over a task's checkbox shows the arrow, as Obsidian's does, not the text I-beam: the
+  box is a control a click toggles, not text to place the caret in.
+layer: unit
+dimension: function
+source:
+  kind: issue
+  from: owner report (the pointer stayed an I-beam over a task's box)
+  license: owned
+input: []
+steps:
+  - cargo-test:
+      package: kition-note-kit
+      test: a_task_box_under_the_pointer_takes_the_arrow
+expected:
+  - actual: out:cargo-test
+    compare: exit
+since: "2026-11-16"

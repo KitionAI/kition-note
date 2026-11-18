@@ -1,0 +1,23 @@
+format: 1
+id: regressions/issue-comment-anchor-moves
+feature: note.comments
+intent: >-
+  A comment thread's stored range stayed where it was through the note's writes, and the thread was
+  found again at the occurrence of its quote nearest that stale range, so inserting 80 characters
+  above a thread on "beta" moved it onto the front matter's "beta" tag. Every write of the kit
+  (text commands, the edit commands, note.write, file.setLineEndings, and so the editor's typing)
+  now moves the threads' ranges with its edits in the same step, and the quote is looked for from
+  there; an undo takes the move back with the text.
+layer: gate
+dimension: collab
+source:
+  kind: probe
+  from: bindings/wasm/tests/edit_regressions.rs (comment_anchors_move_with_writes)
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: edit_regressions, filter: comment_anchors_move_with_writes }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

@@ -1,0 +1,25 @@
+format: 1
+id: note.agent.premises/outside-changes
+feature: note.agent.premises
+intent: >-
+  A colleague's program rewrites the .md between an agent's observation and its write with that
+  basis: an unrelated change applies and `others` names only the root's body; the same text is
+  refused `changed`; a deleted section or comment thread is refused; a table or a line inserted
+  before an index refuses a write by it, after it does not; a moved section refuses a write by
+  offset or line and not by heading path or block id; a name swap and a rename away refuse a write
+  by that name; premise, epoch and off guards; another agent of the same server before and after an
+  offset; repeated unrelated changes refuse no write under the premise guard and every write
+  under the epoch guard.
+layer: gate
+dimension: ai
+source:
+  kind: synthetic
+  from: bindings/headless/tests/outside.rs
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note, test: outside }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

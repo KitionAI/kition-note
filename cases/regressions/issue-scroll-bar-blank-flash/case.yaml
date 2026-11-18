@@ -1,0 +1,34 @@
+format: 1
+id: regressions/issue-scroll-bar-blank-flash
+feature: note.view
+intent: >-
+  Scrolling a long note never shows blank canvas: a drag of the scroll bar (many screens a step)
+  keeps the painted view until the new one is painted, a wheel scroll paints the lines coming into
+  view while it scrolls, and a note scrolled to its end stays there when the pointer moves over it.
+  The person saw blank flashes while dragging and the note jumping back to its top (Obsidian shows
+  neither).
+layer: unit
+dimension: fidelity
+source:
+  kind: issue
+  from: owner report (dragging the scroll bar flashed blank; the note jumped to the top)
+  license: owned
+input: []
+steps:
+  - flow:
+      spec: web/tests/obsidian.mjs
+      scenario: a scroll-bar drag never flashes blank canvas
+      browsers: [chromium, webkit]
+  - flow:
+      spec: web/tests/obsidian.mjs
+      scenario: lines come into view painted while the note scrolls
+      browsers: [chromium, webkit]
+  - flow:
+      spec: web/tests/obsidian.mjs
+      scenario: a scroll to the end stays there when the pointer moves over the note
+      browsers: [chromium, webkit]
+expected:
+  - actual: out:flow
+    compare: exit
+since: "2026-11-16"
+requires: [chromium, webkit]

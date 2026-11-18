@@ -1,0 +1,17 @@
+format: 1
+id: note.format/save-reopen
+feature: note.format
+intent: >-
+  Bold, italic, strike, inline code, inline math, a level-2 heading and a quote applied to selections survive a Markdown save and reopen: the reopened note saves the same bytes.
+layer: gate
+source:
+  kind: synthetic
+  from: bindings/wasm/src/round_trip_tests.rs (inline_and_block_formatting_survive_save_and_reopen)
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, filter: "round_trip_tests::inline_and_block_formatting_survive_save_and_reopen" }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

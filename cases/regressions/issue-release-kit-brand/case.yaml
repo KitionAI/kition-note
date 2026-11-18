@@ -1,0 +1,18 @@
+format: 1
+id: regressions/issue-release-kit-brand
+feature: note.platform.brand
+intent: The kit declares the canonical light and dark brand colors shipped by Kition.
+layer: gate
+source:
+  kind: probe
+  from: kit.json
+  license: owned
+input: []
+steps:
+  - exec:
+      cmd: [node, -e, "const assert = require('node:assert/strict'); assert.deepEqual(require('./kit.json').ui.brand, {light: '#5645d4', dark: '#8b7cf0'})"]
+expected:
+  - actual: out:exec
+    compare: exit
+    value: 0
+since: "2026-11-16"

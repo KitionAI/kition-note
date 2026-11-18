@@ -1,0 +1,19 @@
+format: 1
+id: regressions/issue-5
+feature: note.agent.recover
+intent: >-
+  A line with $$...$$ opened and closed on it (`$$E=mc^2$$ and text`) is inline math, not an
+  unclosed math block: only a line with an odd number of $$ opens or closes a block, so note_check
+  reports note.unclosed-fence only for a block that is really never closed.
+layer: gate
+source:
+  kind: issue
+  from: Kition Note regression suite
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: inline_math }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

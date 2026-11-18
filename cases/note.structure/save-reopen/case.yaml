@@ -1,0 +1,17 @@
+format: 1
+id: note.structure/save-reopen
+feature: note.structure
+intent: >-
+  Sections replaced, inserted and moved, a heading level changed, a block replaced and a block appended survive a Markdown save and reopen: the reopened note saves the same bytes and reads the same.
+layer: gate
+source:
+  kind: synthetic
+  from: bindings/wasm/src/round_trip_tests.rs (sections_blocks_and_headings_survive_save_and_reopen)
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, filter: "round_trip_tests::sections_blocks_and_headings_survive_save_and_reopen" }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

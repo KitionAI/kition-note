@@ -1,0 +1,23 @@
+format: 1
+id: regressions/issue-dropped-threads
+feature: note.agent.premises
+intent: >-
+  After any change made in the .md, the headless kit reads the file again and the agent's comment
+  threads are gone (comments are the host's, never in the file); `others` does not say so, and a
+  write naming a thread reached the kit and failed `not-found`. The kit now answers the addressed
+  ids it no longer has as unproven, so the write is refused `unknown` before it runs. The note
+  read again now keeps the threads (continuity); the refusal remains for a reread the kit cannot
+  pair with the note it replaces.
+layer: gate
+dimension: ai
+source:
+  kind: probe
+  from: bindings/headless/tests/mixed.rs (W1 by id)
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note, test: mixed }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

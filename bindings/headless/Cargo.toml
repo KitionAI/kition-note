@@ -1,0 +1,28 @@
+[package]
+name = "kition-note"
+description = "The Note kit for Kition's agent: the Kition SDK document served headless over the Kit Protocol."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+kition-note-kit = { path = "../wasm" }
+kition-headless = { workspace = true }
+kition-note-fonts = { workspace = true }
+
+[dev-dependencies]
+# The headless tests drive the kit as a host does (KitBackend) and read what it answers.
+kition-kit-server = { workspace = true }
+serde_json = { workspace = true }
+base64 = { workspace = true }
+image = { workspace = true }
+# outside.rs and premises.rs drive the kit through the kits' MCP server's tools, as an agent does.
+kition-kits = { workspace = true }
+kition-env = { workspace = true }
+kition-kit = { workspace = true }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }

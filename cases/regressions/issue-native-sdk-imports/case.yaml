@@ -1,0 +1,17 @@
+format: 1
+id: regressions/issue-native-sdk-imports
+feature: note.platform.native-host
+layer: unit
+directions: [compat]
+intent: A third-party native host imports the document contract from the note kit without pinning the kition-sdk revision the kit depends on.
+source:
+  kind: probe
+  from: kition-note 4e67e94 (native third-party hosts consume the SDK through the binding alone)
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: native_host_imports
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

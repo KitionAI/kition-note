@@ -1,0 +1,20 @@
+format: 1
+id: regressions/issue-open-at-line-scroll
+feature: note.view
+intent: >-
+  A note the host opens at a place (document.view: a search hit's line, a heading, a block) shows
+  that place: the place is selected only after the first view is placed, so placing the first view
+  at the top never scrolls the opened line away again (web/tests/flow.mjs "opening at a line
+  selects it and shows it" failed about 1 run in 6).
+layer: unit
+source:
+  kind: probe
+  from: kition-note web/tests/flow.mjs (line 201 selected, not visible)
+  license: Apache-2.0
+input: []
+steps:
+  - exec: { cmd: [sh, -c, "cd web && npx vitest run src/firstView.spec.ts"] }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

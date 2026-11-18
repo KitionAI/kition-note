@@ -1,0 +1,19 @@
+format: 1
+id: note.text.edit/edge-files-byte-for-byte
+feature: note.text.edit
+intent: >-
+  Every synthetic edge file (byte order marks, CRLF and mixed line endings, missing final newline and
+  the other edges in the note bench) opens and saves back byte for byte, both from the file and for
+  a co-editor who opens only the replica.
+layer: unit
+source:
+  kind: synthetic
+  from: crates/kdm (kition_note_kdm::file::bench::EDGE_FILES)
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, filter: "tests::every_edge_saves_back_byte_for_byte" }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

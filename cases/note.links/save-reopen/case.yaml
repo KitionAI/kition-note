@@ -1,0 +1,17 @@
+format: 1
+id: note.links/save-reopen
+feature: note.links
+intent: >-
+  A Markdown link updated, a link inserted and wikilinks retargeted survive a save and reopen: the same bytes and the same links.list.
+layer: gate
+source:
+  kind: synthetic
+  from: bindings/wasm/src/round_trip_tests.rs (links_survive_save_and_reopen)
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, filter: "round_trip_tests::links_survive_save_and_reopen" }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

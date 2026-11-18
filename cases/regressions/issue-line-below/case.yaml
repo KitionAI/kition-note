@@ -1,0 +1,20 @@
+format: 1
+id: regressions/issue-line-below
+feature: note.agent.projection
+intent: >-
+  A write by line (task.toggle {line}) was refused `changed` after a colleague added a line right
+  below it: the insertion at the line's end touched it under the closed-edge rule. A line whose
+  characters are whole where the change put them now applies, and is relocated when it moved.
+layer: gate
+dimension: ai
+source:
+  kind: probe
+  from: bindings/wasm/src/premise.rs (a_write_by_line_is_moved_by_lines_above_and_applies_after_lines_below), bindings/headless/tests/outside.rs (s15)
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note, test: outside }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

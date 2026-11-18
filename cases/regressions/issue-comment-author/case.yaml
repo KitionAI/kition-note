@@ -1,0 +1,22 @@
+format: 1
+id: regressions/issue-comment-author
+feature: note.comments
+intent: >-
+  comment.add and comment.reply wrote the `author` parameter as the comment's author whoever called
+  them, so an agent could write a comment as another principal. A comment is written as its caller
+  now: an author other than the caller's own principal is refused (invalid-params), the caller's
+  own is accepted, and only the editor's local person, whose principal the host passes in `author`,
+  names it.
+layer: gate
+dimension: function
+source:
+  kind: probe
+  from: bindings/wasm/tests/edit_regressions.rs (comment_author_is_the_caller)
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: edit_regressions, filter: comment_author_is_the_caller }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

@@ -1,0 +1,25 @@
+format: 1
+id: note.platform.display-modes/mode-smoke
+feature: note.platform.display-modes
+intent: >-
+  The note in each display mode, through the development host and kition-sdk's mode smoke: Menus,
+  Single line and Classic each show, Cmd+\ enters Focus and Escape leaves it; Single line opens
+  on Format and shows a Markdown toolbar (headings, bold, italic, strikethrough, inline code,
+  lists, task list, quote, link, table, code block) at 1440 and 1024 px; Classic still shows at
+  Kition's editor widths (1165 and 749 px), its ribbon giving way; the Focus bar covers none of
+  the note's controls.
+layer: gate
+dimension: function
+source:
+  kind: synthetic
+  from: web/tests/modes.mjs
+  license: owned
+input: []
+steps:
+  - exec:
+      cmd: [node, web/tests/modes.mjs, webkit]
+expected:
+  - { actual: "out:exec", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300
+requires: [webkit]

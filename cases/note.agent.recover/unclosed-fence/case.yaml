@@ -1,0 +1,33 @@
+format: 1
+id: note.agent.recover/unclosed-fence
+feature: note.agent.recover
+intent: >-
+  The agent finds an unclosed code fence with the kit's check and closes it, keeping the note's
+  text: the check-then-fix loop agents rely on (KHP Verify).
+layer: eval
+source:
+  kind: synthetic
+  from: repo:conformance/check-unclosed-fence.md
+  license: Apache-2.0
+  note: A copy of the conformance fixture for note.unclosed-fence.
+input: [input/setup.md]
+steps:
+  - task:
+      prompt: Check setup.md with the kit and fix every problem it reports, without removing any of its text.
+      max_turns: 20
+  - check: { path: setup.md, as: diagnostics }
+  - file: { path: setup.md, as: text }
+expected:
+  - actual: out:diagnostics
+    compare: diagnostics
+    value: { absent: [note.unclosed-fence], max_errors: 0 }
+  - actual: out:text
+    compare: text
+    collateral: true
+    value:
+      contains: ["# Setup", "npm install", "More text that became code."]
+solution:
+  - tool: note_run
+    args: { path: setup.md, steps: [{ command: text.insert, params: { at: 58, text: "```\n" } }] }
+since: "2026-11-16"
+timeout_s: 600

@@ -1,0 +1,18 @@
+format: 1
+id: regressions/issue-msrv-math-dependency
+feature: note.platform.native-host
+layer: unit
+directions: [compat, fidelity]
+intent: A native consumer builds with the kit's declared Rust 1.95 minimum while math fractions and superscripts still lay out correctly. latex-rust 3.0.1 requires Rust 1.99 and prevents both tests from compiling.
+source:
+  kind: probe
+  from: kition-note 4e67e94 (native third-party hosts consume the SDK through the binding alone)
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: native_host_imports
+  - cargo-test: a_fraction_lays_out_with_a_bar_and_glyphs
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

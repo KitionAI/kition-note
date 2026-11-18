@@ -1,0 +1,44 @@
+format: 1
+id: note.agent.act/risks-section
+feature: note.agent.act
+intent: >-
+  The agent adds a new section with a list at the end of a structured note, keeping its front
+  matter, tasks, table and callout intact.
+layer: eval
+source:
+  kind: synthetic
+  from: repo:conformance/basic.md
+  license: Apache-2.0
+  note: A copy of the conformance note the note kit tests check clean.
+input: [input/plan.md]
+steps:
+  - task:
+      prompt: >-
+        Add a section "## Risks" at the end of plan.md with two bullet points: "Venue may be
+        booked" and "Speakers may cancel".
+      max_turns: 20
+  - file: { path: plan.md, as: text }
+  - inspect: { path: plan.md, as: after }
+expected:
+  - actual: out:text
+    compare: text
+    value:
+      matches: ["^## Risks\\n+- Venue may be booked\\n- Speakers may cancel\\s*(?![\\s\\S])"]
+      contains: ["title: Launch plan", "> Dates move if the beta slips."]
+  - actual: out:after
+    compare: values
+    collateral: true
+    value:
+      details.tasks.done: 1
+      details.tasks.open: 1
+      details.properties: { count: 3 }
+      details.tables: { count: 1 }
+  - actual: out:after
+    compare: values
+    value:
+      details.headings: 5
+solution:
+  - tool: note_run
+    args: { path: plan.md, steps: [{ command: text.insert, params: { at: 456, text: "\n## Risks\n\n- Venue may be booked\n- Speakers may cancel\n" } }] }
+since: "2026-11-16"
+timeout_s: 600

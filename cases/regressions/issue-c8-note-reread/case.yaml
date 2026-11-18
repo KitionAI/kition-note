@@ -1,0 +1,26 @@
+format: 1
+id: regressions/issue-c8-note-reread
+feature: note.agent.premises
+intent: >-
+  kition-sdk's reread contract: a clean session whose file another program changed is read again
+  into the same session, or refused when the kit cannot reconcile the undo history it holds.
+  The note implemented none of the reread hooks, so after an agent's write any change of the
+  .md refused every later call ("this kit cannot reconcile retained session history after a
+  file reread"). The note now takes the file's difference into its session as an import,
+  outside both undo histories: the agent's next write applies, its undo takes back only its own
+  steps and leaves the outside change, and the selection, the folds and the comment threads
+  stay with their ids.
+layer: gate
+dimension: ai
+source:
+  kind: probe
+  from: bindings/headless/tests/outside.rs (s1 after an agent's write)
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note, test: reread }
+  - cargo-test: { package: kition-note-kit, test: reread }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

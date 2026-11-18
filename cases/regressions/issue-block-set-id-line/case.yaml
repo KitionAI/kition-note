@@ -1,0 +1,20 @@
+format: 1
+id: regressions/issue-block-set-id-line
+feature: note.structure
+intent: >-
+  block.setId by line wrote ' ^id' into front-matter lines, code-block lines and table rows, and
+  refused the id the line already had. Those lines are refused as invalid targets now (no Markdown
+  block an id can mark), and the line's own id is accepted as no change.
+layer: gate
+dimension: function
+source:
+  kind: probe
+  from: bindings/wasm/tests/edit_regressions.rs (block_set_id_by_line_takes_only_block_lines)
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: edit_regressions, filter: block_set_id_by_line_takes_only_block_lines }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

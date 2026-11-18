@@ -1,0 +1,17 @@
+format: 1
+id: regressions/issue-native-host-origin
+feature: note.platform.native-host
+intent: A downstream native host can label system edits through the note kit alone, without its own dependency on kition-sdk, and those edits stay outside person undo.
+layer: unit
+requirements: []
+source:
+  kind: probe
+  from: kition-note 4e67e94 (native third-party hosts consume the SDK through the binding alone)
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: native_host_system_edits_stay_outside_person_undo
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

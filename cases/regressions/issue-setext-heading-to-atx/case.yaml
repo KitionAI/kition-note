@@ -1,0 +1,21 @@
+format: 1
+id: regressions/issue-setext-heading-to-atx
+feature: note.structure
+intent: >-
+  heading.setLevel with style "atx" on an underlined (Setext) heading whose text spans lines kept
+  only the first line and dropped the rest. Every line is kept now, joined with one space into the
+  one ATX line, the way Markdown reads a line break inside a heading, so the heading's text (and
+  its path in the outline) is unchanged.
+layer: gate
+dimension: function
+source:
+  kind: probe
+  from: bindings/wasm/tests/edit_regressions.rs (setext_heading_to_atx_keeps_every_line)
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: edit_regressions, filter: setext_heading_to_atx_keeps_every_line }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

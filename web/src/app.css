@@ -1,0 +1,1023 @@
+/* The shell around the engine's canvas: the canvas fills the body between the bar and the status bar. */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+/* The note has no page: the canvas around the document is the same white as the document, as in
+   Obsidian. Important, so a host theme's canvas backdrop (an inline style on the root) does not
+   frame the note as a sheet. */
+:root {
+  --kit-canvas: #ffffff !important;
+}
+
+.note-kit-title {
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note-kit-body {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.note-kit-body > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.note-kit-body > .kui-message {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+}
+
+.note-kit-canvas {
+  position: relative;
+  display: flex;
+  min-height: 0;
+}
+
+/* The note's scroll bar (src/NoteScroll.tsx): thin, at the right, as in Obsidian. */
+.note-scrollbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 12px;
+  z-index: 3;
+  cursor: default;
+}
+
+.note-scrollbar-thumb {
+  position: absolute;
+  right: 3px;
+  width: 6px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.18);
+  transition: background 0.15s ease-in-out;
+}
+
+.note-scrollbar:hover .note-scrollbar-thumb {
+  right: 2px;
+  width: 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.note-kit-canvas > .kui-canvas-region {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* The find bar over the note (src/FindBar.tsx): a light row with 8 px fields. */
+.note-kit-body > .note-find {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--kit-border, #e5e3df);
+  background: var(--kit-surface, #fff);
+}
+
+.note-find-input {
+  width: 220px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--kit-border, #e5e3df);
+  border-radius: 8px;
+  background: var(--kit-surface, #fff);
+  color: var(--kit-text, #1a1a1a);
+  font: inherit;
+  font-size: 13px;
+}
+
+.note-find-input:focus {
+  outline: 2px solid var(--kit-primary, #5645d4);
+  outline-offset: -1px;
+}
+
+.note-kit-panel {
+  display: flex;
+  flex: 0 0 280px;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+  border-left: 1px solid var(--kit-border, #e5e3df);
+}
+
+.note-kit-comments {
+  flex-basis: 320px;
+}
+
+.note-kit-outline {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+}
+
+/* An outline row: a plain list row (8 px radius on hover, never a pill). */
+.note-kit-outline-row {
+  display: block;
+  width: 100%;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--kit-text, #1a1a1a);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.note-kit-outline-row[data-level='1'] {
+  font-weight: 600;
+}
+
+.note-kit-outline-row:hover,
+.note-kit-outline-row:focus-visible {
+  background: var(--kit-surface-muted, #fafaf9);
+  outline: none;
+}
+
+.note-kit-outline-empty {
+  padding: 8px;
+  font-size: 13px;
+}
+
+.note-kit-comments-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 8px 0;
+}
+
+/* The AI review bar over the note (src/ai/ReviewBar.tsx): a light card, the purple Accept. */
+/* The file changed on disk under unsaved edits: the person chooses (Kit UI protocol document/fileChanged). */
+.note-kit-body > .note-disk-changed {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 12px 0;
+  padding: 6px 10px;
+  border: 1px solid var(--kit-border, #e5e3df);
+  border-radius: 12px;
+  background: var(--kit-surface-muted, #fafaf9);
+  font-size: 13px;
+}
+
+.note-kit-body > .note-ai-review {
+  flex: 0 0 auto;
+  margin: 8px 12px 0;
+  padding: 8px 10px;
+  border: 1px solid var(--kit-border, #e5e3df);
+  border-radius: 12px;
+  background: var(--kit-surface, #ffffff);
+  box-shadow: 0 1px 3px rgba(26, 26, 26, 0.06);
+  font-size: 13px;
+}
+
+.note-ai-review-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.note-ai-review-icon {
+  display: inline-flex;
+  color: var(--kit-primary, #5645d4);
+}
+
+.note-ai-review-spacer {
+  flex: 1 1 auto;
+}
+
+.note-ai-review-body {
+  max-height: 160px;
+  margin-top: 8px;
+  padding: 8px;
+  overflow: auto;
+  border-radius: 8px;
+  background: var(--kit-surface-muted, #fafaf9);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
+.note-ai-review-error {
+  color: var(--kit-text-muted, #5d5b54);
+}
+
+.note-ai-removed {
+  color: var(--kit-text-muted, #5d5b54);
+  text-decoration: line-through;
+  background: rgba(180, 35, 24, 0.08);
+}
+
+.note-ai-added {
+  text-decoration: none;
+  background: rgba(86, 69, 212, 0.12);
+}
+
+/* The rewrites for a selection, floating at the bottom center of the note. */
+.note-kit-body > .note-ai-selection {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  z-index: 30;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  padding: 4px;
+  transform: translateX(-50%);
+  border: 1px solid var(--kit-border, #e5e3df);
+  border-radius: 12px;
+  background: var(--kit-surface, #ffffff);
+  box-shadow: 0 4px 12px rgba(26, 26, 26, 0.08);
+}
+
+/* The export dialog (src/ExportDialog.tsx). */
+.note-export-sizes {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.note-export-text {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.note-export-gaps {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--kit-text-muted, #5d5b54);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* The table controls over the canvas (src/TableControls.tsx): edge rails whose append button shows
+   while the rail is hovered, and the column menu (8 px radius, a light shadow; Delete in the warning color). */
+.note-tables {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.note-table {
+  position: absolute;
+}
+
+.note-table-rail {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.note-table-rail-bottom {
+  left: 0;
+  right: 0;
+}
+
+.note-table-rail-right {
+  top: 0;
+  bottom: 0;
+}
+
+.note-table-add {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--kit-border, #e5e3df);
+  border-radius: 8px;
+  background: var(--kit-surface, #fff);
+  color: var(--kit-text-muted, #6b6b6b);
+  opacity: 0;
+  transition: opacity 120ms ease;
+  cursor: pointer;
+}
+
+.note-table-rail:hover .note-table-add,
+.note-table-add:hover,
+.note-table-add:focus-visible {
+  opacity: 1;
+}
+
+.note-table-add:hover {
+  border-color: var(--kit-primary, #5645d4);
+  color: var(--kit-primary, #5645d4);
+}
+
+/* A column's and a body row's drag handles (Obsidian 1.14's): a faint grip under the pointer,
+   the accent with a white grip while held. */
+.note-table-handle {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ababab;
+  background: transparent;
+  opacity: 0;
+  cursor: grab;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+.note-table-handle:hover,
+.note-table-handle.is-active {
+  opacity: 1;
+}
+
+.note-table-handle-col {
+  border-radius: 4px 4px 0 0;
+}
+
+.note-table-handle-row {
+  border-radius: 4px 0 0 4px;
+}
+
+.note-table-handle.is-active {
+  z-index: 3;
+  color: #fff;
+  background: var(--kit-primary, #5645d4);
+  box-shadow: 0 0 0 2px var(--kit-primary, #5645d4);
+  cursor: grabbing;
+}
+
+.note-table-handle svg {
+  pointer-events: none;
+}
+
+/* The column or row being dragged: outlined in the accent, tinted at 10%. */
+.note-table-selection {
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
+  border: 2px solid var(--kit-primary, #5645d4);
+  border-radius: 4px;
+  background: rgb(86 69 212 / 0.1);
+  pointer-events: none;
+}
+
+/* Where the dragged column or row goes: a 4px accent bar on the boundary. */
+.note-table-drop {
+  position: absolute;
+  z-index: 3;
+  border-radius: 2px;
+  background: var(--kit-primary, #5645d4);
+  pointer-events: none;
+}
+
+.note-table-drop-col {
+  width: 4px;
+}
+
+.note-table-drop-row {
+  height: 4px;
+}
+
+.note-table-menu {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  padding: 4px;
+  border: 1px solid var(--kit-border, #e5e3df);
+  border-radius: 12px;
+  background: var(--kit-surface, #fff);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+  pointer-events: auto;
+  outline: none;
+}
+
+.note-table-menu-item {
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--kit-text, #1a1a1a);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.note-table-menu-item.is-selected {
+  background: var(--kit-surface-muted, #f4f3f1);
+}
+
+.note-table-menu-item.is-warning {
+  color: var(--kit-danger, #c4372b);
+}
+
+/* The note's text for assistive technology (src/App.tsx): present, but not drawn. */
+.note-kit-body > .note-a11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: pre-wrap;
+  flex: none;
+  /* Out of view and skipped by layout (it stays in the accessibility tree): a large note's text,
+     all of it, is not laid out again whenever the page around it is. */
+  left: -100000px;
+  top: 0;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 1px;
+}
+
+/* The text an input method is composing, at the caret (src/App.tsx `Composition`): over the page,
+   underlined, until it is committed. */
+/* The properties block (src/Properties.tsx), as Obsidian's: document pixels, scaled with the view. */
+.note-properties {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  transform-origin: 0 0;
+  color: #5c5c5c;
+  /* Obsidian's interface faces: overlays are drawn by the page, which has the system's. */
+  font: 14px/1.3 var(--note-ui-font);
+  pointer-events: auto;
+}
+
+.note-properties-heading {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  padding: 4px;
+  color: #222222;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 19px;
+  cursor: pointer;
+}
+
+/* Its fold chevron, 22 px before it (Obsidian's collapse indicator): down and shown under the
+   pointer while open, pointing right and always shown while folded. */
+.note-properties-fold {
+  position: absolute;
+  top: 4px;
+  left: -22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 19px;
+  color: #5c5c5c;
+  opacity: 0;
+}
+
+.note-properties-heading:hover .note-properties-fold,
+.note-properties-heading.is-collapsed .note-properties-fold {
+  opacity: 1;
+}
+
+.note-properties-heading.is-collapsed .note-properties-fold svg {
+  transform: rotate(-90deg);
+}
+
+.note-property {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  height: 29px;
+  border-radius: 6px;
+  cursor: text;
+}
+
+.note-property:hover {
+  background: rgba(0, 0, 0, 0.035);
+}
+
+.note-property-icon {
+  flex: none;
+  margin-left: 4px;
+}
+
+.note-property-key {
+  flex: none;
+  width: 124px;
+  padding: 4px 8px;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A date property's field: its calendar icon at the left opens the picker, as Obsidian's. */
+.note-property-date-input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+/* A property's icon opens its menu: a button with no frame of its own. */
+.note-property-icon-button {
+  display: flex;
+  flex: none;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.note-property-icon-button:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Obsidian's date field: its link icon 12 px after the date's text (this field's text is 76 px). */
+.note-property-date-input[type='date'] {
+  width: 78px;
+}
+
+/* A key and a value edited where they are shown, as Obsidian's fields: no frame of their own. */
+input.note-property-key,
+.note-property-date-input {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+
+.note-property-text,
+.note-property-new {
+  min-width: 2em;
+  outline: none;
+  cursor: text;
+}
+
+.note-property-text:empty::before {
+  content: attr(data-placeholder);
+  color: #ababab;
+}
+
+.note-property-value {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 4px 8px;
+  color: #222222;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.note-property-pill {
+  padding: 0 0.15em;
+}
+
+.note-property-pill.is-tag {
+  padding: 2px 0.65em;
+  border-radius: 2em;
+  background: #eeecfb;
+  color: #5645d4;
+}
+
+.note-property-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.note-property-remove {
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.note-property-remove:hover {
+  opacity: 1;
+}
+
+.note-property-link {
+  color: #5645d4;
+}
+
+/* A web address value: Obsidian's external link, underlined, its icon after it. */
+.note-property-url {
+  color: #5645d4;
+  text-decoration: underline;
+}
+
+.note-property-url-icon {
+  display: inline-block;
+  margin-left: 2px;
+  vertical-align: -1px;
+  color: #ababab;
+}
+
+.note-property-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Obsidian's Open daily note button after a date: a 14px link icon in a 22px box. */
+.note-property-date-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-left: 6px;
+  color: #5c5c5c;
+  opacity: 0.85;
+}
+
+/* A link value's edit button: at the cell's end, shown while the pointer is over the cell but
+   not over the link itself (Obsidian's metadata link flair). */
+.note-property-flair {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding: 2px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #5c5c5c;
+  opacity: 0;
+  cursor: text;
+  transition: opacity 0.1s ease-in-out 0.25s;
+}
+
+.note-property-value:hover .note-property-flair {
+  opacity: 0.85;
+}
+
+.note-property-value:has(.note-property-link:hover, .note-property-url:hover) .note-property-flair {
+  opacity: 0;
+}
+
+.note-property-date .note-property-icon {
+  margin-left: 0;
+}
+
+.note-property-checkbox {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #5645d4;
+}
+
+.note-properties-add {
+  position: absolute;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 29px;
+  padding: 4px 4px 4px 2px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #5c5c5c;
+  font: 14px var(--note-ui-font);
+  cursor: pointer;
+}
+
+.note-properties-add:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* A code block's label (src/CodeFlair.tsx): its language, a copy button under the pointer. */
+.note-code-flair {
+  position: absolute;
+  z-index: 3;
+  transform: translateX(calc(-100% - 6px));
+  /* Obsidian's flair: 4px 8px around 12px text on an 18px line. */
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #5c5c5c;
+  font: 12px/18px var(--note-ui-font);
+  cursor: pointer;
+}
+
+.note-code-flair-icon {
+  display: block;
+  /* At the button's top, 28.5px tall in all, as Obsidian's copy button. */
+  margin: 0 0 4.5px;
+}
+
+.note-code-flair-copy {
+  display: none;
+}
+
+.note-code-flair:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.note-code-flair:hover .note-code-flair-language {
+  display: none;
+}
+
+.note-code-flair:hover .note-code-flair-copy {
+  display: inline;
+}
+
+/* The caret (src/App.tsx Caret): Obsidian's blink, steady for half a second after a move. */
+.note-caret {
+  position: absolute;
+  z-index: 3;
+  width: 1.5px;
+  margin-left: -0.75px;
+  background: var(--kit-text, #222222);
+  pointer-events: none;
+  animation: note-caret-blink 1.2s steps(1, end) 0.5s infinite;
+}
+
+@keyframes note-caret-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note-caret {
+    animation: none;
+  }
+}
+
+.note-composition {
+  position: absolute;
+  z-index: 4;
+  padding: 0 1px;
+  background: var(--kit-surface, #fff);
+  color: var(--kit-text, #1a1a1a);
+  text-decoration: underline;
+  text-decoration-color: var(--kit-primary, #5645d4);
+  text-underline-offset: 3px;
+  white-space: pre;
+  pointer-events: none;
+}
+
+/* The slash menu at the caret (src/SlashMenu.tsx): a light list, 12 px radius, 8 px rows. */
+.note-slash {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  max-height: 280px;
+  overflow: auto;
+  padding: 4px;
+  border: 1px solid var(--kit-border, #e5e3df);
+  border-radius: 12px;
+  background: var(--kit-surface, #fff);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+}
+
+.note-slash-item {
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--kit-text, #1a1a1a);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.note-slash-item.is-selected {
+  background: var(--kit-surface-muted, #f4f3f1);
+}
+
+/* Mermaid diagrams over the canvas, as Obsidian's live preview draws them: the diagram at its
+   natural size from the column's left edge (a wide one scrolls sideways), on a 24 px line (the
+   SVG sits on its baseline, 6 px above the box's bottom); under the pointer, a hairline ring and
+   the edit button at the top right. A block that does not parse shows Mermaid's error as code. */
+:root {
+  /* Obsidian's text faces (`--font-default`): its diagrams and interface are drawn in them. */
+  --note-ui-font: ui-sans-serif, -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", "Google Sans Flex", Roboto, "Inter Variable", "Inter", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  --note-mono: ui-monospace, SFMono-Regular, "Cascadia Mono", "Roboto Mono", "DejaVu Sans Mono", "Liberation Mono", Menlo, Monaco, Consolas, "Source Code Pro", monospace;
+}
+
+.note-diagram-block {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  transform-origin: 0 0;
+  border-radius: 4px;
+  pointer-events: auto;
+}
+
+.note-diagram-block:hover {
+  box-shadow: 0 0 0 1px #e0e0e0, inset 0 0 0 1px #e0e0e0;
+}
+
+.note-diagram {
+  overflow-x: auto;
+  color: #222;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: start;
+}
+
+/* An HTML block, as Obsidian's rendered HTML: the note's text, a details' summary clickable. */
+.note-diagram-html {
+  font-family: var(--note-ui-font);
+  white-space: normal;
+  user-select: text;
+}
+
+/* An HTML block's table: Obsidian's rendered table (collapsed 1px borders, cells padded 4px 8px
+   on a 1.3 line). */
+.note-diagram-html table {
+  border-collapse: collapse;
+  margin: 0;
+}
+
+.note-diagram-html th,
+.note-diagram-html td {
+  padding: 4px 8px;
+  border: 1px solid #e4e4e4;
+  line-height: 1.3;
+  vertical-align: top;
+}
+
+.note-diagram-html summary {
+  cursor: pointer;
+}
+
+.note-diagram-html a {
+  color: #5645d4;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.note-diagram-error {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 4px;
+  background: #fafafa;
+  font: 16px/24px var(--note-mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.note-diagram-error code {
+  color: #222;
+  font: 14px/21px var(--note-mono);
+}
+
+.note-diagram-edit {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #5c5c5c;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.07s ease-out;
+}
+
+.note-diagram-block:hover .note-diagram-edit {
+  opacity: 1;
+}
+
+.note-diagram-edit:hover {
+  background: rgba(0, 0, 0, 0.067);
+}
+
+.note-diagram-edit svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The diagrams' layer: no box of its own (the canvas stays under the pointer around them). */
+.note-diagrams {
+  display: contents;
+}
+
+/* Other people in the note (presence): their selection as a tint, their caret as a bar with their name. */
+.note-peers {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.note-peer-selection {
+  position: absolute;
+  opacity: 0.22;
+}
+
+.note-peer-caret {
+  position: absolute;
+  width: 2px;
+  margin-left: -1px;
+}
+
+.note-peer-name {
+  position: absolute;
+  bottom: 100%;
+  left: -1px;
+  padding: 1px 5px;
+  border-radius: 4px 4px 4px 0;
+  color: #ffffff;
+  font: 600 11px/14px system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+/* A host's comment threads (Kit UI protocol section 7k): the anchored text tinted, the canvas keeping
+   its clicks, and a marker beside the column that opens the thread in the host. */
+.note-threads {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.note-thread-range {
+  position: absolute;
+  background: rgba(250, 204, 21, 0.32);
+  border-bottom: 2px solid rgba(234, 179, 8, 0.8);
+  box-sizing: border-box;
+}
+
+.note-thread-marker {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 22px;
+  padding: 0 4px;
+  border: 1px solid var(--kit-border, #e5e3df);
+  border-radius: 6px;
+  background: var(--kit-surface, #ffffff);
+  color: var(--kit-text-muted, #6b6b6b);
+  font: 600 11px/1 system-ui, sans-serif;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.note-thread-marker:hover {
+  color: var(--kit-primary, #5645d4);
+  border-color: var(--kit-primary, #5645d4);
+}
+
+/* The selection in a read-only note (src/readOnlySelect.ts), which the engine's tool does not draw there. */
+.note-readonly-selection {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.note-readonly-selection > div {
+  position: absolute;
+  background: color-mix(in srgb, var(--kit-primary, #5645d4) 22%, transparent);
+}

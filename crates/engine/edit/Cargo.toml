@@ -1,0 +1,15 @@
+[package]
+name = "kition-note-edit"
+description = "The note's minimal-span edits: properties, tables, sections, blocks, tasks, links and text search, each rewriting only the source it is about."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+kition-note-markdown = { workspace = true }
+regex = { workspace = true }

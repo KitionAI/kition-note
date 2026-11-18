@@ -1,0 +1,21 @@
+format: 1
+id: regressions/issue-2
+feature: note.agent.observe
+intent: >-
+  Every command the headless executable lists in commands.list carries a description (what it
+  does, when to choose it, what it changes or answers) and an output schema (KitAgent A1), and
+  every command's real answer matches that schema exactly, so a host that turns the commands into
+  tools can tell a model what each one does and what it returns. Before, 88 of the 119 commands
+  (every edit and every editor command) declared no output schema.
+layer: gate
+source:
+  kind: issue
+  from: Kition Note regression suite
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: commands }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

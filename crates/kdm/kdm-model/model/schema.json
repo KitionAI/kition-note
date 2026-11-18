@@ -1,0 +1,96 @@
+{
+  "kdm": 1,
+  "kit": "kit.note",
+  "schemaVersion": 1,
+  "root": "Note",
+  "types": {
+    "Note": {
+      "fields": {
+        "body": { "kind": "text", "sample": false },
+        "eol": { "kind": "enum", "values": ["lf", "crlf", "mixed"], "optional": true, "sample": false },
+        "bom": { "kind": "boolean", "optional": true, "sample": false },
+        "sections": { "kind": "list", "of": "Section" },
+        "tasks": { "kind": "list", "of": "Task" },
+        "tables": { "kind": "list", "of": "Table" },
+        "links": { "kind": "list", "of": "Link" },
+        "properties": { "kind": "list", "of": "Property" }
+      },
+      "structuralConsequences": [{ "container": "Note", "on": ["delete", "set"], "fields": ["body"] }]
+    },
+    "CommentThread": {
+      "fields": { "anchor": { "kind": "json" }, "resolved": { "kind": "boolean", "optional": true }, "comments": { "kind": "list", "of": "Comment" } },
+      "batchOps": { "*": { "direct": true } }
+    },
+    "Comment": {
+      "fields": { "author": { "kind": "string" }, "name": { "kind": "string", "optional": true }, "body": { "kind": "text" }, "created": { "kind": "string" } },
+      "batchOps": { "*": { "direct": true } }
+    },
+    "Section": {
+      "projected": true,
+      "toolId": { "field": "number", "prefix": "section:" },
+      "label": "heading",
+      "text": "heading",
+      "fields": {
+        "number": { "kind": "string", "readOnly": true },
+        "heading": { "kind": "string", "readOnly": true },
+        "path": { "kind": "string", "readOnly": true },
+        "level": { "kind": "integer", "minimum": 1, "maximum": 6 },
+        "body": { "kind": "string", "readOnly": true },
+        "sections": { "kind": "list", "of": "Section" },
+        "tasks": { "kind": "list", "of": "Task" },
+        "tables": { "kind": "list", "of": "Table" },
+        "links": { "kind": "list", "of": "Link" }
+      },
+      "structuralConsequences": [{ "container": "Section", "on": ["set", "delete"], "fields": ["body"] }],
+      "projectedOps": {
+        "set.level": { "command": "heading.setLevel", "params": { "section": "target", "level": "value" } },
+        "delete": { "command": "section.delete", "params": { "section": "target" } }
+      }
+    },
+    "Task": {
+      "projected": true,
+      "toolId": { "field": "number", "prefix": "task:" },
+      "label": "text",
+      "text": "text",
+      "fields": {
+        "number": { "kind": "string", "readOnly": true },
+        "text": { "kind": "string", "readOnly": true },
+        "checked": { "kind": "boolean" }
+      },
+      "projectedOps": {
+        "set.checked": { "command": "task.toggle", "params": { "task": "target", "done": "value" } }
+      }
+    },
+    "Table": {
+      "projected": true,
+      "toolId": { "field": "number", "prefix": "table:" },
+      "label": "header",
+      "fields": {
+        "number": { "kind": "string", "readOnly": true },
+        "header": { "kind": "string", "readOnly": true },
+        "rows": { "kind": "integer", "readOnly": true },
+        "columns": { "kind": "integer", "readOnly": true },
+        "text": { "kind": "string", "readOnly": true }
+      }
+    },
+    "Link": {
+      "projected": true,
+      "toolId": { "field": "number", "prefix": "link:" },
+      "label": "destination",
+      "fields": {
+        "number": { "kind": "string", "readOnly": true },
+        "destination": { "kind": "string", "readOnly": true }
+      }
+    },
+    "Property": {
+      "projected": true,
+      "toolId": { "field": "number", "prefix": "property:" },
+      "label": "key",
+      "fields": {
+        "number": { "kind": "string", "readOnly": true },
+        "key": { "kind": "string", "readOnly": true },
+        "value": { "kind": "string", "readOnly": true }
+      }
+    }
+  }
+}

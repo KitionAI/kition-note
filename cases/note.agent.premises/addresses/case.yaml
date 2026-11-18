@@ -1,0 +1,24 @@
+format: 1
+id: note.agent.premises/addresses
+feature: note.agent.premises
+intent: >-
+  Every parameter of every write is an object by id (typed), a place in the note's text, or a value
+  listed with why; the handlers agree (a declared place moves the write, nothing else moves where
+  it reads); no write an agent is offered reads editor state; every write family on every
+  conformance and corpus file saves what it holds.
+layer: unit
+dimension: ai
+source:
+  kind: synthetic
+  from: bindings/wasm/tests/object_params.rs, table_check.rs, context.rs, saved.rs
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: object_params }
+  - cargo-test: { package: kition-note-kit, test: table_check }
+  - cargo-test: { package: kition-note-kit, test: context }
+  - cargo-test: { package: kition-note-kit, test: saved }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

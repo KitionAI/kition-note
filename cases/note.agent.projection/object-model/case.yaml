@@ -1,0 +1,24 @@
+format: 1
+id: note.agent.projection/object-model
+feature: note.agent.projection
+intent: >-
+  The note's sections, tasks, tables, links and properties are projected objects of the object
+  model, computed from the text and never stored: note_query reads a section with its subsections,
+  tasks and tables; note_batch sets a task's box through task.toggle, refused changed when another
+  writer set that box since basis and applied after a change elsewhere; a raw batch write of the
+  body, which declares no premise contract, is refused before anything runs, and raw writes of a
+  comment thread (kition-sdk's shared comment types declare theirs) apply; sampled edits of the
+  projection (kition-env) pass their oracle.
+layer: gate
+dimension: ai
+source:
+  kind: synthetic
+  from: bindings/headless/tests/projected.rs
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note, test: projected }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

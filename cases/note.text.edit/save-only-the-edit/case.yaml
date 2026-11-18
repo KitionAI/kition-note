@@ -1,0 +1,18 @@
+format: 1
+id: note.text.edit/save-only-the-edit
+feature: note.text.edit
+intent: >-
+  An unedited note saves back to its own bytes, and a text.insert changes only the inserted bytes
+  of the saved Markdown (an emoji after it stays intact); marking it saved clears the dirty flag.
+layer: unit
+source:
+  kind: synthetic
+  from: bindings/wasm/src/tests.rs (a three-line plan with an emoji)
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, filter: "tests::opens_edits_and_saves_only_the_edit" }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

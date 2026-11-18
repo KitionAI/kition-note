@@ -1,0 +1,37 @@
+format: 1
+id: regressions/issue-table-drag-handles
+feature: note.tables
+intent: >-
+  A table in live preview shows Obsidian's drag handles: a grip tab above each column and left of
+  each body row, shown on hover. Dragging a handle outlines the column or row, follows the pointer,
+  marks the drop boundary, and on release moves the column or row there; Escape cancels the drag.
+  The person reported that Obsidian can drag table columns and Kition could not.
+layer: unit
+dimension: fidelity
+source:
+  kind: issue
+  from: owner report (Obsidian drags table columns by their handle; Kition had none)
+  license: owned
+input: []
+steps:
+  - flow:
+      spec: web/tests/obsidian.mjs
+      scenario: a table shows a drag handle over each column
+      browsers: [chromium, webkit]
+  - flow:
+      spec: web/tests/obsidian.mjs
+      scenario: dragging a column handle moves the column
+      browsers: [chromium, webkit]
+  - flow:
+      spec: web/tests/obsidian.mjs
+      scenario: dragging a row handle moves the row
+      browsers: [chromium, webkit]
+  - flow:
+      spec: web/tests/obsidian.mjs
+      scenario: Escape cancels a column drag
+      browsers: [chromium, webkit]
+expected:
+  - actual: out:flow
+    compare: exit
+since: "2026-11-16"
+requires: [chromium, webkit]

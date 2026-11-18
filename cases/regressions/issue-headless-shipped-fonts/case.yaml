@@ -1,0 +1,22 @@
+format: 1
+id: regressions/issue-headless-shipped-fonts
+feature: note.agent.preview
+intent: >-
+  `kition-note` lays notes out and draws them with the fonts the kit ships (KHP A39) with no
+  environment variable: Inter, JetBrains Mono, Droid Sans Fallback and Noto Color Emoji, the faces
+  the editor gives the engine (`kition_note_fonts::CHECKOUT_FILES`), are built into the executable
+  from the kition-fonts checkout the web build copies them from. Before, the executable registered
+  no face, so its previews drew the note's text as bars.
+layer: gate
+source:
+  kind: probe
+  from: "agent readiness review (previews without KITION_FONTS_DIR have no text)"
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note, test: fonts }
+expected:
+  - actual: out:cargo-test
+    compare: exit
+    value: 0
+since: "2026-11-16"

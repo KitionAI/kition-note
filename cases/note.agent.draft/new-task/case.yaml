@@ -1,0 +1,44 @@
+format: 1
+id: note.agent.draft/new-task
+feature: note.agent.draft
+intent: >-
+  Over two messages the agent adds a task and checks it off in a draft for the person to review;
+  the note itself keeps its two tasks (KHP Recover, A12–A14).
+layer: eval
+source:
+  kind: synthetic
+  from: repo:conformance/basic.md
+  license: Apache-2.0
+  note: A copy of the conformance note the note kit tests check clean.
+input: [input/plan.md]
+steps:
+  - task:
+      turns:
+        - >-
+          As a draft I can review (do not change plan.md itself), add a task "Book the venue" at
+          the end of the Tasks section.
+        - In the same draft, mark that new task as done.
+      max_turns: 20
+  - inspect: { path: plan.md, args: { draft: true }, as: draft, missing_ok: true }
+  - inspect: { path: plan.md, as: after }
+expected:
+  - actual: out:draft
+    compare: values
+    value:
+      details.tasks.done: 2
+      details.tasks.open: 1
+  - actual: out:after
+    compare: values
+    collateral: true
+    value:
+      details.tasks.done: 1
+      details.tasks.open: 1
+      details.properties: { count: 3 }
+      details.tables: { count: 1 }
+solution:
+  - tool: note_run
+    args: { path: plan.md, draft: true, steps: [{ command: text.insert, params: { at: 322, text: "- [ ] Book the venue\n" } }] }
+  - tool: note_run
+    args: { path: plan.md, draft: true, steps: [{ command: task.toggle, params: { line: 21, done: true } }] }
+since: "2026-11-16"
+timeout_s: 600

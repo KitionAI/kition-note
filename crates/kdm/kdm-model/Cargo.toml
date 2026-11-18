@@ -1,0 +1,16 @@
+[package]
+name = "kition-note-kdm"
+description = "The Note kit's KDM model: schema kit.note v1, the materialised view, and its repair (kition-sdk session)."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+kition-kit = { workspace = true }
+kition-note-markdown-file = { workspace = true }
+serde_json = { workspace = true }

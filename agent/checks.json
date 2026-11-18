@@ -1,0 +1,80 @@
+[
+  {
+    "code": "note.invalid-utf8",
+    "severity": "error",
+    "summary": "The file is not valid UTF-8, so the note is open read-only and saves its bytes unchanged.",
+    "fixture": "check-invalid-utf8.md"
+  },
+  {
+    "code": "note.unclosed-fence",
+    "severity": "error",
+    "summary": "A code fence or a $$ math block is never closed, so the rest of the note renders as code.",
+    "fixture": "check-unclosed-fence.md"
+  },
+  {
+    "code": "note.frontmatter-invalid",
+    "severity": "error",
+    "summary": "The property block at the top does not parse as YAML, so no property is read.",
+    "fixture": "check-frontmatter-invalid.md"
+  },
+  {
+    "code": "note.frontmatter-duplicate-key",
+    "severity": "error",
+    "summary": "A property key is written twice, and readers disagree on which value counts.",
+    "fixture": "check-frontmatter-duplicate-key.md"
+  },
+  {
+    "code": "note.broken-link",
+    "severity": "error",
+    "summary": "A wikilink or Markdown link names a file that does not exist, or has no target.",
+    "fixture": "check-broken-link.md"
+  },
+  {
+    "code": "note.broken-embed",
+    "severity": "error",
+    "summary": "An embed names a file that does not exist.",
+    "fixture": "check-broken-embed.md"
+  },
+  {
+    "code": "note.broken-anchor",
+    "severity": "error",
+    "summary": "A link's #heading or #^block part names no heading or block id in its target.",
+    "fixture": "check-broken-anchor.md"
+  },
+  {
+    "code": "note.duplicate-block-id",
+    "severity": "error",
+    "summary": "Two blocks end with the same ^id, so links to it are ambiguous.",
+    "fixture": "check-duplicate-block-id.md"
+  },
+  {
+    "code": "note.table-column-mismatch",
+    "severity": "warning",
+    "summary": "A table row has more or fewer cells than its header.",
+    "fixture": "check-table-column-mismatch.md"
+  },
+  {
+    "code": "note.heading-level-skip",
+    "severity": "warning",
+    "summary": "A heading is more than one level below the heading before it.",
+    "fixture": "check-heading-level-skip.md"
+  },
+  {
+    "code": "note.property-complex",
+    "severity": "info",
+    "summary": "A property's value is a nested map, a block scalar, or carries comments; the engine reads it but does not rewrite it.",
+    "fixture": "check-property-complex.md"
+  },
+  {
+    "code": "note.mixed-line-endings",
+    "severity": "info",
+    "summary": "The file mixes line endings or has a lone CR; it is kept as it is.",
+    "fixture": "check-mixed-line-endings.md"
+  },
+  {
+    "code": "note.truncated",
+    "severity": "info",
+    "summary": "More than 100 diagnostics of one code; the rest are counted, not listed.",
+    "fixture": "check-truncated.md"
+  }
+]

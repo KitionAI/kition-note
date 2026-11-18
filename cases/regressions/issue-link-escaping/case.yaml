@@ -1,0 +1,22 @@
+format: 1
+id: regressions/issue-link-escaping
+feature: note.links
+intent: >-
+  link.update and links.retarget wrote what they were given unescaped: a destination with ')' or
+  '<' broke the link, and link text with ']' ended it early. They now write a destination in angle
+  brackets with its own brackets escaped (or percent-encoded where the link is written that way)
+  and escape brackets in link text, as link.insert does now too (it used to drop them); a wikilink,
+  which has no escaping, refuses a destination with ']]' or '|' and text with ']]'.
+layer: gate
+dimension: function
+source:
+  kind: probe
+  from: bindings/wasm/tests/edit_regressions.rs (link_writes_escape_what_they_write)
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: edit_regressions, filter: link_writes_escape_what_they_write }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

@@ -1,0 +1,16 @@
+[package]
+name = "kition-note-fonts"
+description = "The Note kit's fonts: faces registered at run time, per-character fallback, shaping, and glyph outlines"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+[dependencies]
+skrifa = { workspace = true }
+harfrust = { workspace = true }
+kurbo = { workspace = true }
+
+[lints]
+workspace = true

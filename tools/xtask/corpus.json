@@ -1,0 +1,215 @@
+{
+  "$comment": "The note round-trip corpus: public Markdown files. `cargo xtask corpus` fetches them by commit into corpus/; `cargo xtask golden` checks them.",
+  "files": [
+    {
+      "name": "obsidian-01.md",
+      "source": "Obsidian Help vault: Basic formatting syntax",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Editing%20and%20formatting/Basic%20formatting%20syntax.md",
+      "sha256": "38db5d30f637adfcbe212fd8b5616412b93bd8c0387845e5ff5355f5195235bd",
+      "bytes": 16149
+    },
+    {
+      "name": "obsidian-02.md",
+      "source": "Obsidian Help vault: Advanced formatting syntax",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Editing%20and%20formatting/Advanced%20formatting%20syntax.md",
+      "sha256": "15ed1c714c0e8a4dd48ac05ce53df787d1eda241c78d8b27a091f142cbe26307",
+      "bytes": 5545
+    },
+    {
+      "name": "obsidian-03.md",
+      "source": "Obsidian Help vault: Obsidian Flavored Markdown",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Editing%20and%20formatting/Obsidian%20Flavored%20Markdown.md",
+      "sha256": "da08d3873a6b5a2334d57c1c943a9a1ca6d74991573638b466d3f6ecf9c9cda4",
+      "bytes": 2564
+    },
+    {
+      "name": "obsidian-04.md",
+      "source": "Obsidian Help vault: Properties",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Editing%20and%20formatting/Properties.md",
+      "sha256": "75c85e422f5e2b17c9c8fe9125b6c9b4159fd6635cefbbef6b72c3272b623db6",
+      "bytes": 10453
+    },
+    {
+      "name": "obsidian-05.md",
+      "source": "Obsidian Help vault: Callouts",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Editing%20and%20formatting/Callouts.md",
+      "sha256": "5d12e34b9fb68c6b7ad0ea39d80fb11267b0406cd204f61d4c00f2d5dea9bab6",
+      "bytes": 6176
+    },
+    {
+      "name": "obsidian-06.md",
+      "source": "Obsidian Help vault: Editing shortcuts",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Editing%20and%20formatting/Editing%20shortcuts.md",
+      "sha256": "c20886bb62cf1e7461a7015ff747ebacb9914ea0e3b812ff40a1a85f971d8ed6",
+      "bytes": 5080
+    },
+    {
+      "name": "obsidian-07.md",
+      "source": "Obsidian Help vault: Internal links",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Linking%20notes%20and%20files/Internal%20links.md",
+      "sha256": "4ebf7be1cce4bf31e104b60c8eb2a175f134a79a29e29a16822033cfb5088ce1",
+      "bytes": 8992
+    },
+    {
+      "name": "obsidian-08.md",
+      "source": "Obsidian Help vault: Embed files",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Linking%20notes%20and%20files/Embed%20files.md",
+      "sha256": "5757a6269949f507f3b5f1605ab9bfe81f247738d5b44c3bf096efc6215fbc54",
+      "bytes": 3125
+    },
+    {
+      "name": "obsidian-09.md",
+      "source": "Obsidian Help vault: Backlinks",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Plugins/Backlinks.md",
+      "sha256": "d6f71bc20352f1af0338cad780095d0c32c65af6bfffd0065f315b3a8685d928",
+      "bytes": 3045
+    },
+    {
+      "name": "obsidian-10.md",
+      "source": "Obsidian Help vault: Daily notes",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Plugins/Daily%20notes.md",
+      "sha256": "776472f0c26adcc0c7556b4a7f3b7e3440720b48b724689a0282985fede4c2b8",
+      "bytes": 2341
+    },
+    {
+      "name": "obsidian-11.md",
+      "source": "Obsidian Help vault: Search",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Plugins/Search.md",
+      "sha256": "1d7cd531ea24dff744f3a307daea7aa236bb756ff0320f4c7bfe4b1aef82cdfa",
+      "bytes": 12207
+    },
+    {
+      "name": "obsidian-12.md",
+      "source": "Obsidian Help vault: Import HTML files",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Import%20notes/Import%20HTML%20files.md",
+      "sha256": "1e919a00a3ad89c019add53dea72369f8474c1a4e93ba4406c5b3add1a40d6d8",
+      "bytes": 2395
+    },
+    {
+      "name": "obsidian-13.md",
+      "source": "Obsidian Help vault: Catalyst license",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Licenses%20and%20payment/Catalyst%20license.md",
+      "sha256": "ad4071f4ccd358059629240c2ab78efc0fccf62aecacd05ef4f88e66f0a19906",
+      "bytes": 3069
+    },
+    {
+      "name": "obsidian-14.md",
+      "source": "Obsidian Help vault: Local and remote vaults",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Obsidian%20Sync/Local%20and%20remote%20vaults.md",
+      "sha256": "af5beb85a02d5aee41cd24351f9d7634a849197c804389da9b3cd27d514cbe6c",
+      "bytes": 5734
+    },
+    {
+      "name": "obsidian-15.md",
+      "source": "Obsidian Help vault: Home",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/en/Home.md",
+      "sha256": "406152da3e87c25a3d6037a4d0cc6046ed63fed6488b08d5c72e2a0de70977dc",
+      "bytes": 2055
+    },
+    {
+      "name": "obsidian-16.md",
+      "source": "Obsidian Help vault: v1.14.3",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/Release%20notes/v1.14.3.md",
+      "sha256": "78a60344761526c1709f3ca454c5e41f504bbdb2bb62c2b719064be622cbd27c",
+      "bytes": 2543
+    },
+    {
+      "name": "obsidian-17.md",
+      "source": "Obsidian Help vault: zh basic formatting syntax",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/zh/%E7%BC%96%E8%BE%91%E4%B8%8E%E6%A0%BC%E5%BC%8F%E5%8C%96/%E5%9F%BA%E6%9C%AC%E6%A0%BC%E5%BC%8F%E8%AF%AD%E6%B3%95.md",
+      "sha256": "96116725afc16a3f43da61e4a5b7c0f0c655cd559a10a4e1e7d644f000e3256f",
+      "bytes": 15442
+    },
+    {
+      "name": "obsidian-18.md",
+      "source": "Obsidian Help vault: zh callouts",
+      "url": "https://raw.githubusercontent.com/obsidianmd/obsidian-help/cd6c9f3c7d5492bbbec94e8f403572b84eeb325b/zh/%E7%BC%96%E8%BE%91%E4%B8%8E%E6%A0%BC%E5%BC%8F%E5%8C%96/%E6%A0%87%E6%B3%A8.md",
+      "sha256": "05054d6c8d8a224f704d87e822ecb5a9a3d0dcab7dd8ea22c44dd29c7e754e41",
+      "bytes": 5897
+    },
+    {
+      "name": "readme-facebook-react.md",
+      "source": "README of facebook/react",
+      "url": "https://raw.githubusercontent.com/facebook/react/9ffcb463b0ab01a42e781d4dc2e00f3a1b97a188/README.md",
+      "sha256": "9b6ac13cb03c06ae5643376cebd8d0e6cbae7ec0dd30a5cdc443a93160c348eb",
+      "bytes": 5296
+    },
+    {
+      "name": "readme-microsoft-vscode.md",
+      "source": "README of microsoft/vscode",
+      "url": "https://raw.githubusercontent.com/microsoft/vscode/816ad64a0ce3eb3ec0814c9f29b45d34485a37a8/README.md",
+      "sha256": "45a411a3b8d49556fbaa73601befc458ab10ad873fca9088136888c89abb8935",
+      "bytes": 6728
+    },
+    {
+      "name": "readme-rust-lang-rust.md",
+      "source": "README of rust-lang/rust",
+      "url": "https://raw.githubusercontent.com/rust-lang/rust/7189d39d9ce936881b8132c6addeaf3e295cd455/README.md",
+      "sha256": "b3f6ef2fef88b98cb9ec013a5c86213095e53e40eb228679574e4d06517f33c8",
+      "bytes": 3304
+    },
+    {
+      "name": "readme-ohmyzsh-ohmyzsh.md",
+      "source": "README of ohmyzsh/ohmyzsh",
+      "url": "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/2100c630ba4bd67bb48802c3e7da893a4fdaa1a0/README.md",
+      "sha256": "50c4dbf1674d850707601b1124ec6eaffebe29ba48696a79094b6f1454583393",
+      "bytes": 23381
+    },
+    {
+      "name": "readme-vuejs-core.md",
+      "source": "README of vuejs/core",
+      "url": "https://raw.githubusercontent.com/vuejs/core/0ff253bfba3ee8d3d65448bd44ad890fd01b0ecd/README.md",
+      "sha256": "ee86575a4126eb9e9e40f94679f85b9b2f090230924cf984153e1a15563e7ffd",
+      "bytes": 2741
+    },
+    {
+      "name": "readme-ollama-ollama.md",
+      "source": "README of ollama/ollama",
+      "url": "https://raw.githubusercontent.com/ollama/ollama/5e31438d5d2223d8338595b366b7434ef3539708/README.md",
+      "sha256": "9e5a7d406950fdd2742084065ab38a3ea09b5aab5e2f13ef7d64147229ae0d8b",
+      "bytes": 19347
+    },
+    {
+      "name": "readme-astral-sh-uv.md",
+      "source": "README of astral-sh/uv",
+      "url": "https://raw.githubusercontent.com/astral-sh/uv/63fd7764eb3026d9411ff469c9ae03b3196872f1/README.md",
+      "sha256": "57a84a5a635f30e3a26541ebc16ca690944a7750f05713b1af92d3170b58f704",
+      "bytes": 9859
+    },
+    {
+      "name": "readme-excalidraw-excalidraw.md",
+      "source": "README of excalidraw/excalidraw",
+      "url": "https://raw.githubusercontent.com/excalidraw/excalidraw/1d4dc2c0e6e476911d0760e9c3cf3694f2d43384/README.md",
+      "sha256": "011eea74cbbf38fd263ec93a221f379466c557dc7587acfe93797201193a7e7a",
+      "bytes": 7774
+    },
+    {
+      "name": "readme-logseq-logseq.md",
+      "source": "README of logseq/logseq",
+      "url": "https://raw.githubusercontent.com/logseq/logseq/05c3ae73e08498e9e20f1b11c3eac5525e5e588d/README.md",
+      "sha256": "597bcf7218c37fdf053524467029e22db5c29faffd8fb21007512bbbd3affe56",
+      "bytes": 15551
+    },
+    {
+      "name": "readme-laurent22-joplin.md",
+      "source": "README of laurent22/joplin",
+      "url": "https://raw.githubusercontent.com/laurent22/joplin/280954e58fc7c9e74200fd817272ac3fb80dcead/README.md",
+      "sha256": "b9444e9a16aa4d8b87124a368605847ce9ad368e603e5f6116c34f3121a86f69",
+      "bytes": 62392
+    },
+    {
+      "name": "readme-tensorflow-tensorflow.md",
+      "source": "README of tensorflow/tensorflow",
+      "url": "https://raw.githubusercontent.com/tensorflow/tensorflow/8a3ca8dd172c8443424504394208939532b58965/README.md",
+      "sha256": "e2f779cef212fbc54c3f9b1e273583720edac1ac9cc6ce6813b1e0386a968f0d",
+      "bytes": 7738
+    },
+    {
+      "name": "readme-github-gitignore.md",
+      "source": "README of github/gitignore",
+      "url": "https://raw.githubusercontent.com/github/gitignore/0e5d690153ca3da8a4a1aef2d053406f408f531c/README.md",
+      "sha256": "b4777fe65003e4b43fd2ceaface229dce48e506bc0082b5356f14d3b72c5d16f",
+      "bytes": 5847
+    }
+  ]
+}

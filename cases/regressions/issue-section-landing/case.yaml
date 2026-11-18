@@ -1,0 +1,25 @@
+format: 1
+id: regressions/issue-section-landing
+feature: note.agent.premises
+intent: >-
+  A write that names a section (section.delete by line or id, section.insert after the section,
+  block.append by heading) applied after another writer demoted the heading that ended the
+  section, or added a subsection where the write lands: no character the write read had changed,
+  but the section it lands in had. It now rests on the levels of the headings between the heading
+  it names and where it lands, and is refused changed; a rename, or a change elsewhere, applies.
+  The same file shows what writes hold beyond what they read narrowed: heading.setLevel by id after
+  a rename, block.setId by block id after an edit of the block, table row and alignment writes
+  after an edit of another row apply.
+layer: gate
+dimension: ai
+source:
+  kind: probe
+  from: bindings/headless/tests/independent.rs
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note, test: independent }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

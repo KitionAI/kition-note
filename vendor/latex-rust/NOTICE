@@ -1,0 +1,18 @@
+LaTeX-Rust
+Copyright 2026 Jeffrey S Carr
+
+Licensed under MIT OR Apache-2.0 (LICENSE-MIT, LICENSE-APACHE).
+
+This is a modified copy of latex-rust 2.1.1 from crates.io
+(https://github.com/jscarr64/LaTeX-Rust), kept in the Kition Note kit.
+Changed by the Kition authors: src/color.rs takes the dvips color names
+(\color{TealBlue} and the other 67) from a table of their own, with each
+name's CMYK definition, in place of upstream's data/dvipsnames.tsv, which
+this copy does not contain. Everything else in src/ and data/ is unchanged;
+upstream's tests, golds, benches and documents are left out.
+
+This product embeds STIX Two Math (version 2.13), licensed under the
+SIL Open Font License 1.1. See fonts/stix-two-math/OFL.txt.
+
+STIX Fonts is a trademark of The Institute of Electrical and
+Electronics Engineers, Inc.

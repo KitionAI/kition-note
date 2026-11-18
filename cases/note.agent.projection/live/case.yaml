@@ -1,0 +1,21 @@
+format: 1
+id: note.agent.projection/live
+feature: note.agent.projection
+intent: >-
+  The note open in the page: ids follow the person's typing (a paragraph above, a heading renamed
+  by typing, a task's box), a file merged into the open note keeps its threads and ids, and the
+  guard's hooks answer as headless (covered with the body at basis; a whole body compared, an
+  excerpt never kept cannot say).
+layer: gate
+dimension: ai
+source:
+  kind: synthetic
+  from: bindings/wasm/tests/live.rs
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: live }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

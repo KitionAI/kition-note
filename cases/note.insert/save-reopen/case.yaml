@@ -1,0 +1,17 @@
+format: 1
+id: note.insert/save-reopen
+feature: note.insert
+intent: >-
+  A rule, a code block, a callout, a math block, a footnote and a table inserted at the caret survive a Markdown save and reopen: the reopened note saves the same bytes.
+layer: gate
+source:
+  kind: synthetic
+  from: bindings/wasm/src/round_trip_tests.rs (inserted_blocks_survive_save_and_reopen)
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, filter: "round_trip_tests::inserted_blocks_survive_save_and_reopen" }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

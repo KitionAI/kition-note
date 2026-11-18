@@ -1,0 +1,26 @@
+[package]
+name = "kition-note-view"
+description = "The Note kit's view: the note laid out in one column, its geometry for editing, and its pixels"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+[dependencies]
+kition-note-fonts = { workspace = true }
+kition-note-markdown = { workspace = true }
+pulldown-cmark = { workspace = true }
+kurbo = { workspace = true }
+kition-tessera-icons = { workspace = true }
+vello_cpu = { workspace = true }
+latex-rust = { workspace = true }
+rustc-hash = { workspace = true }
+unicode-linebreak = { workspace = true }
+unicode-segmentation = { workspace = true }
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+png = "0.18"

@@ -1,0 +1,21 @@
+format: 1
+id: regressions/issue-block-replace-ids
+feature: note.structure
+intent: >-
+  block.replace wrote an id the replacement sets without checking it, so two blocks could end
+  with the same ^id, and in a tight list item it overwrote the list marker and checkbox. An id
+  another block carries is refused now, as block.setId refuses it, and a list item keeps its
+  marker and checkbox unless the replacement starts with a marker of its own.
+layer: gate
+dimension: function
+source:
+  kind: probe
+  from: bindings/wasm/tests/edit_regressions.rs (block_replace_checks_new_ids_and_keeps_the_list_marker)
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: edit_regressions, filter: block_replace_checks_new_ids_and_keeps_the_list_marker }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

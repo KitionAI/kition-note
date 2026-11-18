@@ -1,0 +1,23 @@
+format: 1
+id: regressions/issue-focus-escape-text-tool
+feature: note.platform.display-modes
+intent: >-
+  Escape leaves Focus when there is nothing to cancel (no text selected, no menu, field or dialog
+  open), and with text selected it only clears the selection (KitPointer 4.4). The note's text
+  tool takes every editing key, Escape included, so kit-editor saw every Escape as taken and Focus
+  could not be left by key (kition-sdk's mode smoke failed "Escape leaves Focus" in all three
+  modes).
+layer: gate
+source:
+  kind: probe
+  from: kit display modes work, web/tests/modes.mjs
+  license: owned
+input: []
+steps:
+  - exec:
+      cmd: [node, web/tests/modes.mjs, chromium]
+expected:
+  - { actual: "out:exec", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300
+requires: [chromium]

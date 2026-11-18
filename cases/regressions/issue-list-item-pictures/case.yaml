@@ -1,0 +1,24 @@
+format: 1
+id: regressions/issue-list-item-pictures
+feature: note.images
+intent: >-
+  A picture alone in a list item or a quote (`- ![](shot.png)`, `> ![](shot.png)`) is drawn, as
+  Obsidian draws it, where the item's text starts and after its bullet or the quote's bar; a
+  picture among words stays a link. Before, only a line holding nothing but the picture was drawn,
+  so pictures pasted from an online document, each a list item of its own, were kept as files but
+  showed as empty bullets.
+layer: unit
+dimension: function
+source:
+  kind: issue
+  from: owner report (pictures pasted from an online document did not show)
+  license: owned
+input: []
+steps:
+  - cargo-test:
+      package: kition-note-view
+      test: a_picture_alone_in_a_list_item_or_quote_is_drawn_where_its_text_starts
+expected:
+  - actual: out:cargo-test
+    compare: exit
+since: "2026-11-11"

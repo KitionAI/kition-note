@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Note kit: comment threads test host</title>
+    <style>
+      html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; }
+      body { display: flex; flex-direction: column; }
+      header { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid #e5e3df; }
+      iframe { flex: 1; border: 0; }
+    </style>
+  </head>
+  <body>
+    <header><strong>Comment threads test host</strong> <span id="status">opening…</span></header>
+    <iframe id="kit" src="about:blank" title="Note"></iframe>
+    <script type="module" src="./commentsHost.ts"></script>
+  </body>
+</html>

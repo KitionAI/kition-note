@@ -1,0 +1,16 @@
+[package]
+name = "kition-note-export"
+description = "The Note kit's reading view: Markdown laid out on pages (base-14 PDF fonts), drawn as pixels, and written as PDF and as a standalone HTML file."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+kition-note-markdown = { workspace = true }
+pulldown-cmark = { workspace = true }
+serde_json = { workspace = true }

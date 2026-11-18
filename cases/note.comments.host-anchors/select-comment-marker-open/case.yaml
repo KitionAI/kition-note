@@ -1,0 +1,25 @@
+format: 1
+id: note.comments.host-anchors/select-comment-marker-open
+feature: note.comments.host-anchors
+intent: >-
+  In a host that keeps comment threads itself (Kit UI protocol 2.6 section 7k, as Kition One does):
+  a selection's Comment (the selection bar, the context menu, Mod+Alt+M) sends comment.create with
+  the selection's anchor (the note root, its range in Unicode characters, its quote); the host's
+  threads are marked on their text and stay on it as text is typed above and inside it; a marker's
+  click sends comments/activated; a resolved thread is not marked; a stored anchor is found again in
+  a note changed while closed; a commenter selects with the mouse and comments, and a viewer is
+  offered no Comment but opens threads from their markers.
+layer: gate
+dimension: collab
+source:
+  kind: synthetic
+  from: web/tests/comments.mjs
+  license: owned
+input: []
+steps:
+  - exec:
+      cmd: [node, web/tests/comments.mjs, chromium]
+expected:
+  - { actual: "out:exec", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

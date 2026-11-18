@@ -1,0 +1,20 @@
+format: 1
+id: regressions/issue-editor-cut-text
+feature: note.editing
+intent: >-
+  Cut removed the opener of a span whose closer it cut ('**b** c' from 'b** c' selected) but put
+  only the selected text on the clipboard, so a paste did not give back what was cut. The
+  clipboard text is now exactly the text removed.
+layer: gate
+dimension: function
+source:
+  kind: probe
+  from: bindings/wasm/tests/edit_regressions.rs (cut_answers_the_text_it_removes)
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: edit_regressions, filter: cut_answers_the_text_it_removes }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

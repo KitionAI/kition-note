@@ -1,0 +1,11 @@
+{
+  "steps": [
+    {
+      "command": "text.insert",
+      "params": {
+        "at": 76,
+        "text": "Reviewed on Monday.\n\n"
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "kition-note-ui",
+  "version": "0.3.0",
+  "private": true,
+  "packageManager": "pnpm@10.34.9",
+  "description": "The Note kit's own editor: kit-editor's frame around the canvas the kit's Rust engine draws and edits (WebAssembly in a Web Worker), embedded by hosts over the Kit UI protocol.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "engine": "sh scripts/build-engine.sh",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:flow": "node tests/canvas.mjs chromium && node tests/canvas.mjs webkit && node tests/flow.mjs chromium && node tests/flow.mjs webkit && node tests/table.mjs chromium && node tests/table.mjs webkit && node tests/workspace.mjs chromium && node tests/workspace.mjs webkit && node tests/ai.mjs chromium && node tests/ai.mjs webkit && node tests/export.mjs chromium && node tests/export.mjs webkit && node tests/modes.mjs chromium && node tests/modes.mjs webkit && node tests/autosave.mjs chromium && node tests/autosave.mjs webkit && node tests/obsidian.mjs chromium && node tests/obsidian.mjs webkit && node tests/find.mjs chromium && node tests/find.mjs webkit && node tests/comments.mjs chromium && node tests/comments.mjs webkit"
+  },
+  "dependencies": {
+    "@kition/kdm": "^0.1.0",
+    "@kition/kit-editor": "^0.1.0",
+    "@kition/kit-engine": "^0.1.0",
+    "@kition/kit-host": "^0.1.0",
+    "@kition/kit-ui-protocol": "^0.1.0",
+    "@kition/tessera-icons": "^0.1.0",
+    "dompurify": "3.4.17",
+    "loro-crdt": "1.16.4",
+    "mermaid": "11.13.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "turndown": "7.2.0"
+  },
+  "devDependencies": {
+    "@kition/kit-dev-host": "^0.1.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/turndown": "5.0.6",
+    "@vitejs/plugin-react": "^6.0.1",
+    "playwright": "1.59.1",
+    "typescript": "6.0.3",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
+  }
+}

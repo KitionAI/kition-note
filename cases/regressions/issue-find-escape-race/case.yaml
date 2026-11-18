@@ -1,0 +1,24 @@
+format: 1
+id: regressions/issue-find-escape-race
+feature: note.text.edit
+intent: >-
+  Enter then Escape in Find hands the keyboard back to the note only after the match Enter asked for
+  is selected, so a key typed next lands after that match. Escape used to close Find while the
+  engine was still finding, and the next keys went where the caret had been before Find (into the
+  heading), which Kition's table widget gate caught as "# Cells" becoming "#! Cells".
+layer: gate
+source:
+  kind: issue
+  from: Kition end-to-end tests, note-table-widget.spec.ts "typing in a cell changes only its line" failed once in 3
+  license: owned
+input: []
+steps:
+  - flow:
+      spec: web/tests/find.mjs
+      scenario: a key typed right after Enter and Escape in Find goes after the match
+      browsers: [chromium, webkit]
+expected:
+  - actual: out:flow
+    compare: exit
+since: "2026-11-16"
+requires: [chromium, webkit]

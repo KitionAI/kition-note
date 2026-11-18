@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Note kit: workspace test host</title>
+    <style>
+      html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; }
+      body { display: flex; flex-direction: column; }
+      header { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid #e5e3df; }
+      main { flex: 1; display: flex; min-height: 0; }
+      iframe { flex: 1; border: 0; min-width: 0; }
+      iframe + iframe { border-left: 1px solid #e5e3df; }
+    </style>
+  </head>
+  <body>
+    <header><strong>Workspace test host</strong> <span id="status">opening…</span></header>
+    <main>
+      <iframe id="kit-a" src="about:blank" title="Note A"></iframe>
+      <iframe id="kit-b" src="about:blank" title="Note B"></iframe>
+    </main>
+    <script type="module" src="./workspaceHost.ts"></script>
+  </body>
+</html>

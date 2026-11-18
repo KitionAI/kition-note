@@ -1,0 +1,22 @@
+format: 1
+id: regressions/issue-coedit-save-merged-twice
+feature: note.collab.live
+intent: >-
+  A co-editor's save of a note this editor already holds, taken in with "Merge its changes" while
+  this editor has unsaved edits, brings in nothing twice: the file's merge base takes in other
+  people's changes as they arrive, so only what did not come through the room is merged.
+layer: unit
+dimension: collab
+source:
+  kind: issue
+  from: found while making note co-edit live; the co-editor's sentence came in a second time
+  license: owned
+input: []
+steps:
+  - cargo-test:
+      package: kition-note-kit
+      test: a_co_editors_save_merged_into_this_editor_adds_nothing_twice
+expected:
+  - actual: out:cargo-test
+    compare: exit
+since: "2026-11-16"

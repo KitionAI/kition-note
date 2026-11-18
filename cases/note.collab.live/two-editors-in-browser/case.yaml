@@ -1,0 +1,23 @@
+format: 1
+id: note.collab.live/two-editors-in-browser
+feature: note.collab.live
+intent: >-
+  Two editors of one note in one browser page, their replicas and presence relayed as a co-editing
+  host relays them: what one types shows in the other at once, the other's caret stays on its
+  word while text comes in before it, both typing in one paragraph converge with every word
+  whole and save that text, and each shows the other person's caret (with their name) and
+  selection.
+layer: gate
+dimension: collab
+source:
+  kind: synthetic
+  from: web/tests/workspace.mjs
+  license: owned
+input: []
+steps:
+  - exec:
+      cmd: [node, web/tests/workspace.mjs, chromium]
+expected:
+  - { actual: "out:exec", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

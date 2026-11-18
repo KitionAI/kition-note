@@ -1,0 +1,15 @@
+[package]
+name = "kition-note-markdown"
+description = "A source-positioned index of Obsidian-flavoured Markdown (pulldown-cmark plus an Obsidian scanner) and the note's lossless frontmatter reader."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+pulldown-cmark = { workspace = true }
+saphyr = { workspace = true }

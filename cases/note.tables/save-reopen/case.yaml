@@ -1,0 +1,17 @@
+format: 1
+id: note.tables/save-reopen
+feature: note.tables
+intent: >-
+  A Markdown table created, filled, given a row and a column, aligned, reordered and formatted survives a save and reopen: the same bytes and the same table.read.
+layer: gate
+source:
+  kind: synthetic
+  from: bindings/wasm/src/round_trip_tests.rs (tables_survive_save_and_reopen)
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, filter: "round_trip_tests::tables_survive_save_and_reopen" }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

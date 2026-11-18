@@ -1,0 +1,1 @@
+# latex-rust keeps its upstream formatting: rustfmt defaults, not the workspace settings.

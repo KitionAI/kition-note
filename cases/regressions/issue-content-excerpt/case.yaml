@@ -1,0 +1,22 @@
+format: 1
+id: regressions/issue-content-excerpt
+feature: note.agent.premises
+intent: >-
+  A write by no place (block.append at the note's end) was refused `unknown` after any change of
+  the body by others: an earlier kition-sdk gave content_at a body over 80 characters only as
+  {excerpt, length}. content_at now gets the body at basis whole, so the write
+  applies after many changes elsewhere and is refused changed after one at the end; the kit keeps
+  no bodies of its own.
+layer: gate
+dimension: ai
+source:
+  kind: probe
+  from: bindings/headless/tests/premises.rs
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note, test: premises }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-16"
+timeout_s: 300

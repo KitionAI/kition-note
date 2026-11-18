@@ -1,0 +1,259 @@
+format: 1
+kit: note
+updated: "2026-11-16"
+gate_budget_s: 600
+protected: ["conformance/golden/**"]
+features:
+  - id: note.agent.observe
+    title: An agent reads the note and answers in it
+    dimension: [ai]
+    priority: P0
+    status: has
+    requirements: [AX13]
+    cases: [note.agent.observe/open-tasks, regressions/issue-2]
+    since: "2026-11-16"
+  - id: note.agent.act
+    title: An agent adds sections and lists
+    dimension: [ai]
+    priority: P0
+    status: has
+    requirements: [AX13]
+    cases: [note.agent.act/risks-section]
+    since: "2026-11-16"
+  - id: note.agent.recover
+    title: An agent fixes what the check reports
+    dimension: [ai]
+    priority: P0
+    status: has
+    requirements: [AX13]
+    cases: [note.agent.recover/unclosed-fence, regressions/issue-unknown-params, regressions/issue-5]
+    since: "2026-11-16"
+  - id: note.agent.draft
+    title: An agent works in a draft over a conversation
+    dimension: [ai]
+    priority: P1
+    status: has
+    requirements: [AX13]
+    cases: [note.agent.draft/new-task]
+    since: "2026-11-16"
+  - id: note.agent.preview
+    title: "An agent's preview of a note is drawn by the engine with the fonts the kit ships (note_inspect preview: true)"
+    dimension: [ai, fidelity]
+    priority: P1
+    status: partial
+    paths: [bindings/headless/build.rs, bindings/headless/src/lib.rs, bindings/headless/src/main.rs, crates/view/**]
+    requirements: [AX13]
+    gap: "The headless preview (view.screenshot of kition-headless) draws the note within 1024 pixels: it does not yet honour scale, maxSize or target (KHP A39, an SDK change)."
+    cases: [regressions/issue-golden-preview, regressions/issue-headless-shipped-fonts]
+    since: "2026-11-16"
+  - id: note.agent.premises
+    title: "An agent's write with basis rests on what it read: refused when another writer changed that, applied when they changed something else"
+    dimension: [ai, collab]
+    priority: P0
+    status: has
+    paths: [bindings/wasm/src/premise.rs, bindings/wasm/src/run.rs, bindings/wasm/src/commands.rs, bindings/headless/tests/**]
+    requirements: [AX13]
+    cases: [note.agent.premises/outside-changes, note.agent.premises/mixed-table, note.agent.premises/addresses, note.agent.premises/independent-reading, regressions/issue-move-carries, regressions/issue-dropped-threads, regressions/issue-content-excerpt, regressions/issue-section-landing]
+    since: "2026-11-16"
+  - id: note.agent.projection
+    title: "The note's sections, tasks, tables, properties and links are projected objects of the object model with ids an agent names them by, followed through every change while the note is open; receipts and others name them, and comment threads survive a change made in the file"
+    dimension: [ai, collab]
+    priority: P0
+    status: partial
+    paths: [bindings/wasm/src/projection.rs, bindings/wasm/src/continuity.rs, bindings/wasm/src/premise.rs, bindings/wasm/tests/live.rs, bindings/headless/tests/outside.rs, bindings/headless/tests/projected.rs, crates/kdm/kdm-model/model/schema.json]
+    requirements: [AX13]
+    cases: [note.agent.projection/ids-and-threads, note.agent.projection/live, note.agent.projection/object-model, regressions/issue-line-below]
+    gap: "Through the object model only a task's box, a heading's level and a section's deletion are writable; tables, links and properties are read-only there (their commands take numbers and keys, not ids), and sections and tasks cannot be created or moved through it. A raw batch write of the body is refused; comment threads take raw batch writes through kition-sdk's shared comment types. The page's editor path (web/) with the projection was not run."
+    since: "2026-11-16"
+  - id: note.platform.brand
+    title: The embedded editor uses the canonical kit palette
+    dimension: [platform]
+    priority: P1
+    status: has
+    paths: [kit.json]
+    cases: [regressions/issue-release-kit-brand]
+    since: "2026-11-16"
+  - id: note.platform.native-host
+    title: A native host builds against the note SDK at its Rust minimum and labels its own edits
+    dimension: [compat, function]
+    priority: P1
+    status: has
+    paths: [bindings/wasm/tests/native_host.rs, bindings/wasm/Cargo.toml, crates/view/view/src/math.rs]
+    cases: [regressions/issue-msrv-math-dependency, regressions/issue-native-host-origin, regressions/issue-native-sdk-imports]
+    since: "2026-11-16"
+  - id: note.platform.display-modes
+    title: "The editor in every display mode: Menus, Single line and Classic open on Format, a Markdown toolbar; Focus shows only the note and leaves on Escape"
+    dimension: [function, platform]
+    priority: P1
+    status: has
+    paths: [web/src/FormatRibbon.tsx, web/src/focusEscape.ts, web/src/menus.ts, web/src/commandIcons.ts, web/src/App.tsx, web/tests/modes.mjs]
+    cases: [note.platform.display-modes/mode-smoke, regressions/issue-focus-escape-text-tool]
+    since: "2026-11-16"
+  - id: note.collab.live
+    title: People co-edit a note live and see each other's edits, carets and selections at once
+    dimension: [collab, function, data-safety]
+    priority: P1
+    status: has
+    paths: [bindings/wasm/src/lib.rs, bindings/wasm/src/editor.rs, bindings/wasm/src/collab.rs, bindings/wasm/src/coedit_tests.rs, bindings/wasm/tests/convergence.rs, web/src/Presence.tsx, web/src/App.tsx, web/src/main.tsx, kit.json]
+    gap: >-
+      A typing run is one undo step only until another person's change to the text comes in (the
+      replica's undo group ends at an import that touches the same text); the run then undoes in
+      two steps. Peers' carets are placed in this person's own layout (their active line's
+      Markdown syntax is not shown here).
+    cases: [note.collab.live/converges, note.collab.live/editor-follows-remote, note.collab.live/two-editors-in-browser, regressions/issue-coedit-save-merged-twice]
+    since: "2026-11-16"
+  - id: note.text.edit
+    title: "Read, find, insert, delete and replace text; write the whole note"
+    dimension: [function, conversion, data-safety]
+    priority: P0
+    status: has
+    commands: [text.read, text.find, text.insert, text.delete, text.replace, text.findReplace, note.write]
+    paths: [crates/engine/check/src/lib.rs]
+    cases: [note.text.edit/save-only-the-edit, note.text.edit/edge-files-byte-for-byte, regressions/issue-find-escape-race, regressions/issue-find-replace-front-matter]
+    since: "2026-11-16"
+  - id: note.structure
+    title: "Outline, sections and blocks: read, replace, insert, delete, move; heading levels"
+    dimension: [function]
+    priority: P0
+    status: has
+    commands: [outline.read, section.read, section.replace, section.insert, section.delete, section.move, block.read, block.replace, block.append, block.setId, heading.setLevel]
+    paths: [crates/engine/check/src/lib.rs]
+    gap: "section.delete and block.setId are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
+    cases: [note.structure/save-reopen, regressions/issue-setext-heading-to-atx, regressions/issue-block-replace-ids, regressions/issue-block-set-id-line]
+    since: "2026-11-16"
+  - id: note.properties
+    title: "Front-matter properties: list, set, delete, rename, show"
+    dimension: [function]
+    priority: P0
+    status: has
+    commands: [property.list, property.set, property.delete, property.rename, properties.view]
+    paths: [crates/engine/check/src/lib.rs]
+    gap: "properties.view (the editor's properties panel) is covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
+    cases: [note.properties/save-reopen, regressions/issue-3]
+    since: "2026-11-16"
+  - id: note.tables
+    title: "Markdown tables: create, edit cells, insert, delete and move rows and columns, align, format"
+    dimension: [function]
+    priority: P0
+    status: has
+    commands: [table.read, table.create, table.setCell, table.insertRow, table.insertColumn, table.deleteRow, table.deleteColumn, table.moveRow, table.moveColumn, table.align, table.format, table.geometry]
+    paths: [crates/engine/check/src/lib.rs]
+    gap: "table.deleteRow, table.deleteColumn, table.moveColumn and table.geometry are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
+    cases: [note.tables/save-reopen, regressions/issue-table-drag-handles, regressions/issue-table-menu-outside-click, regressions/issue-4, regressions/issue-table-create-line]
+    since: "2026-11-16"
+  - id: note.links
+    title: "Links and wikilinks: list, insert, update, embed, retarget when files move"
+    dimension: [function]
+    priority: P0
+    status: has
+    commands: [links.list, links.retarget, link.insert, link.update, insert.wikilink, insert.embed]
+    paths: [web/src/commandIcons.ts, crates/engine/check/src/lib.rs]
+    gap: "insert.wikilink and insert.embed are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
+    cases: [note.links/save-reopen, regressions/issue-link-escaping]
+    since: "2026-11-16"
+  - id: note.tasks
+    title: "Tasks: list and toggle checkboxes"
+    dimension: [function]
+    priority: P0
+    status: has
+    commands: [tasks.list, task.toggle, list.toggleCheckbox]
+    cases: [note.tasks/save-reopen, regressions/issue-task-box-cursor, regressions/issue-task-toggle-block-id]
+    since: "2026-11-16"
+  - id: note.format
+    title: "Inline and block formatting: bold, italic, strike, code, highlight, math, headings, quotes, lists"
+    dimension: [function]
+    priority: P0
+    status: has
+    commands: [format.math, format.highlightColor, format.clear, format.bold, format.italic, format.strike, format.code, format.highlight, format.link, format.paragraph, format.heading1, format.heading2, format.heading3, format.heading4, format.heading5, format.heading6, format.comment, format.quote, format.headingUp, format.headingDown, list.bullet, list.numbered, list.task]
+    paths: [web/src/commandIcons.ts]
+    gap: "The other formats (highlight and its colour, clear, link, paragraph, the other heading levels, comment, lists) are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
+    cases: [note.format/save-reopen, regressions/issue-editor-list-front-matter, regressions/issue-editor-clear-images]
+    since: "2026-11-16"
+  - id: note.insert
+    title: "Insert images, tags, tables, math, callouts, footnotes, dates, code blocks, rules and templates"
+    dimension: [function]
+    priority: P0
+    status: has
+    commands: [insert.image, insert.tag, insert.table, insert.mathBlock, insert.callout, insert.footnote, insert.date, insert.timestamp, insert.codeBlock, insert.rule, template.expand]
+    paths: [web/src/commandIcons.ts]
+    gap: "insert.image, insert.tag, insert.date, insert.timestamp and template.expand are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
+    cases: [note.insert/save-reopen, regressions/issue-editor-local-date]
+    since: "2026-11-16"
+  - id: note.images
+    title: "Pictures the note refers to: find missing ones, set their files"
+    dimension: [function]
+    priority: P1
+    status: partial
+    commands: [image.wanted, image.set]
+    cases: [regressions/issue-list-item-pictures]
+    gap: "The engine has these commands; no case yet shows the area working end to end in the editor and surviving save and reopen."
+    since: "2026-11-16"
+  - id: note.images.pasted-addresses
+    title: "A picture pasted by its web address (HTML from a web page) is kept as a file in the workspace and linked, not left as an address that expires"
+    dimension: [function, data-safety]
+    priority: P1
+    status: has
+    paths: [web/src/remoteImages.ts, web/src/workspaceImages.ts, web/src/App.tsx]
+    cases: [regressions/issue-pasted-web-images]
+    since: "2026-11-16"
+  - id: note.comments
+    title: "Comment threads: add, reply, resolve, move, delete"
+    dimension: [function, collab]
+    priority: P1
+    status: partial
+    commands: [comment.threads, comment.add, comment.reply, comment.resolve, comment.move, comment.delete]
+    gap: "The engine has these commands; no case yet shows the area working end to end in the editor and surviving save and reopen."
+    cases: [regressions/issue-comment-author, regressions/issue-comment-anchor-moves]
+    since: "2026-11-16"
+  - id: note.comments.host-anchors
+    title: "In a host that keeps comment threads, a selection's Comment starts the host's thread, and its threads are marked on their text"
+    dimension: [collab, function]
+    priority: P1
+    status: has
+    paths: [web/src/commentAnchors.ts, web/src/HostComments.tsx, web/src/readOnlySelect.ts, web/src/ai/ReviewBar.tsx, web/src/EditorMenu.tsx, web/src/App.tsx, web/src/main.tsx, web/tests/commentsHost.ts, web/tests/comments.mjs]
+    gap: >-
+      The host stores an anchor as it was made (the protocol has no anchor update): an open note
+      keeps each thread's range on its text through every edit, and a reopened one finds it again
+      by its quote, nearest to where it was; a thread whose quoted text was edited before a reopen
+      is not marked then (comments/locate answers false). Threads the note kept in its replica
+      before are not shown in such a host.
+    cases: [note.comments.host-anchors/select-comment-marker-open]
+    since: "2026-11-16"
+  - id: note.code-diagrams
+    title: "Code blocks and diagrams"
+    dimension: [function]
+    priority: P1
+    status: partial
+    commands: [code.blocks, diagrams.view, diagram.set]
+    gap: "The engine has these commands; no case yet shows the area working end to end in the editor and surviving save and reopen."
+    since: "2026-11-16"
+  - id: note.export
+    title: "Export to HTML and PDF, page layout, line endings"
+    dimension: [conversion, function]
+    priority: P1
+    status: partial
+    commands: [file.export, file.setLineEndings, page.layout]
+    paths: [bindings/wasm/src/lib.rs, bindings/wasm/src/export.rs, crates/engine/check/src/lib.rs]
+    cases: [regressions/issue-agent-export]
+    gap: "The engine has these commands; no case yet shows the area working end to end in the editor and surviving save and reopen."
+    since: "2026-11-16"
+  - id: note.editing
+    title: "Editor commands: selection, cut, indent, move lines, delete paragraph, sort, trim, undo and redo"
+    dimension: [function]
+    priority: P1
+    status: partial
+    commands: [edit.selectAll, edit.cut, edit.indent, edit.outdent, edit.moveLineUp, edit.moveLineDown, edit.deleteParagraph, edit.selectSection, edit.sortLines, edit.trimWhitespace, edit.undo, edit.redo, selection.get, selection.set, selection.replace, selection.where, selection.controlKey]
+    paths: [bindings/wasm/src/lib.rs, web/src/commandIcons.ts]
+    gap: "The engine has these commands; no case yet shows the area working end to end in the editor and surviving save and reopen."
+    cases: [regressions/issue-editor-cut-text]
+    since: "2026-11-16"
+  - id: note.view
+    title: "Reading width, scrolling, folding and block lookup"
+    dimension: [function]
+    priority: P2
+    status: partial
+    commands: [view.width, view.hoverOut, view.blockAt, view.foldProperties, view.fold, view.foldAll, view.unfoldAll, view.foldMore, view.foldLess]
+    paths: [bindings/wasm/src/lib.rs]
+    gap: "The engine has these commands; no case yet shows the area working end to end in the editor and surviving save and reopen."
+    cases: [regressions/issue-scroll-bar-blank-flash, regressions/issue-open-at-line-scroll]
+    since: "2026-11-16"

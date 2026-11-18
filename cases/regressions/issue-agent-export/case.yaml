@@ -1,0 +1,24 @@
+format: 1
+id: regressions/issue-agent-export
+feature: note.export
+intent: >-
+  An agent exports a note as HTML and PDF through one command (KHP A35, A41; Kition platform K5,
+  K21): kit.json names `file.export` in `agent.export` with `data`, the command every `exports`
+  format runs with `format`, answering the file as base64; `kit.initialize` reports the formats
+  and `document.export` writes the same bytes. The HTML is a whole document holding the note's
+  text and loading nothing from the network; the PDF has a header, a trailer and a page. Before,
+  the formats had two commands (`file.exportHtml`, `file.exportPdf`) that took no `format`, and
+  kit.json had no `agent.export`.
+layer: gate
+source:
+  kind: probe
+  from: "agent readiness review (two export commands without format)"
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note, test: export }
+expected:
+  - actual: out:cargo-test
+    compare: exit
+    value: 0
+since: "2026-11-16"

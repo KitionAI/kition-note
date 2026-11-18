@@ -1,0 +1,5 @@
+{
+  "maxChannelDelta": 2,
+  "maxDifferentPixels": 3600,
+  "note": "The engine's own view (vello_cpu) draws the preview with the fonts the kit ships; anti-aliased edges and glyphs may differ by a step between platforms and SIMD paths, on at most 0.5% of the 710 x 1024 picture's pixels."
+}

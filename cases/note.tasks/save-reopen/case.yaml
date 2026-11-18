@@ -1,0 +1,17 @@
+format: 1
+id: note.tasks/save-reopen
+feature: note.tasks
+intent: >-
+  Tasks toggled with task.toggle and list.toggleCheckbox survive a Markdown save and reopen: the same bytes and the same tasks.list.
+layer: gate
+source:
+  kind: synthetic
+  from: bindings/wasm/src/round_trip_tests.rs (tasks_survive_save_and_reopen)
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, filter: "round_trip_tests::tasks_survive_save_and_reopen" }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"

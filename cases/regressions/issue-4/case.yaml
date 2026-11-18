@@ -1,0 +1,19 @@
+format: 1
+id: regressions/issue-4
+feature: note.tables
+intent: >-
+  A row inserted into a table that has only its header (table.create {rows: 0}) goes after the
+  delimiter row, so the note keeps one well-formed table and later rows and cells address it.
+  Before, the row went between the header and the delimiter row and broke the table.
+layer: gate
+source:
+  kind: issue
+  from: Kition Note regression suite
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: header_only_table }
+expected:
+  - actual: out:exit
+    compare: exit
+since: "2026-11-16"
