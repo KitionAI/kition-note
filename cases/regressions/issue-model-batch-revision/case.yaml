@@ -1,0 +1,25 @@
+format: 1
+id: regressions/issue-model-batch-revision
+feature: note.agent.projection
+intent: >-
+  An edit through the object model (model/batch, what extensions and workspace scripts use) is a
+  change of the note as a command's is. The note did not implement kition-sdk's
+  KitDocument::batch_applied, so a batch changed the text and the undo history but left the
+  revision and dirty as they were: the editor kept drawing the old text, the outline answered the
+  old heading, the caret kept its old offset, and Save stayed off, so the edit was lost. Now a
+  batch that changed the replica ends the typing run, moves the revision, marks the note unsaved,
+  lays out the pages again and moves the selection with the text; a command inside a batch counts
+  once, and a batch that changed nothing leaves the revision.
+layer: gate
+dimension: function
+source:
+  kind: issue
+  from: Kition e2e/extensions.spec.ts (the title-case extension's edit could not be saved)
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, test: model_batch }
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-18"
+timeout_s: 300

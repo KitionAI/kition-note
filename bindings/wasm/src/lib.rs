@@ -63,6 +63,9 @@ pub struct NoteDocument {
     pages: std::cell::OnceCell<page::Pages>,
     revision: u64,
     saved: u64,
+    /// The replica's version when the note last took in a change (`changed`): a model batch that
+    /// moved it past this is a change the note has not taken in yet (`batch_applied`).
+    accounted: kition_kit::kdm::Version,
     /// The text the file held when it was last read or written: the base of an external change
     /// merge ([`NoteDocument::merge_file`]).
     base: String,
@@ -122,11 +125,13 @@ impl NoteDocument {
         let mut editor = editor::Editor::default();
         editor.follow(&base);
         let tracked = std::cell::RefCell::new(projection::Tracked::open(&base));
+        let accounted = session.version();
         Self {
             session,
             pages: std::cell::OnceCell::new(),
             revision: 0,
             saved: 0,
+            accounted,
             base,
             invalid: None,
             name: "Untitled note.md".into(),
@@ -195,6 +200,7 @@ impl NoteDocument {
             let text = self.session.model().body().to_owned();
             self.editor.follow(&text);
         }
+        self.accounted = self.session.version();
     }
 
     /// What the view shows besides the text now (`painted`).
@@ -363,6 +369,20 @@ impl KitDocument for NoteDocument {
     /// model (`projection::objects`), by the ids `projection.read` gives.
     fn projected_objects(&self) -> Result<Vec<kition_kit::kdm::projection::ProjectedObject>, String> {
         Ok(projection::objects(self.ids().now(), premise::ROOT))
+    }
+
+    /// A committed run of the object model's operations (`model/batch`: extensions, workspace
+    /// scripts, kit-env) is a change of the note as a command's is: the open typing run ends, the
+    /// revision moves (the editor draws it, and the note has unsaved changes), the pages are laid
+    /// out again, the selection follows the text and the projection's ids follow it. A command
+    /// inside the batch has taken in its own change already (`changed`), so it is not counted twice.
+    fn batch_applied(&mut self) {
+        if self.session.version() == self.accounted {
+            return;
+        }
+        self.stop_typing();
+        self.changed(&Damage::Full);
+        drop(self.ids());
     }
 
     /// Opens a Markdown file. Every byte string is a note: valid UTF-8 opens for editing and saves

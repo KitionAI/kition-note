@@ -62,7 +62,7 @@ features:
     status: partial
     paths: [bindings/wasm/src/projection.rs, bindings/wasm/src/continuity.rs, bindings/wasm/src/premise.rs, bindings/wasm/tests/live.rs, bindings/headless/tests/outside.rs, bindings/headless/tests/projected.rs, crates/kdm/kdm-model/model/schema.json]
     requirements: [AX13]
-    cases: [note.agent.projection/ids-and-threads, note.agent.projection/live, note.agent.projection/object-model, regressions/issue-line-below]
+    cases: [note.agent.projection/ids-and-threads, note.agent.projection/live, note.agent.projection/object-model, regressions/issue-line-below, regressions/issue-model-batch-revision]
     gap: "Through the object model only a task's box, a heading's level and a section's deletion are writable; tables, links and properties are read-only there (their commands take numbers and keys, not ids), and sections and tasks cannot be created or moved through it. A raw batch write of the body is refused; comment threads take raw batch writes through kition-sdk's shared comment types. The page's editor path (web/) with the projection was not run."
     since: "2026-11-16"
   - id: note.platform.brand
