@@ -2,21 +2,11 @@
 
 Changes to Kition Note, newest first. A version is the kit package version in `kit.json`.
 
-## 0.3.0
-
-The first version with prebuilt headless executables: the Kition SDK release that carries this
-version builds `kition-note` for macOS (arm64, x64), Linux (arm64, x64) and Windows (x64) from the
-`package-v0.3.0` tag. Its number is above every version this repository has published before:
-the 0.1.1 package of 17 November 2026 was withdrawn when the history was rewritten, and
-0.1.0 stays published as it is. From this version on a published tag and its assets are never
-deleted, moved or reused.
-
-- `scripts/fetch-fonts.sh <folder>`: downloads the fonts the build needs from their upstream
-  sources and checks each file's SHA-256, so a source build needs no private repository.
-
 ## 0.1.0
 
-First public release of the source, under the Apache License 2.0. It contains:
+The first public release, under the Apache License 2.0, published as the `package-v0.1.0`
+Release of this repository. A published tag and its assets are never deleted, moved or reused; a
+change is published under a new version. It contains:
 
 - The Rust engine (`kition-note-kit`): Markdown notes kept byte for byte, minimal-span edits for
   text, properties, sections, blocks, tasks, tables and links, find and replace, `note_check`
@@ -25,6 +15,9 @@ First public release of the source, under the Apache License 2.0. It contains:
 - The headless kit (`kition-note`) for agents over the Kit Protocol, with the object model of
   the note's sections, tasks, tables, properties and links, and writes with a `basis` that are
   refused when someone else changed what they rest on.
+- An edit through the object model (`model/batch`: extensions, workspace scripts) is a change of
+  the note as a command's is: the revision moves, so the editor draws it, the note has unsaved
+  changes, and the selection follows the text (`KitDocument::batch_applied`).
 - The kit's editor (`web/`): the engine's canvas in kit-editor's frame, with the live preview,
   tables, comments, find, outline, drafts, history and exports.
 - A clean note whose file another program changed is read again into the same session: the
@@ -41,3 +34,5 @@ First public release of the source, under the Apache License 2.0. It contains:
   `cargo xtask golden` stays the round-trip suite against stored files.
 - Toolchain: Rust 1.95, Node 22.23.4, pnpm 10.34.9. Linking sibling checkouts in `web/` is
   opt-in (KITION_LINK=1).
+- `scripts/fetch-fonts.sh <folder>`: downloads the fonts the build needs from their upstream
+  sources and checks each file's SHA-256, so a source build needs no private repository.
