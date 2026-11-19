@@ -196,6 +196,6 @@ let bytes = document.save(None)?;
   runs as WebAssembly in a Web Worker and draws the note; hosts embed the editor in a sandboxed
   frame over the Kit UI protocol.
 - **Headless.** `kition-note` speaks the Kit Protocol of the
-  [Kit Harness Protocol (KHP)](https://github.com/kitharness/khp); the SDK's
+  [Kit Harness Protocol (KHP)](https://github.com/kitharness/kitharness); the SDK's
   `kition-kits-mcp` serves it to agents, and its `@kition/script` drives it from code.
 - **Comments** are objects of the replica the host stores, beside the file.
