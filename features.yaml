@@ -1,6 +1,6 @@
 format: 1
 kit: note
-updated: "2026-11-16"
+updated: "2026-11-18"
 gate_budget_s: 600
 protected: ["conformance/golden/**"]
 features:
@@ -89,6 +89,16 @@ features:
     paths: [web/src/FormatRibbon.tsx, web/src/focusEscape.ts, web/src/menus.ts, web/src/commandIcons.ts, web/src/App.tsx, web/tests/modes.mjs]
     cases: [note.platform.display-modes/mode-smoke, regressions/issue-focus-escape-text-tool]
     since: "2026-11-16"
+  - id: note.platform.color-scheme
+    title: "The editor follows the host's light or dark color scheme, live: the engine paints the note in a dark palette after Obsidian's, and the overlays match it"
+    dimension: [platform, function]
+    priority: P1
+    status: has
+    commands: [view.scheme]
+    paths: [crates/view/view/src/theme.rs, crates/view/view/src/lib.rs, bindings/wasm/src/editor.rs, web/src/colorScheme.ts, web/src/App.tsx, web/src/Diagrams.tsx, web/src/app.css, web/tests/scheme.mjs]
+    gap: "Export, print and the agent's preview stay in the light palette by design. A note opened in dark can show its light paper for a frame before the scheme reaches the engine."
+    cases: [note.platform.color-scheme/follows-host]
+    since: "2026-11-18"
   - id: note.collab.live
     title: People co-edit a note live and see each other's edits, carets and selections at once
     dimension: [collab, function, data-safety]

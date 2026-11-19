@@ -2592,6 +2592,17 @@ impl NoteDocument {
                 }
                 Ok(json!({ "changed": changed, "width": self.view().width() }))
             }
+            "view.scheme" => {
+                // The host's color scheme: the note paints with its palette; nothing moves.
+                let name = params.get("scheme").and_then(Value::as_str).ok_or("invalid-params: scheme is required")?;
+                let scheme =
+                    kition_note_view::Scheme::parse(name).ok_or_else(|| format!("invalid-params: scheme must be light or dark, not {name}"))?;
+                let changed = self.view.borrow_mut().set_scheme(scheme);
+                if changed {
+                    self.pictures.set(self.pictures.get() + 1);
+                }
+                Ok(json!({ "changed": changed, "scheme": name }))
+            }
             "properties.view" => {
                 // The front matter as Obsidian's properties block, for the editor to draw: null
                 // while it is edited as its source. Asking hands its drawing to the editor.

@@ -1080,7 +1080,7 @@ fn a_callout_title_and_a_cells_link_look_as_obsidian_draws_them() {
     };
     // The title is semibold in the kind's color, its bold 800, its inline code in the text's color.
     let title = line("Title");
-    let tip = theme::callout_color(theme::callout_type("tip"));
+    let tip = theme::callout_color(&Theme::default(), theme::callout_type("tip"));
     assert!(title.boxed.styles.iter().any(|style| style.weight == 600 && style.color == tip), "{:?}", title.boxed.styles);
     assert!(title.boxed.styles.iter().any(|style| style.weight == 800 && style.color == tip), "{:?}", title.boxed.styles);
     assert!(title.boxed.styles.iter().any(|style| style.family == kition_note_fonts::Family::Mono && style.color == view.theme().text));
@@ -1688,4 +1688,133 @@ fn a_picture_alone_in_a_list_item_or_quote_is_drawn_where_its_text_starts() {
     let start = text.find("    - ![]").unwrap();
     view.update(text, start..start);
     assert!(image(&view, 1).is_none());
+}
+
+/// WCAG's contrast ratio of two opaque colors.
+fn contrast(a: [u8; 4], b: [u8; 4]) -> f64 {
+    let luminance = |rgba: [u8; 4]| {
+        let channel = |value: u8| {
+            let value = f64::from(value) / 255.0;
+            if value <= 0.04045 { value / 12.92 } else { ((value + 0.055) / 1.055).powf(2.4) }
+        };
+        0.2126 * channel(rgba[0]) + 0.7152 * channel(rgba[1]) + 0.0722 * channel(rgba[2])
+    };
+    let (a, b) = (luminance(a), luminance(b));
+    (a.max(b) + 0.05) / (a.min(b) + 0.05)
+}
+
+#[test]
+fn the_dark_palette_reads_on_its_paper() {
+    let (light, dark) = (Theme::default(), Theme::dark());
+    assert_eq!(light.scheme, Scheme::Light);
+    assert_eq!(dark.scheme, Scheme::Dark);
+    for (name, color) in [
+        ("text", dark.text),
+        ("heading", dark.heading),
+        ("link", dark.link),
+        ("accent", dark.accent),
+        ("secondary", dark.secondary),
+        ("math", dark.math),
+    ] {
+        let ratio = contrast(color, dark.paper);
+        assert!(ratio >= 4.5, "dark {name} {color:?} on the paper is {ratio:.2}:1, under WCAG AA");
+    }
+    // Text on its inline backgrounds: a tag's pill, inline code, a highlight.
+    for (name, color, back) in
+        [("tag", dark.link, dark.tag_background), ("code", dark.text, dark.code_background), ("highlight", dark.text, dark.highlight)]
+    {
+        let ratio = contrast(color, back);
+        assert!(ratio >= 4.0, "dark {name} text on its background is {ratio:.2}:1");
+    }
+    // The faint syntax stays faint, but no fainter than the light palette's.
+    assert!(contrast(dark.muted, dark.paper) >= contrast(light.muted, light.paper));
+    // Code tokens on the code block (comments are faint by design, as the syntax).
+    for color in [
+        dark.code_keyword,
+        dark.code_literal,
+        dark.code_number,
+        dark.code_variable,
+        dark.code_operator,
+        dark.code_property,
+        dark.code_punctuation,
+        dark.code_link,
+    ] {
+        let ratio = contrast(color, dark.code_block);
+        assert!(ratio >= 4.5, "dark code token {color:?} on the code block is {ratio:.2}:1");
+    }
+    // A tag's pill and inline code draw their own shapes: they must stay told apart.
+    assert_ne!(dark.tag_background, dark.code_background);
+    assert_ne!(dark.tag_background, dark.highlight);
+    // Each callout's title color reads on its tint.
+    for kind in 1..=u8::try_from(theme::CALLOUT_TYPES.len()).unwrap() {
+        let ratio = contrast(theme::callout_color(&dark, kind), theme::callout_tint(&dark, kind));
+        assert!(ratio >= 3.0, "dark callout {kind}'s title on its tint is {ratio:.2}:1");
+    }
+    // A nested callout's box shows on the outer one's in either palette.
+    for theme in [&light, &dark] {
+        let outer = theme::callout_tint(theme, 1);
+        assert_ne!(theme::callout_tint_over(theme, outer, 8), outer, "{:?}", theme.scheme);
+    }
+    // The coloured highlights are dark under the dark palette's light text.
+    for (_, color) in style::HIGHLIGHT_COLORS {
+        assert_eq!(light.highlight_background(color), [color[0], color[1], color[2], 255]);
+        assert!(contrast(dark.text, dark.highlight_background(color)) >= 4.5);
+    }
+}
+
+#[test]
+fn the_palettes_share_every_length() {
+    let (light, dark) = (Theme::default(), Theme::dark());
+    let geometry = |theme: &Theme| {
+        (theme.width, theme.margin, theme.top, theme.bottom, theme.min_height, theme.image_height, theme.body_size, theme.code_size, theme.leading)
+    };
+    assert_eq!(geometry(&light), geometry(&dark));
+    // The light palette is the default, unchanged by a round trip through the dark one.
+    assert_eq!(light.with_scheme(Scheme::Dark).with_scheme(Scheme::Light), light);
+    assert_eq!(light.with_scheme(Scheme::Dark), dark);
+    // A fitted width and height survive a switch.
+    let mut view = View::default();
+    view.set_width(1280.0);
+    view.set_visible_height(700.0);
+    let before = geometry(view.theme());
+    assert!(view.set_scheme(Scheme::Dark));
+    assert_eq!(geometry(view.theme()), before);
+    assert_eq!(Scheme::parse("dark"), Some(Scheme::Dark));
+    assert_eq!(Scheme::parse("light"), Some(Scheme::Light));
+    assert_eq!(Scheme::parse("sepia"), None);
+}
+
+#[test]
+fn switching_the_scheme_repaints_and_moves_nothing() {
+    if !fonts() {
+        return;
+    }
+    let text = format!("{SAMPLE}\n> [!note] Note\n> Body\n> > [!warning] Nested\n> > Inside\n\n==🔵blue== and ==🟡yellow==\n");
+    let mut view = View::default();
+    view.update(&text, 0..0);
+    let (width, height) = (view.width(), view.height());
+    let carets: Vec<_> = (0..text.len()).filter(|at| text.is_char_boundary(*at)).map(|at| view.caret(at)).collect();
+    let light = view.frame(0.0, 0.0, 1.0, width as u16, height as u16);
+    assert!(!view.set_scheme(Scheme::Light), "already light");
+    assert!(view.set_scheme(Scheme::Dark));
+    assert!(!view.set_scheme(Scheme::Dark), "already dark");
+    view.update(&text, 0..0);
+    assert_eq!((view.width(), view.height()), (width, height), "the page keeps its size");
+    let moved: Vec<_> = (0..text.len()).filter(|at| text.is_char_boundary(*at)).map(|at| view.caret(at)).collect();
+    assert_eq!(carets, moved, "no character moves");
+    let dark = view.frame(0.0, 0.0, 1.0, width as u16, height as u16);
+    let paper = Theme::dark().paper;
+    assert_eq!(dark.get(0..4), Some(&paper[..]), "the paper is the dark palette's");
+    // No light paper is left, and the text is lighter than the paper.
+    let white = dark.as_chunks::<4>().0.iter().filter(|px| px[..3] == [255, 255, 255]).count();
+    assert_eq!(white, 0, "{white} white pixels on the dark paper");
+    let lit = dark.as_chunks::<4>().0.iter().filter(|px| px[0] > 160 && px[1] > 160 && px[2] > 160).count();
+    assert!(lit > 2_000, "light text draws on the dark paper ({lit} pixels)");
+    if let Some(dir) = std::env::var_os("KITION_NOTE_VIEW_PNG") {
+        png(&std::path::Path::new(&dir).join("sample-dark.png"), &dark, width, height);
+    }
+    // Back to light: the same pixels as before the switch.
+    assert!(view.set_scheme(Scheme::Light));
+    view.update(&text, 0..0);
+    assert_eq!(view.frame(0.0, 0.0, 1.0, width as u16, height as u16), light, "the light paint is as it was");
 }

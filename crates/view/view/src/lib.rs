@@ -21,7 +21,7 @@ use std::ops::Range;
 
 use layout::{Cache, Placed, Row, Stop};
 use style::Styles;
-pub use theme::Theme;
+pub use theme::{Scheme, Theme};
 
 /// Where the caret for a byte is drawn, in document pixels.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -654,6 +654,19 @@ impl View {
         self.laid = None;
         // The readable column, centered; narrower windows keep a side margin.
         self.theme.margin = ((width - Theme::COLUMN) / 2.0).max(Theme::SIDE.min(width * 0.06)).round();
+        true
+    }
+
+    /// Paints with `scheme`'s palette (the host's light or dark color scheme): the lengths stay,
+    /// so nothing moves. Laid out lines hold their colors, so the next `update` lays out again.
+    /// Answers whether it changed.
+    pub fn set_scheme(&mut self, scheme: theme::Scheme) -> bool {
+        if self.theme.scheme == scheme {
+            return false;
+        }
+        self.theme = self.theme.with_scheme(scheme);
+        self.cache = Cache::default();
+        self.laid = None;
         true
     }
 

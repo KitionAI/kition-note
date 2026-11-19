@@ -1,0 +1,23 @@
+format: 1
+id: note.platform.color-scheme/follows-host
+feature: note.platform.color-scheme
+intent: >-
+  The note follows the host's color scheme, through the development host: opened in dark, the
+  engine paints its paper dark (#1e1e1e, Obsidian's dark theme) and the canvas around it is the
+  same color, so no white slab sits in a dark shell; switched to light and back without a reload,
+  the note repaints each time and no character moves.
+layer: gate
+dimension: platform
+source:
+  kind: synthetic
+  from: web/tests/scheme.mjs
+  license: owned
+input: []
+steps:
+  - exec:
+      cmd: [node, web/tests/scheme.mjs, webkit]
+expected:
+  - { actual: "out:exec", compare: exit, value: 0 }
+since: "2026-11-18"
+timeout_s: 300
+requires: [webkit]

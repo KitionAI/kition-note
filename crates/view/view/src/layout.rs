@@ -428,7 +428,7 @@ fn run_style(theme: &Theme, line: LineStyle, flags: flag::Flags) -> RunStyle {
     } else if let Some(color) = crate::style::interned_color((flags & flag::COLOR) >> flag::COLOR_SHIFT) {
         // A coloured highlight's colour (alpha 254) is its background; any other, the text's.
         if flags & flag::HIGHLIGHT != 0 && color[3] == 254 {
-            style.background = Some([color[0], color[1], color[2], 255]);
+            style.background = Some(theme.highlight_background(color));
         } else {
             style.color = color;
         }
@@ -481,7 +481,7 @@ fn run_style(theme: &Theme, line: LineStyle, flags: flag::Flags) -> RunStyle {
     }
     // A callout's title in its kind's color, but for its inline code (the text's color).
     if callout_title && flags & flag::CODE == 0 {
-        style.color = crate::theme::callout_color(line.callout);
+        style.color = crate::theme::callout_color(theme, line.callout);
     }
     style
 }
@@ -916,7 +916,7 @@ fn place(
                 Mark::Callout { kind } => {
                     let side = style.size * 1.05;
                     let (x0, y0) = (x, baseline - style.size * 0.4 - side / 2.0);
-                    let color = crate::theme::callout_color(kind);
+                    let color = crate::theme::callout_color(theme, kind);
                     row.over.push(RowRect {
                         x0,
                         y0,

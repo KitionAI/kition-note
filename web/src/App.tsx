@@ -57,6 +57,7 @@ import { NoteAutosave } from './autosave'
 import { PeerPresence, useNotePresence } from './Presence'
 import { HostCommentMarks, canCreateComment, useHostComments } from './HostComments'
 import { useReadOnlySelect } from './readOnlySelect'
+import { useColorScheme } from './colorScheme'
 
 type Strings = ReturnType<typeof createKitStrings>
 
@@ -318,6 +319,17 @@ export function App({ host }: { host: HostConnection }) {
       current = false
     }
   }, [doc, change.revision])
+  // The host's color scheme: the engine paints the note in its palette (nothing moves), at open
+  // and whenever the host changes it.
+  // (The session is read through a ref: it is a new object on each render, and running the
+  // command on each render would never settle.)
+  const scheme = useColorScheme()
+  const schemeSession = useRef(session)
+  schemeSession.current = session
+  useEffect(() => {
+    if (!doc) return
+    void schemeSession.current.run('view.scheme', { scheme }).catch(() => undefined)
+  }, [doc, scheme])
   // Mermaid diagrams: those to draw, and where the drawn ones are (in view and a screen around).
   const [diagrams, setDiagrams] = useState<DiagramsView | null>(null)
   useEffect(() => {
@@ -979,7 +991,7 @@ export function App({ host }: { host: HostConnection }) {
               <Caret caret={caretAt} view={shownView} readOnly={readOnly} />
               <CodeFlairs blocks={codeBlocks} view={shownView} read={readText} t={t} />
               <Properties block={properties ?? pendingProperties} view={shownView} run={note.run} readOnly={readOnly} t={t} addRequest={addProperty} onCancel={() => setPendingProperties(null)} />
-              <Diagrams view={shownView} diagrams={diagrams} sizes={sizeDiagram} run={note.run} readOnly={readOnly} t={t} />
+              <Diagrams view={shownView} diagrams={diagrams} sizes={sizeDiagram} run={note.run} readOnly={readOnly} scheme={scheme} t={t} />
               <SlashMenu caret={slashCaret} place={caretPlace(caretAt, shownView)} run={note.run} t={t} readOnly={readOnly} />
               <TagMenu caret={slashCaret} place={caretPlace(caretAt, shownView)} run={note.run} tags={noteTags} t={t} readOnly={readOnly} />
             </KitDocumentCanvas>

@@ -1,6 +1,8 @@
 //! Sizes, spacing, and colors of the note's column, after Obsidian's light theme in live preview
 //! (a white surface, a readable column of at most 700 px, its type scale, faint Markdown syntax),
-//! with Kition's purple `#5645d4` as the accent.
+//! with Kition's purple `#5645d4` as the accent; and its dark palette, after Obsidian's default
+//! dark theme, with Kition's dark purple `#8b7cf0` (`kit.json`'s dark brand). The two palettes
+//! share every length: switching them moves nothing.
 
 use crate::style::{Block, LineStyle};
 
@@ -33,27 +35,58 @@ pub fn callout_type(kind: &str) -> u8 {
     CALLOUT_TYPES.iter().position(|(names, ..)| names.contains(&kind.as_str())).map_or(1, |at| u8::try_from(at + 1).unwrap_or(1))
 }
 
-/// A callout type's color.
-pub fn callout_color(kind: u8) -> [u8; 4] {
-    let [r, g, b] = CALLOUT_TYPES.get(usize::from(kind.saturating_sub(1))).map_or([8, 109, 221], |(_, color, _)| *color);
+/// The callout types' colors in the dark palette, in `CALLOUT_TYPES`' order: Obsidian's dark
+/// theme's blue, cyan, green, orange, red, purple, and grey.
+const DARK_CALLOUT_COLORS: [[u8; 3]; 13] = [
+    [2, 122, 255],
+    [83, 223, 221],
+    [2, 122, 255],
+    [2, 122, 255],
+    [83, 223, 221],
+    [68, 207, 110],
+    [233, 151, 63],
+    [233, 151, 63],
+    [251, 70, 76],
+    [251, 70, 76],
+    [251, 70, 76],
+    [168, 130, 255],
+    [158, 158, 158],
+];
+
+/// The highlight colours' backgrounds in the dark palette, in `style::HIGHLIGHT_COLORS`' order:
+/// Obsidian's dark theme's red, orange, yellow, green, blue, and purple at 30% over the paper.
+const DARK_HIGHLIGHTS: [[u8; 4]; 6] =
+    [[96, 42, 44, 255], [91, 66, 40, 255], [88, 88, 55, 255], [41, 83, 54, 255], [22, 58, 98, 255], [71, 60, 98, 255]];
+
+/// A callout type's color in `theme`'s palette.
+pub fn callout_color(theme: &Theme, kind: u8) -> [u8; 4] {
+    let at = usize::from(kind.saturating_sub(1));
+    let light = CALLOUT_TYPES.get(at).map_or([8, 109, 221], |(_, color, _)| *color);
+    let [r, g, b] = match theme.scheme {
+        Scheme::Light => light,
+        Scheme::Dark => DARK_CALLOUT_COLORS.get(at).copied().unwrap_or([2, 122, 255]),
+    };
     [r, g, b, 255]
 }
 
 /// A callout type's tint behind its box: its color at a tenth over the paper.
 pub fn callout_tint(theme: &Theme, kind: u8) -> [u8; 4] {
-    let [r, g, b, _] = callout_color(kind);
+    let [r, g, b, _] = callout_color(theme, kind);
     let mix = |paper: u8, color: u8| (f32::from(paper) * 0.9 + f32::from(color) * 0.1).round() as u8;
     [mix(theme.paper[0], r), mix(theme.paper[1], g), mix(theme.paper[2], b), 255]
 }
 
-/// A nested callout's tint: its color at a tenth over `under` (the outer callout's tint),
-/// darkened as Obsidian blends a callout's background (`mix-blend-mode: darken`).
-pub fn callout_tint_over(under: [u8; 4], kind: u8) -> [u8; 4] {
+/// A nested callout's tint: its color at a tenth over `under` (the outer callout's tint), blended
+/// as Obsidian blends a callout's background: darkened on the light paper (`mix-blend-mode:
+/// darken`), lightened on the dark one (`lighten`), so the nested box shows on either.
+pub fn callout_tint_over(theme: &Theme, under: [u8; 4], kind: u8) -> [u8; 4] {
     let [ur, ug, ub, _] = under;
-    let [r, g, b, _] = callout_color(kind);
+    let [r, g, b, _] = callout_color(theme, kind);
+    let dark = theme.scheme == Scheme::Dark;
     let mix = |back: u8, front: u8| {
         let (back, front) = (f32::from(back), f32::from(front));
-        (back - 0.1 * (back - back.min(front))).round() as u8
+        let blended = if dark { back.max(front) } else { back.min(front) };
+        (back + 0.1 * (blended - back)).round() as u8
     };
     [mix(ur, r), mix(ug, g), mix(ub, b), 255]
 }
@@ -63,9 +96,30 @@ pub fn callout_icon(kind: u8) -> u8 {
     CALLOUT_TYPES.get(usize::from(kind.saturating_sub(1))).map_or(1, |(.., icon)| *icon)
 }
 
+/// Which palette a theme paints with: the host's color scheme.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub enum Scheme {
+    #[default]
+    Light,
+    Dark,
+}
+
+impl Scheme {
+    /// The scheme a host names (`light` or `dark`, as the Kit UI protocol's `colorScheme`).
+    pub fn parse(name: &str) -> Option<Self> {
+        match name {
+            "light" => Some(Self::Light),
+            "dark" => Some(Self::Dark),
+            _ => None,
+        }
+    }
+}
+
 /// The column and its look. Lengths are document pixels.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Theme {
+    /// The palette the colors below are from.
+    pub scheme: Scheme,
     /// The document's width.
     pub width: f32,
     /// The text column's left and right margins.
@@ -120,6 +174,7 @@ pub struct Theme {
 impl Default for Theme {
     fn default() -> Self {
         Self {
+            scheme: Scheme::Light,
             width: 816.0,
             margin: (816.0 - Self::COLUMN) / 2.0,
             top: 32.0,
@@ -165,6 +220,84 @@ impl Theme {
     pub const COLUMN: f32 = 700.0;
     /// The least space beside the column.
     pub const SIDE: f32 = 32.0;
+
+    /// The dark palette, after Obsidian's default dark theme (a `#1e1e1e` surface, `#dadada`
+    /// text, `#666666` faint syntax, `#363636` borders, `#242424` code), with Kition's dark purple
+    /// `#8b7cf0` as the accent. Every length is the light theme's.
+    pub fn dark() -> Self {
+        let accent = [139, 124, 240, 255];
+        Self {
+            scheme: Scheme::Dark,
+            paper: [30, 30, 30, 255],
+            text: [218, 218, 218, 255],
+            heading: [218, 218, 218, 255],
+            muted: [102, 102, 102, 255],
+            invalid: [251, 70, 76, 255],
+            secondary: [179, 179, 179, 255],
+            link: accent,
+            math: [190, 160, 240, 255],
+            code_background: [36, 36, 36, 255],
+            code_block: [36, 36, 36, 255],
+            quote_bar: accent,
+            rule: [54, 54, 54, 255],
+            // Obsidian's `rgba(255, 208, 0, 0.4)` over the paper.
+            highlight: [120, 101, 18, 255],
+            // The accent at a tenth over the paper.
+            tag_background: [41, 39, 51, 255],
+            table_border: [54, 54, 54, 255],
+            table_header: [30, 30, 30, 255],
+            accent,
+            // Obsidian's `rgba(255, 255, 255, 0.12)` over the paper.
+            indent_guide: [57, 57, 57, 255],
+            code_keyword: [250, 153, 205, 255],
+            code_literal: [68, 207, 110, 255],
+            code_number: [168, 130, 255, 255],
+            code_comment: [102, 102, 102, 255],
+            code_variable: [83, 223, 221, 255],
+            code_operator: [251, 82, 88, 255],
+            code_property: [224, 222, 113, 255],
+            code_punctuation: [179, 179, 179, 255],
+            code_link: [166, 138, 249, 255],
+            ..Self::default()
+        }
+    }
+
+    /// The palette of `scheme`, with this theme's lengths (its width, margins, sizes): only colors
+    /// change.
+    pub fn with_scheme(&self, scheme: Scheme) -> Self {
+        let palette = match scheme {
+            Scheme::Light => Self::default(),
+            Scheme::Dark => Self::dark(),
+        };
+        Self {
+            width: self.width,
+            margin: self.margin,
+            top: self.top,
+            bottom: self.bottom,
+            min_height: self.min_height,
+            image_height: self.image_height,
+            body_size: self.body_size,
+            code_size: self.code_size,
+            leading: self.leading,
+            ..palette
+        }
+    }
+
+    /// The background a coloured highlight draws (one of `style::HIGHLIGHT_COLORS`): itself on
+    /// the light paper, the same hue over the dark one.
+    pub fn highlight_background(&self, color: [u8; 4]) -> [u8; 4] {
+        let [r, g, b, _] = color;
+        let light = [r, g, b, 255];
+        match self.scheme {
+            Scheme::Light => light,
+            Scheme::Dark => crate::style::HIGHLIGHT_COLORS
+                .iter()
+                .position(|(_, known)| *known == color)
+                .and_then(|at| DARK_HIGHLIGHTS.get(at))
+                .copied()
+                .unwrap_or(light),
+        }
+    }
 
     /// The text column's width.
     pub fn content_width(&self) -> f32 {

@@ -63,9 +63,9 @@ Commands by namespace (the part of the id before the first dot):
 | `tasks` | 1 | 0 | 1 | `tasks.list` |
 | `template` | 1 | 0 | 1 | `template.expand` |
 | `text` | 6 | 4 | 6 | `text.read`, `text.find`, `text.insert` |
-| `view` | 9 | 0 | 0 | `view.width`, `view.hoverOut`, `view.blockAt` |
+| `view` | 10 | 0 | 0 | `view.width`, `view.hoverOut`, `view.blockAt` |
 
-The 70 commands in `kit.json` `agent.exclude` are editor commands the agent tools do not
+The 71 commands in `kit.json` `agent.exclude` are editor commands the agent tools do not
 offer.
 
 ### How things are addressed

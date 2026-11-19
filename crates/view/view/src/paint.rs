@@ -212,7 +212,7 @@ fn draw_blocks(ctx: &mut RenderContext, view: &View, line: &Placed, prev: Option
             // The outer box's end below the nested one's last line is the outer box's alone.
             let outer_end = if joins { 0.0 } else { 28.0 };
             let bottom = box_bottom - outer_end + if inner_joins { box_gap(true) } else { 0.0 };
-            ctx.set_paint(color(crate::theme::callout_tint_over(tint, style.callout)));
+            ctx.set_paint(color(crate::theme::callout_tint_over(theme, tint, style.callout)));
             block_box(ctx, Rect::new(left + 24.0, box_top, right - 12.0, bottom), inner_first, !inner_joins, 4.0, to_screen);
         }
         // A code block in a callout: its box inside the callout's, 24 px in and 12 px from its
@@ -575,13 +575,11 @@ fn draw_tessera(ctx: &mut RenderContext, name: &str, x: f64, y: f64, size: f64, 
 /// Obsidian's): the heading, then a row per key with its type's icon, its name in a 124 px column
 /// and its value; tags as pills, a checkbox as a box.
 fn draw_properties(ctx: &mut RenderContext, view: &View, block: &crate::PropertiesBlock, to_screen: Affine) {
-    const MUTED: [u8; 4] = [0x5c, 0x5c, 0x5c, 255];
-    const TEXT: [u8; 4] = [0x22, 0x22, 0x22, 255];
-    const ACCENT: [u8; 4] = [0x56, 0x45, 0xd4, 255];
-    const TAG: [u8; 4] = [0xee, 0xec, 0xfb, 255];
-    let left = view.theme().margin;
+    let theme = view.theme();
+    let (muted, text, accent, tag) = (theme.secondary, theme.text, theme.accent, theme.tag_background);
+    let left = theme.margin;
     // The heading: 4 px padding 8 px down, 16 px at weight 500 on a 19 px line.
-    draw_text(ctx, "Properties", left + 4.0, block.top + 12.0 + 15.0, 16.0, 500, TEXT, to_screen);
+    draw_text(ctx, "Properties", left + 4.0, block.top + 12.0 + 15.0, 16.0, 500, text, to_screen);
     if block.folded {
         return;
     }
@@ -600,18 +598,18 @@ fn draw_properties(ctx: &mut RenderContext, view: &View, block: &crate::Properti
             "datetime" => "clock",
             _ => "text-align-start",
         };
-        draw_tessera(ctx, icon, f64::from(left + 4.0), f64::from(middle - 8.0), 16.0, MUTED, to_screen);
-        draw_text(ctx, &row.key, left + 28.0, baseline, size, 400, MUTED, to_screen);
+        draw_tessera(ctx, icon, f64::from(left + 4.0), f64::from(middle - 8.0), 16.0, muted, to_screen);
+        draw_text(ctx, &row.key, left + 28.0, baseline, size, 400, muted, to_screen);
         let mut x = left + 152.0;
         match row.kind {
             "tags" => {
                 for value in &row.values {
                     let width = text_width(value, size, 400) + 2.0 * 0.65 * size;
                     ctx.set_transform(to_screen);
-                    ctx.set_paint(color(TAG));
+                    ctx.set_paint(color(tag));
                     let pill = Rect::new(f64::from(x), f64::from(middle - 11.0), f64::from(x + width), f64::from(middle + 11.0));
                     ctx.fill_path(&RoundedRect::from_rect(pill, 11.0).to_path(0.1));
-                    draw_text(ctx, value, x + 0.65 * size, baseline, size, 400, ACCENT, to_screen);
+                    draw_text(ctx, value, x + 0.65 * size, baseline, size, 400, accent, to_screen);
                     x += width + 4.0;
                 }
             }
@@ -620,29 +618,29 @@ fn draw_properties(ctx: &mut RenderContext, view: &View, block: &crate::Properti
                 let area = Rect::new(f64::from(x), f64::from(middle - 7.0), f64::from(x + 14.0), f64::from(middle + 7.0));
                 ctx.set_transform(to_screen);
                 if on {
-                    ctx.set_paint(color(ACCENT));
+                    ctx.set_paint(color(accent));
                     ctx.fill_path(&RoundedRect::from_rect(area, 3.0).to_path(0.1));
                     let mut check = BezPath::new();
                     check.move_to((area.x0 + 3.5, area.y0 + 7.0));
                     check.line_to((area.x0 + 6.0, area.y0 + 9.5));
                     check.line_to((area.x0 + 10.5, area.y0 + 4.5));
-                    ctx.set_paint(color([255, 255, 255, 255]));
+                    ctx.set_paint(color(theme.paper));
                     ctx.set_stroke(kurbo::Stroke::new(1.6).with_caps(kurbo::Cap::Round).with_join(kurbo::Join::Round));
                     ctx.stroke_path(&check);
                 } else {
-                    ctx.set_paint(color([0xab, 0xab, 0xab, 255]));
+                    ctx.set_paint(color(theme.muted));
                     ctx.set_stroke(kurbo::Stroke::new(1.0));
                     ctx.stroke_path(&RoundedRect::from_rect(area.inset(-0.5), 3.0).to_path(0.1));
                 }
             }
             "list" | "aliases" => {
                 for value in &row.values {
-                    x += draw_text(ctx, value, x, baseline, size, 400, TEXT, to_screen) + 8.0;
+                    x += draw_text(ctx, value, x, baseline, size, 400, text, to_screen) + 8.0;
                 }
             }
             _ => {
                 let value = row.values.first().map_or("", String::as_str);
-                draw_text(ctx, value, x, baseline, size, 400, TEXT, to_screen);
+                draw_text(ctx, value, x, baseline, size, 400, text, to_screen);
             }
         }
     }

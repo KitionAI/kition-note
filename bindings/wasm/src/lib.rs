@@ -50,8 +50,8 @@ fn local_person() -> Origin {
 
 /// One open note.
 /// What the view shows besides the text (see `NoteDocument::painted`): the lines with the
-/// caret, folds and pictures, the width, and the heading under the pointer.
-type PaintedKey = (usize, usize, u64, u32, Option<usize>);
+/// caret, folds and pictures, the width, the heading under the pointer, and the color scheme.
+type PaintedKey = (usize, usize, u64, u32, Option<usize>, kition_note_view::Scheme);
 
 /// What the view was last laid out for: the revision, the caret's lines, the selection, and the
 /// pictures and folds.
@@ -227,7 +227,7 @@ impl NoteDocument {
             }
             hasher.finish()
         };
-        (active.start, active.end, self.pictures.get() ^ folds ^ shown, view.theme().width.to_bits(), view.hover())
+        (active.start, active.end, self.pictures.get() ^ folds ^ shown, view.theme().width.to_bits(), view.hover(), view.theme().scheme)
     }
 
     /// The editing view, laid out for the current text.
@@ -668,7 +668,7 @@ impl KitSessionDocument for NoteDocument {
         // overlays ask after every keystroke (code blocks, diagrams, properties, tables), and a run
         // they broke would undo a character at a time.
         let reads = !commands::mutates(command) && (!command.starts_with("selection.") || matches!(command, "selection.get" | "selection.where"));
-        let reads = reads && !matches!(command, "view.fold" | "view.foldAll" | "view.unfoldAll" | "view.width");
+        let reads = reads && !matches!(command, "view.fold" | "view.foldAll" | "view.unfoldAll" | "view.width" | "view.scheme");
         // The editor's own commands take the undo step as Obsidian's do (a Cmd+B joins the word
         // typed before it).
         if !(self.editor.inside || reads || (commands::is_editor(command) && commands::mutates(command))) {

@@ -1316,3 +1316,26 @@ fn a_task_box_under_the_pointer_takes_the_arrow() {
         assert_eq!(hover(&mut doc, (text_x + 20.0, y)).cursor, "text", "the I-beam over {line}'s text");
     }
 }
+
+#[test]
+fn the_host_s_color_scheme_repaints_the_note_and_keeps_its_place() {
+    assert!(fonts());
+    let text = "# Plan\n\nSome text with a [link](https://kition.ai) and a #tag.\n\n> [!note] Note\n> Inside\n";
+    let mut doc = note(text);
+    doc.execute("view.width", json!({ "width": 800, "height": 600 })).unwrap();
+    let revision = doc.revision();
+    let light = doc.render(0.0, 0.0, 1.0, 200, 120).unwrap();
+    assert_eq!(&light[0..4], &[255, 255, 255, 255], "the light paper");
+    let caret = doc.execute("selection.where", json!({ "at": 20 })).unwrap();
+    let answer = doc.execute("view.scheme", json!({ "scheme": "dark" })).unwrap();
+    assert_eq!(answer["changed"], json!(true));
+    assert_ne!(doc.revision(), revision, "the canvas repaints");
+    let dark = doc.render(0.0, 0.0, 1.0, 200, 120).unwrap();
+    assert_eq!(&dark[0..4], &[30, 30, 30, 255], "the dark paper");
+    assert_eq!(doc.execute("selection.where", json!({ "at": 20 })).unwrap(), caret, "nothing moves");
+    assert!(!doc.dirty(), "the scheme is not an edit");
+    assert_eq!(doc.execute("view.scheme", json!({ "scheme": "dark" })).unwrap()["changed"], json!(false));
+    assert!(doc.execute("view.scheme", json!({ "scheme": "sepia" })).unwrap_err().starts_with("invalid-params"));
+    doc.execute("view.scheme", json!({ "scheme": "light" })).unwrap();
+    assert_eq!(doc.render(0.0, 0.0, 1.0, 200, 120).unwrap(), light, "back to the same light pixels");
+}

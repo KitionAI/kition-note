@@ -616,6 +616,13 @@ fn view_width_output() -> Value {
     ])
 }
 
+fn view_scheme_output() -> Value {
+    object(&[
+        ("changed", required(boolean("Whether the palette differed, so the note is painted again."))),
+        ("scheme", required(string("The color scheme the note paints with now."))),
+    ])
+}
+
 fn block_at_output() -> Value {
     object(&[
         ("callout", required(boolean("Whether the point is in a callout."))),
@@ -1507,6 +1514,15 @@ pub const SPECS: &[Spec] = &[
         false,
     )),
     private(spec(
+        "view.scheme",
+        "Paint the note in the host's color scheme",
+        "Paints the note with the light or the dark palette, as the host's color scheme is; nothing moves. Answers whether that changed.",
+        "{ scheme: 'light' | 'dark' }",
+        scheme_schema,
+        view_scheme_output,
+        false,
+    )),
+    private(spec(
         "view.hoverOut",
         "The pointer left the note: nothing is hovered",
         "Tells the editor the pointer left the note, so no heading or item is drawn hovered.",
@@ -2031,6 +2047,10 @@ fn width_schema() -> Value {
     ])
 }
 
+fn scheme_schema() -> Value {
+    schema(&[("scheme", required(one_of(&["light", "dark"], "The host's color scheme.")))])
+}
+
 fn highlight_color_schema() -> Value {
     schema(&[("color", required(one_of(&["red", "orange", "yellow", "green", "blue", "purple"], "The highlight's colour.")))])
 }
@@ -2084,6 +2104,7 @@ pub fn is_editor(id: &str) -> bool {
                 | "properties.view"
                 | "table.geometry"
                 | "view.width"
+                | "view.scheme"
                 | "view.hoverOut"
                 | "view.fold"
                 | "view.foldAll"

@@ -121,6 +121,7 @@ fn calls(id: &str) -> Vec<Call> {
         "image.set" => on(json!({ "name": "a.png", "data": "" })),
         "selection.replace" => on(json!({ "text": "x" })),
         "view.width" => on(json!({ "width": 800, "height": 600 })),
+        "view.scheme" => on(json!({ "scheme": "dark" })),
         "selection.where" => on(json!({ "at": 0 })),
         "view.blockAt" => on(json!({ "x": 10, "y": 10 })),
         "format.highlightColor" => on(json!({ "color": "red" })),

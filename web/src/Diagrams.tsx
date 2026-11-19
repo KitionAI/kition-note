@@ -15,6 +15,7 @@ import { createKitStrings, type KitCanvasView } from '@kition/kit-editor'
 import { CodeXmlIcon } from '@kition/tessera-icons/react'
 import type { NoteRun } from './useNote'
 import { useWheelToCanvas } from './wheel'
+import type { ColorScheme } from './colorScheme'
 
 type Strings = ReturnType<typeof createKitStrings>
 type Mermaid = (typeof import('mermaid'))['default']
@@ -33,28 +34,38 @@ type Drawn = { svg: string; error?: undefined } | { svg?: undefined; error: stri
 const FONT = 'var(--note-ui-font)'
 
 let loading: Promise<Mermaid> | null = null
+/** The scheme Mermaid was last set up for. */
+let themed: ColorScheme | null = null
 
-/** Mermaid, loaded the first time a note has a diagram, with Obsidian's settings. */
-function mermaid(): Promise<Mermaid> {
-  loading ??= import('mermaid').then(({ default: loaded }) => {
-    loaded.initialize({
-      startOnLoad: false,
-      securityLevel: 'strict',
-      themeVariables: { fontFamily: FONT },
-      flowchart: { useMaxWidth: false },
-      sequence: { useMaxWidth: false },
-      // Obsidian's gantt axis: dates, a tick on Mondays.
-      gantt: { useMaxWidth: true, axisFormatter: [['%Y-%m-%d', (date: Date) => date.getDay() === 1]] } as Record<string, unknown>,
-      journey: { useMaxWidth: true },
-      class: { useMaxWidth: true },
-      gitGraph: { useMaxWidth: false },
-      state: { useMaxWidth: true },
-      er: { useMaxWidth: false },
-      pie: { useMaxWidth: true },
-    })
-    return loaded
-  })
-  return loading
+/** Mermaid's settings, as Obsidian's, with its theme for the host's scheme (Obsidian's dark theme draws with Mermaid's `dark`). */
+function settings(scheme: ColorScheme) {
+  return {
+    startOnLoad: false,
+    securityLevel: 'strict' as const,
+    theme: scheme === 'dark' ? ('dark' as const) : ('default' as const),
+    themeVariables: { fontFamily: FONT },
+    flowchart: { useMaxWidth: false },
+    sequence: { useMaxWidth: false },
+    // Obsidian's gantt axis: dates, a tick on Mondays.
+    gantt: { useMaxWidth: true, axisFormatter: [['%Y-%m-%d', (date: Date) => date.getDay() === 1]] } as Record<string, unknown>,
+    journey: { useMaxWidth: true },
+    class: { useMaxWidth: true },
+    gitGraph: { useMaxWidth: false },
+    state: { useMaxWidth: true },
+    er: { useMaxWidth: false },
+    pie: { useMaxWidth: true },
+  }
+}
+
+/** Mermaid, loaded the first time a note has a diagram, set up for `scheme`. */
+async function mermaid(scheme: ColorScheme): Promise<Mermaid> {
+  loading ??= import('mermaid').then(({ default: loaded }) => loaded)
+  const loaded = await loading
+  if (themed !== scheme) {
+    loaded.initialize(settings(scheme))
+    themed = scheme
+  }
+  return loaded
 }
 
 let drawing: Promise<unknown> = Promise.resolve()
@@ -92,7 +103,7 @@ function sanitize(html: string) {
 }
 
 /** `source` drawn: HTML sanitized, or Mermaid's diagram, one at a time (Mermaid's rendering is not reentrant). */
-function draw(source: string, kind: Kind, column: number): Promise<Drawn> {
+function draw(source: string, kind: Kind, column: number, scheme: ColorScheme): Promise<Drawn> {
   if (kind === 'html') return Promise.resolve({ svg: sanitize(source) })
   const next = drawing.then(async (): Promise<Drawn> => {
     const id = `note-mermaid-${++counter}`
@@ -102,7 +113,7 @@ function draw(source: string, kind: Kind, column: number): Promise<Drawn> {
     box.style.cssText = `position:absolute;left:-100000px;top:0;visibility:hidden;width:${column}px`
     document.body.append(box)
     try {
-      const { svg } = await (await mermaid()).render(id, source, box)
+      const { svg } = await (await mermaid(scheme)).render(id, source, box)
       return { svg }
     } catch (error) {
       return { error: `Error parsing Mermaid diagram!\n\n${error instanceof Error ? error.message : String(error)}` }
@@ -142,7 +153,7 @@ function measure(html: string, width: number) {
   return height
 }
 
-type Known = { drawn: Drawn; html: string; column: number }
+type Known = { drawn: Drawn; html: string; column: number; scheme: ColorScheme }
 
 /**
  * A block's markup over the canvas. An HTML block that changes size (a `<details>` opened) tells
@@ -184,6 +195,7 @@ export function Diagrams({
   sizes,
   run,
   readOnly,
+  scheme,
   t,
 }: {
   view: KitCanvasView | null
@@ -191,6 +203,8 @@ export function Diagrams({
   sizes: (source: string, width: number, height: number) => Promise<unknown>
   run: NoteRun
   readOnly: boolean
+  /** The host's color scheme: a diagram is drawn again in the other's colors. */
+  scheme: ColorScheme
   t: Strings
 }) {
   const known = useRef(new Map<string, Known>())
@@ -201,25 +215,30 @@ export function Diagrams({
     if (!diagrams) return undefined
     let current = true
     const { column } = diagrams
-    const stale = diagrams.diagrams.filter((diagram) => known.current.get(diagram.source)?.column !== column)
+    const stale = diagrams.diagrams.filter((diagram) => {
+      const entry = known.current.get(diagram.source)
+      return entry?.column !== column || (diagram.kind === 'mermaid' && entry?.scheme !== scheme)
+    })
     const asked = new Map<string, Kind>()
     for (const { kind, source } of [...diagrams.wanted, ...stale]) asked.set(source, kind)
     void (async () => {
       for (const [source, kind] of asked) {
-        // A diagram drawn for another column width is drawn again (Mermaid lays it out for its
-        // box: a gantt chart fills it); an HTML block is only measured again.
+        // A diagram drawn for another column width or scheme is drawn again (Mermaid lays it out
+        // for its box: a gantt chart fills it; its colors are its theme's); an HTML block is only
+        // measured again.
         const before = known.current.get(source)
-        if (before && kind === 'mermaid' && before.column !== column) known.current.delete(source)
+        if (before && kind === 'mermaid' && (before.column !== column || before.scheme !== scheme)) known.current.delete(source)
         let entry = known.current.get(source)
         if (!entry) {
-          let drawing = pending.current.get(source)
+          const key = `${scheme}:${source}`
+          let drawing = pending.current.get(key)
           if (!drawing) {
-            drawing = draw(source, kind, column)
-            pending.current.set(source, drawing)
+            drawing = draw(source, kind, column, scheme)
+            pending.current.set(key, drawing)
           }
           const drawn = await drawing
-          pending.current.delete(source)
-          entry = known.current.get(source) ?? { drawn, html: markup(drawn, kind), column: 0 }
+          pending.current.delete(key)
+          entry = known.current.get(source) ?? { drawn, html: markup(drawn, kind), column: 0, scheme }
         }
         if (!current) return
         entry.column = column
@@ -233,7 +252,7 @@ export function Diagrams({
     return () => {
       current = false
     }
-  }, [diagrams, sizes])
+  }, [diagrams, sizes, scheme])
   const layer = useWheelToCanvas()
   return (
     <div ref={layer} className="note-diagrams">
