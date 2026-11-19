@@ -2,6 +2,11 @@
 
 Changes to Kition Note, newest first. A version is the kit package version in `kit.json`.
 
+## 0.1.2
+
+- The same kit as 0.1.1, released again so that its release carries prebuilt headless
+  executables for macOS, Linux and Windows, which `kition kit install` downloads.
+
 ## 0.1.1
 
 - The editor follows the host's color scheme, live: in a dark host the note is painted in a dark
