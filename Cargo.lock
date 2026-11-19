@@ -1020,7 +1020,7 @@ dependencies = [
 
 [[package]]
 name = "kition-note"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "base64",
  "image",
@@ -1037,7 +1037,7 @@ dependencies = [
 
 [[package]]
 name = "kition-note-check"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "kition-kit",
  "kition-note-markdown",
@@ -1046,7 +1046,7 @@ dependencies = [
 
 [[package]]
 name = "kition-note-edit"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "kition-note-markdown",
  "regex",
@@ -1054,7 +1054,7 @@ dependencies = [
 
 [[package]]
 name = "kition-note-export"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "kition-note-markdown",
  "pulldown-cmark",
@@ -1063,7 +1063,7 @@ dependencies = [
 
 [[package]]
 name = "kition-note-fonts"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "harfrust",
  "kurbo",
@@ -1072,7 +1072,7 @@ dependencies = [
 
 [[package]]
 name = "kition-note-kdm"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "kition-kit",
  "kition-note-markdown-file",
@@ -1081,7 +1081,7 @@ dependencies = [
 
 [[package]]
 name = "kition-note-kit"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "base64",
  "image",
@@ -1102,7 +1102,7 @@ dependencies = [
 
 [[package]]
 name = "kition-note-markdown"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "pulldown-cmark",
  "saphyr",
@@ -1110,11 +1110,11 @@ dependencies = [
 
 [[package]]
 name = "kition-note-markdown-file"
-version = "0.1.0"
+version = "0.1.1"
 
 [[package]]
 name = "kition-note-view"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "kition-note-fonts",
  "kition-note-markdown",
@@ -2626,7 +2626,7 @@ checksum = "3ad82d2a33cdc9674dc7465672f271e096168fcdbe0f799d9e6db8c5892679dc"
 
 [[package]]
 name = "xtask"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "kition-kit",
  "kition-note-kdm",

@@ -2,6 +2,13 @@
 
 Changes to Kition Note, newest first. A version is the kit package version in `kit.json`.
 
+## 0.1.1
+
+- The editor follows the host's color scheme, live: in a dark host the note is painted in a dark
+  palette after Obsidian's default dark theme, with the same lengths as the light one, so nothing
+  moves on a switch. The overlays, the canvas backdrop and Mermaid diagrams follow it. Export,
+  print and the agent's preview stay light (`note.platform.color-scheme`).
+
 ## 0.1.0
 
 The first public release, under the Apache License 2.0, published as the `package-v0.1.0`
