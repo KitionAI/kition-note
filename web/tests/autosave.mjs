@@ -36,7 +36,8 @@ async function openPage(name, query = '') {
   await page.goto(`${origin}/dev.html?locale=en-US${query}`)
   await page.waitForFunction(() => document.getElementById('status')?.textContent?.includes(' open in '), null, { timeout: 90000 })
   await page.evaluate(async ([name, text]) => window.devHost.open(name, new TextEncoder().encode(text).buffer), [name, NOTE])
-  await page.waitForFunction((name) => document.getElementById('status')?.textContent?.includes(`${name} open in `), name, { timeout: 90000 })
+  // Once open, the status line names the note; it may already say the revision a view change moved.
+  await page.waitForFunction((name) => document.getElementById('status')?.textContent?.startsWith(name), name, { timeout: 90000 })
   const kit = () => page.frames().find((frame) => frame !== page.mainFrame())
   const run = (command, params = {}) => page.evaluate(async ([command, params]) => (await window.devHost.connection().ai.run([{ command, params }], false)).completed[0].result, [command, params])
   const editorText = async () => (await run('text.read')).text

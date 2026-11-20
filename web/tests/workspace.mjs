@@ -6,6 +6,7 @@
 import { chromium, webkit } from 'playwright'
 import { readFile } from 'node:fs/promises'
 import { createServer } from 'vite'
+import { reveal, selectChars } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
 const server = await createServer({ configFile: new URL('../vite.config.ts', import.meta.url).pathname, server: { port: 0, host: '127.0.0.1' }, logLevel: 'error' })
@@ -63,11 +64,19 @@ async function clickChar(index, slot = 'a', modifiers = []) {
   await page.mouse.click(point.x, point.y)
   for (const key of modifiers) await page.keyboard.up(key)
 }
-/** Puts the caret after `text` through the engine's selection, then focuses the canvas. */
+/** The person's selection in `slot`, as the host shows a place (tests/canvasHelpers.mjs). */
+const select = (anchor, focus = anchor, slot = 'a') => selectChars(page, (name, params) => command(name, params, slot), anchor, focus, slot)
+/** Puts the caret on `line` (from 1; past the last, the last) at `column`, as the host shows a place. */
+async function showLine(line, column = 1, slot = 'a') {
+  const lines = (await engineText(slot)).split('\n').length
+  await reveal(page, `body:${line}:${column}`, slot)
+  await until(async () => (await command('selection.get', {}, slot)).line === Math.min(line, lines))
+}
+/** Focuses the canvas, then puts the caret after `text` as the host shows a place. */
 async function caretAfter(text, slot = 'a') {
   const box = await (await canvasOf(slot)).boundingBox()
   await page.mouse.click(box.x + box.width - 20, box.y + 20)
-  await command('selection.set', { anchor: await charsBefore(text, text.length, slot) }, slot)
+  await select(await charsBefore(text, text.length, slot), undefined, slot)
   await page.keyboard.press('ArrowLeft')
   await page.keyboard.press('ArrowRight')
 }
@@ -119,7 +128,7 @@ try {
     const box = await (await canvasOf('b')).boundingBox()
     await page.mouse.click(box.x + box.width - 20, box.y + 20)
   }
-  await command('selection.set', { anchor: 0 }, 'b')
+  await select(0, 0, 'b')
   await page.keyboard.press('ArrowRight')
   await page.keyboard.press('ArrowLeft')
   await page.keyboard.type('Draft: ')
@@ -165,7 +174,8 @@ try {
     const shared = await page.evaluate(() => window.workspaceHost.presences.b)
     step('the caret travels as a replica text position', shared?.caret?.object === 'note' && shared?.caret?.field === 'body' && Number.isInteger(shared?.caret?.offset), JSON.stringify(shared))
     // B selects a word: A shows B's selection.
-    await command('selection.set', { anchor: await charsBefore('[beta]', 0, 'b'), focus: await charsBefore('[beta]', 6, 'b') }, 'b')
+    await (await sinkOf('b')).focus()
+    await select(await charsBefore('[beta]', 0, 'b'), await charsBefore('[beta]', 6, 'b'), 'b')
     await (await sinkOf('b')).press('Shift+ArrowRight')
     await (await sinkOf('b')).press('Shift+ArrowLeft')
     const peerSelection = (await frameOf('a')).getByTestId('note-peer-selection')
@@ -243,7 +253,7 @@ try {
     const away = async () => {
       const all = await engineText()
       const line = all.slice(0, all.indexOf(target)).split('\n').length
-      await command('selection.set', { line: line + 1, column: 1 })
+      await showLine(line + 1)
       await page.waitForTimeout(150)
     }
     const clickLink = async (text, offset) => {
@@ -276,7 +286,7 @@ try {
     await clickLink('[the site]', 2)
     step('a web address goes to the host', await until(async () => (await opens()).some((entry) => entry.method === 'host/openUrl' && entry.params.url === 'https://example.com/docs')), JSON.stringify((await opens()).at(-1)))
     // On the caret's own line a link shows its Markdown; Cmd/Ctrl+click opens it there too.
-    await command('selection.set', { anchor: await charsBefore('See [[Plan') })
+    await select(await charsBefore('See [[Plan'))
     const before = (await opens()).length
     await clickChar(await charsBefore('[[Plan#Goals]]', 4), 'a', [process.platform === 'darwin' ? 'Meta' : 'Control'])
     step('Cmd/Ctrl+click opens a link shown as Markdown', await until(async () => (await opens()).length > before), JSON.stringify((await opens()).at(-1)))
@@ -309,7 +319,7 @@ try {
     const drawn = async () => (await command('image.wanted')).drawn
     step('an image the note links by path is drawn from the workspace', await until(async () => (await drawn()).includes('pics/dot.png'), 100), JSON.stringify(await command('image.wanted')))
     // Pasted at the end: kept in the attachments folder, linked relative to the note, drawn.
-    await command('selection.set', { line: 10000, column: 1 })
+    await showLine(10000)
     await kitFrame.evaluate((base64) => {
       const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0))
       const data = new DataTransfer()
@@ -321,7 +331,7 @@ try {
     const linked = await until(async () => (await editorText()).includes('](../attachments/Notes/Pictures.md/pasted-'))
     step('the note links it relative to its folder', linked, JSON.stringify(await editorText()))
     // Its line is drawn once the caret leaves it.
-    await command('selection.set', { line: 1, column: 1 })
+    await showLine(1)
     {
       const box = await (await canvasOf('a')).boundingBox()
       await page.mouse.click(box.x + box.width - 20, box.y + 20)
@@ -350,7 +360,7 @@ try {
       const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0))
       window.workspaceHost.web.set(url, { bytes: bytes.buffer, mime: 'image/png' })
     }, [PNG, SIGNED])
-    await command('selection.set', { line: 10000, column: 1 })
+    await showLine(10000)
     await kitFrame.evaluate(([signed, gone]) => {
       const data = new DataTransfer()
       data.setData('text/html', `<ul><li>Writer</li></ul><p><img src="${signed.replaceAll('&', '&amp;')}"></p><p><img src="${gone}" alt="gone"></p>`)

@@ -6,7 +6,7 @@
 // headless: they are checked in the desktop app.
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
-import { canvasReady, caretAfter as caretAfterIn, clickAtChar, focusCanvas, selectText } from './canvasHelpers.mjs'
+import { canvasReady, caretAfter as caretAfterIn, clickAtChar, focusCanvas, reveal, selectChars, selectText } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
 const sdkDir = process.env.KITION_SDK ?? new URL('../../../kition-sdk', import.meta.url).pathname
@@ -242,7 +242,7 @@ try {
     const outside = clean.replace('Closing words. During.', 'Closing words. During. Changed outside.')
     // In the body (the caret never stays in the front matter).
     const goals = [...clean.slice(0, clean.indexOf('Goals') + 2)].length
-    await run('selection.set', { anchor: goals })
+    await selectChars(page, run, goals)
     await setFile(NAME, outside)
     const followed = await until(async () => (await engineText()) === outside, 100)
     step("a clean note takes its file's change from disk", followed && (await kit().getByTestId('note-disk-changed').count()) === 0, JSON.stringify(await engineText()))
@@ -298,7 +298,9 @@ try {
   await page.evaluate(async (text) => window.devHost.open('Mixed.md', new TextEncoder().encode(text).buffer), MIXED)
   await until(async () => (await canvasReady(page)) && (await engineText().catch(() => '')) === MIXED, 300)
   await focusCanvas(page)
-  await run('selection.set', { line: 1, column: 100 })
+  // The host shows the first line at a column past its end: the caret goes to the line's end.
+  await reveal(page, 'body:1:100')
+  await until(async () => (await run('selection.get')).line === 1 && (await run('selection.get')).column > 1)
   await page.keyboard.type('X')
   await page.keyboard.press('End')
   await page.keyboard.press('Enter')
@@ -333,7 +335,8 @@ try {
     await kit().getByTestId('note-property-remove').click()
     const removed = await until(async () => !/\nstatus:/.test(await engineText()))
     step("a property's icon menu removes it", removed, JSON.stringify(await engineText()))
-    await run('selection.set', { anchor: 0 })
+    await reveal(page, 'body:1:1')
+    await until(async () => (await run('selection.get')).line > 1, 30)
     const { caret: at } = await run('selection.get')
     step('the caret given the front matter goes past it', (await run('selection.get')).line > 1, JSON.stringify(at))
   }

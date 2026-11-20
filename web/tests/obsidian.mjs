@@ -4,6 +4,7 @@
 // checks the text and the caret after. Prints PASS or FAIL per scenario; exits 1 on any FAIL.
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
+import { selectChars } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
 const mod = process.platform === 'darwin' ? 'Meta' : 'Control'
@@ -57,12 +58,12 @@ async function marked() {
   return [...text.slice(0, from), '‹', ...text.slice(from, to), '›', ...text.slice(to)].join('')
 }
 
-/** Sets the note's text and selection, and gives the canvas the keyboard. */
+/** Sets the note's text, and the person's selection (the canvas has the keyboard). */
 async function set(markedText) {
   const { text, anchor, focus } = parse(markedText)
   const now = [...(await run('text.read')).text].length
   await run('text.replace', { from: 0, to: now, text })
-  await run('selection.set', { anchor, focus })
+  await selectChars(page, run, anchor, focus)
   await page.waitForTimeout(60)
 }
 
@@ -88,8 +89,9 @@ const type = (text) => async () => {
 try {
   await page.goto(`${origin}/dev.html?locale=en-US`)
   await page.waitForFunction(() => document.getElementById('status')?.textContent?.includes(' open in '), null, { timeout: 90000 })
+  // Once open, the status line names the note; it may already say the revision a view change moved.
   await page.evaluate(async () => window.devHost.open('Parity.md', new TextEncoder().encode('# Parity\n').buffer))
-  await page.waitForFunction(() => document.getElementById('status')?.textContent?.includes(' open in '), null, { timeout: 90000 })
+  await page.waitForFunction(() => document.getElementById('status')?.textContent?.startsWith('Parity.md'), null, { timeout: 90000 })
   await until(async () => (await canvas().count()) > 0, 300)
   const box = await canvas().boundingBox()
   await page.mouse.click(box.x + box.width / 2, box.y + 60)
@@ -458,7 +460,7 @@ try {
     const text = (await run('text.read')).text
     const at = [...text.slice(0, text.indexOf('End'))].length
     await run('text.replace', { from: at, to: at + 3, text: 'Finish' })
-    await run('selection.set', { anchor: 0 })
+    await selectChars(page, run, 0)
     step('away from the caret, the edited diagram draws', await until(() => drawn('Finish'), 120))
     const editor = kit().getByTestId('note-editor')
     const y = async () => Number((await editor.getAttribute('data-view')).split(',')[1])
@@ -498,7 +500,7 @@ try {
   if (which === 'chromium') {
     await set('|')
     await page.mouse.click(box.x + box.width / 2, box.y + 30)
-    await run('selection.set', { anchor: 0 })
+    await selectChars(page, run, 0)
     const html = '<h2>Title</h2><p>Hello <b>bold</b>, <i>italic</i>, <a href="https://example.com/page">link</a>.</p><ol start="3"><li>three</li></ol><table><tr><th>A</th><th>B</th></tr><tr><td>1</td><td>2</td></tr></table>'
     await page.evaluate(async (html) => navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob(['Title'], { type: 'text/plain' }) })]), html)
     await page.keyboard.press(`${mod}+v`)
@@ -512,7 +514,7 @@ try {
   {
     await set('blink here|')
     await page.mouse.click(box.x + box.width / 2, box.y + 30)
-    await run('selection.set', { anchor: 10 })
+    await selectChars(page, run, 10)
     const caret = kit().getByTestId('note-caret')
     step('a caret is drawn while the editor has the keyboard', await until(async () => (await caret.count()) === 1))
     const seen = new Set()
@@ -639,7 +641,7 @@ try {
     // Set directly: `|` would be read as the caret.
     const doc = `Intro\n\n${table}\nAfter\n`
     await run('text.replace', { from: 0, to: [...(await run('text.read')).text].length, text: doc })
-    await run('selection.set', { anchor: [...doc].length - 1 })
+    await selectChars(page, run, [...doc].length - 1)
     const ready = await until(async () => (await kit().getByTestId('note-table-col-handle').count()) === 3)
     step('a table shows a drag handle over each column', ready)
     const handles = kit().getByTestId('note-table-col-handle')

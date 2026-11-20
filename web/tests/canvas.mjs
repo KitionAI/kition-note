@@ -5,6 +5,7 @@
 // desktop app. SHOT=<dir> writes a screenshot of the editor there.
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
+import { selectChars } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
 const server = await createServer({ configFile: new URL('../vite.config.ts', import.meta.url).pathname, server: { port: 0, host: '127.0.0.1' }, logLevel: 'error' })
@@ -34,18 +35,19 @@ const ORIGINAL = ['# Plan', '', 'Goals for the quarter.', '', '- first', '', 'Cl
 const run = (command, params = {}) => page.evaluate(async ([command, params]) => (await window.devHost.connection().ai.run([{ command, params }], false)).completed[0].result, [command, params])
 const engineText = async () => (await run('text.read')).text
 const kit = () => page.frames().find((frame) => frame !== page.mainFrame())
-/** Puts the caret at the end of the line holding `text`, through the engine's selection. */
+/** Puts the person's caret right after `text`, as the host shows a place (tests/canvasHelpers.mjs). */
 async function caretAfter(text) {
   const all = await engineText()
   const at = all.indexOf(text) + text.length
-  await run('selection.set', { anchor: [...all.slice(0, at)].length })
+  await selectChars(page, run, [...all.slice(0, at)].length)
 }
 
 try {
   await page.goto(`${origin}/dev.html?locale=en-US`)
   await page.waitForFunction(() => document.getElementById('status')?.textContent?.includes(' open in '), null, { timeout: 90000 })
+  // Once open, the status line names the note; it may already say the revision a view change moved.
   await page.evaluate(async ([name, text]) => window.devHost.open(name, new TextEncoder().encode(text).buffer), [NAME, ORIGINAL])
-  await page.waitForFunction(() => document.getElementById('status')?.textContent?.includes(' open in '), null, { timeout: 90000 })
+  await page.waitForFunction((name) => document.getElementById('status')?.textContent?.startsWith(name), NAME, { timeout: 90000 })
   const ready = await until(async () => (await kit().locator('[data-testid="note-canvas"] canvas').count()) > 0, 300)
   step('opens the note on the engine canvas', ready)
   step('no CodeMirror editor is left', (await kit().locator('.cm-content').count()) === 0)
