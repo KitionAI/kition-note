@@ -1818,3 +1818,43 @@ fn switching_the_scheme_repaints_and_moves_nothing() {
     view.update(&text, 0..0);
     assert_eq!(view.frame(0.0, 0.0, 1.0, width as u16, height as u16), light, "the light paint is as it was");
 }
+
+#[test]
+fn what_follows_a_coloured_highlight_keeps_its_own_color() {
+    if !fonts() {
+        return;
+    }
+    // Every coloured highlight first, so their colours are among the ones the view keeps.
+    let mut text = String::new();
+    for (emoji, _) in style::HIGHLIGHT_COLORS {
+        text.push_str(&format!("=={emoji}one== text, and math $E=mc^2$\n\n"));
+    }
+    text.push_str("==🔵blue== then [a link](https://kition.ai), [[a page]], #tag, `code`, *emphasis* and **strong**.\n\n");
+    text.push_str("==🟢$x^2$ inside==, and math $a+b$ after\n\nend\n");
+    let math = kition_note_fonts::math_face(latex_rust::STIX_TWO_MATH_OTF).unwrap();
+    let highlights: Vec<[u8; 4]> = style::HIGHLIGHT_COLORS.iter().map(|(_, color)| *color).collect();
+    for scheme in [Scheme::Light, Scheme::Dark] {
+        let mut view = View::default();
+        view.set_scheme(scheme);
+        view.update(&text, text.len()..text.len());
+        let theme = view.theme().clone();
+        let mut formulas = 0;
+        for line in view.lines() {
+            for glyph in line.boxed.rows.iter().flat_map(|row| row.glyphs.iter()) {
+                let style = line.boxed.styles[usize::from(glyph.style)];
+                let source = &text[line.range.clone()];
+                assert!(!highlights.contains(&style.color), "{scheme:?}: a glyph of {source:?} is drawn in a highlight's colour {:?}", style.color);
+                if glyph.face == math {
+                    formulas += 1;
+                    assert_eq!(style.color, theme.text, "{scheme:?}: the formula in {source:?} keeps the text's color");
+                }
+            }
+        }
+        assert!(formulas > 0, "the formulas are drawn");
+        if let Some(dir) = std::env::var_os("KITION_NOTE_VIEW_PNG") {
+            let (width, height) = (view.width(), view.height());
+            let name = format!("highlight-then-math-{}.png", if scheme == Scheme::Dark { "dark" } else { "light" });
+            png(&std::path::Path::new(&dir).join(name), &view.frame(0.0, 0.0, 1.0, width as u16, height as u16), width, height);
+        }
+    }
+}

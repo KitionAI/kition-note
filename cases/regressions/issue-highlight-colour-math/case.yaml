@@ -1,0 +1,25 @@
+format: 1
+id: regressions/issue-highlight-colour-math
+feature: note.format
+intent: >-
+  What follows a coloured highlight keeps its own colour: in `==🔵blue== text, and math
+  $E=mc^2$` the formula drawn away from the caret is in the text's colour, in the light and the
+  dark palette, and a link, an internal link, a tag, inline code and emphasis after a coloured
+  highlight are drawn in theirs. Before, math's colour bits (its TeX token kind) were read as an
+  interned inline colour once its dollars were hidden, so the formula took the colour of whichever
+  highlight had been interned under the same number (pale blue after a blue highlight).
+layer: unit
+dimension: function
+source:
+  kind: issue
+  from: owner report (inline math after a blue highlight drawn pale blue)
+  license: owned
+input: []
+steps:
+  - cargo-test:
+      package: kition-note-view
+      test: what_follows_a_coloured_highlight_keeps_its_own_color
+expected:
+  - actual: out:cargo-test
+    compare: exit
+since: "2026-11-19"

@@ -425,7 +425,11 @@ fn run_style(theme: &Theme, line: LineStyle, flags: flag::Flags) -> RunStyle {
                 crate::highlight::Kind::Link => theme.code_link,
             };
         }
-    } else if let Some(color) = crate::style::interned_color((flags & flag::COLOR) >> flag::COLOR_SHIFT) {
+    } else if flags & flag::MATH == 0
+        && let Some(color) = crate::style::interned_color((flags & flag::COLOR) >> flag::COLOR_SHIFT)
+    {
+        // (Math's colour bits hold its TeX token kind, as a code block's do, even where its
+        // formula is drawn in place of the source: never an interned colour.)
         // A coloured highlight's colour (alpha 254) is its background; any other, the text's.
         if flags & flag::HIGHLIGHT != 0 && color[3] == 254 {
             style.background = Some(theme.highlight_background(color));
