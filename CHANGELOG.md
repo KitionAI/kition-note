@@ -2,6 +2,17 @@
 
 Changes to Kition Note, newest first. A version is the kit package version in `kit.json`.
 
+## 0.1.3
+
+- Math after a coloured highlight keeps the text's colour; before, the formula drawn away from
+  the caret could take the highlight's colour, in the light and the dark palette.
+- In a dark host the first frame is already dark: the editor no longer paints light frames
+  before it follows the host's color scheme.
+- `kit.json` declares the engine's editor state as `engine.editorState`, the same list as the
+  engine's `EDITOR_STATE`, so a host that does not run the engine reads `inspect()` without it.
+- The README connects an agent with `npm install -g @kition/cli` and `kition agent add`, uses
+  the standard kit link row, and links KHP at `kitharness/kitharness`.
+
 ## 0.1.2
 
 - The same kit as 0.1.1, released again so that its release carries prebuilt headless
