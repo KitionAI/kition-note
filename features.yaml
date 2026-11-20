@@ -96,8 +96,8 @@ features:
     status: has
     commands: [view.scheme]
     paths: [crates/view/view/src/theme.rs, crates/view/view/src/lib.rs, bindings/wasm/src/editor.rs, web/src/colorScheme.ts, web/src/App.tsx, web/src/Diagrams.tsx, web/src/app.css, web/tests/scheme.mjs]
-    gap: "Export, print and the agent's preview stay in the light palette by design. A note opened in dark can show its light paper for a frame before the scheme reaches the engine."
-    cases: [note.platform.color-scheme/follows-host]
+    gap: "Export, print and the agent's preview stay in the light palette by design."
+    cases: [note.platform.color-scheme/follows-host, regressions/issue-dark-first-frame]
     since: "2026-11-18"
   - id: note.collab.live
     title: People co-edit a note live and see each other's edits, carets and selections at once

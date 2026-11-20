@@ -2,7 +2,8 @@
 // [chromium|webkit]. Opens a note with every kind of block in the dark scheme, checks that the
 // engine paints its paper dark and that the canvas around it is the same color (no white sheet,
 // no frame), then switches the host to light and back without a reload and checks that the note
-// repaints each time and nothing moves. Needs the engine and fonts built into public/ (pnpm run
+// repaints each time and nothing moves. Every frame the engine paints from the open is checked:
+// none is light (no white flash before the scheme reaches the engine). Needs the engine and fonts built into public/ (pnpm run
 // engine). SHOT=<dir> writes screenshots of both schemes there.
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
@@ -15,6 +16,28 @@ const origin = `http://127.0.0.1:${server.httpServer.address().port}`
 const browser = await (which === 'webkit' ? webkit : chromium).launch()
 const context = await browser.newContext({ viewport: { width: 1280, height: 1000 } })
 await context.addInitScript(() => localStorage.setItem('kit.note.autosave', 'off'))
+// Every frame the engine paints, from the kit's first: kit-editor puts each into a canvas
+// (putImageData). Kept per frame: its size and its shares of light paper and of dark paper.
+await context.addInitScript(() => {
+  if (window === window.top) return
+  const frames = []
+  window.__noteFrames = frames
+  const put = CanvasRenderingContext2D.prototype.putImageData
+  CanvasRenderingContext2D.prototype.putImageData = function (image, ...rest) {
+    const { data, width, height } = image
+    let light = 0
+    let dark = 0
+    let seen = 0
+    for (let at = 0; at < data.length; at += 4 * 7) {
+      if (data[at + 3] === 0) continue
+      seen += 1
+      if (data[at] >= 250 && data[at + 1] >= 250 && data[at + 2] >= 250) light += 1
+      else if (Math.abs(data[at] - 30) <= 3 && Math.abs(data[at + 1] - 30) <= 3 && Math.abs(data[at + 2] - 30) <= 3) dark += 1
+    }
+    frames.push({ width, height, light: seen ? light / seen : 0, dark: seen ? dark / seen : 0 })
+    return put.call(this, image, ...rest)
+  }
+})
 const page = await context.newPage()
 const errors = []
 let failures = 0
@@ -144,9 +167,17 @@ const where = () => page.evaluate(async () => (await window.devHost.connection()
 try {
   await page.goto(`${origin}/dev.html?locale=en-US&scheme=dark`)
   await page.waitForFunction(() => document.getElementById('status')?.textContent?.includes(' open in '), null, { timeout: 90000 })
+  // Once open, the status line names the note; it may already say the revision a view change moved.
   await page.evaluate(async (text) => window.devHost.open('Scheme.md', new TextEncoder().encode(text).buffer), NOTE)
-  await page.waitForFunction(() => document.getElementById('status')?.textContent?.includes(' open in '), null, { timeout: 90000 })
+  await page.waitForFunction(() => document.getElementById('status')?.textContent?.startsWith('Scheme.md'), null, { timeout: 90000 })
   step('opens the note on the engine canvas', await until(async () => (await canvas().count()) > 0, 300))
+  // Opened in a dark host, the note's first painted frame is already dark: no light paper shows
+  // for a frame before the scheme reaches the engine.
+  await until(async () => (await kit().evaluate(() => window.__noteFrames.length)) > 0, 100)
+  const frames = await kit().evaluate(() => window.__noteFrames)
+  const lit = frames.filter((frame) => frame.light > 0.2)
+  step('the first frame painted is dark', frames.length > 0 && frames[0].dark > 0.5, JSON.stringify(frames.slice(0, 3)))
+  step('no frame painted from the open is light', frames.length > 0 && lit.length === 0, `${lit.length} of ${frames.length}: ${JSON.stringify(lit.slice(0, 3))}`)
   step('the host marks the editor dark', (await kit().evaluate(() => document.documentElement.dataset.colorScheme)) === 'dark')
   step('the note paints its paper dark', await paints('dark'), JSON.stringify(await colorsAt(await paperPoints())))
   const backdrop = await kit().evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--kit-canvas').trim())

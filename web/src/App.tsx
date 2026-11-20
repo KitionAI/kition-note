@@ -323,13 +323,27 @@ export function App({ host }: { host: HostConnection }) {
   // and whenever the host changes it.
   // (The session is read through a ref: it is a new object on each render, and running the
   // command on each render would never settle.)
+  // An engine opens in the light palette, so the canvas shows a document only once the engine has
+  // its scheme: its first frame is already in the host's (no light paper for a frame in a dark
+  // host). That is one command in the worker after the open; a later change repaints in place.
   const scheme = useColorScheme()
   const schemeSession = useRef(session)
   schemeSession.current = session
+  const [schemedDoc, setSchemedDoc] = useState<typeof doc>(null)
   useEffect(() => {
-    if (!doc) return
-    void schemeSession.current.run('view.scheme', { scheme }).catch(() => undefined)
+    if (!doc) return undefined
+    let current = true
+    void schemeSession.current
+      .run('view.scheme', { scheme })
+      .catch(() => undefined)
+      .then(() => {
+        if (current) setSchemedDoc(doc)
+      })
+    return () => {
+      current = false
+    }
   }, [doc, scheme])
+  const schemeSet = doc !== null && schemedDoc === doc
   // Mermaid diagrams: those to draw, and where the drawn ones are (in view and a screen around).
   const [diagrams, setDiagrams] = useState<DiagramsView | null>(null)
   useEffect(() => {
@@ -976,17 +990,18 @@ export function App({ host }: { host: HostConnection }) {
             // The document area in view (document pixels), for tests and for the host's look at the editor.
             data-view={shownView ? `${Math.round(shownView.x)},${Math.round(shownView.y)},${Math.round(shownView.width / shownView.zoom)},${Math.round(shownView.height / shownView.zoom)},${shownView.zoom.toFixed(3)}` : undefined}
           >
-            <KitDocumentCanvas canvas={canvas} viewMemory={viewMemory} framed={false} onView={onView} testId="note-canvas">
-              <TableControls tables={tables} view={shownView} run={note.run} readOnly={readOnly} t={t} menuAt={tableMenu} />
-              <Composition caret={caretAt} view={shownView} />
-              <HostCommentMarks marks={hostComments.marks} view={shownView} right={docWidth !== null && diagrams ? (docWidth + diagrams.column) / 2 : null} onActivate={hostComments.activate} t={t} />
-              <PeerPresence marks={peers} view={shownView} />
-              {host.readOnly === true && shownView && readOnlyRects.length ? (
-                <div className="note-readonly-selection" data-testid="note-readonly-selection">
-                  {readOnlyRects.map((rect, index) => (
-                    <div key={index} style={{ left: (rect.x - shownView.x) * shownView.zoom, top: (rect.y - shownView.y) * shownView.zoom, width: rect.width * shownView.zoom, height: rect.height * shownView.zoom }} />
-                  ))}
-                </div>
+            {schemeSet ? (
+              <KitDocumentCanvas canvas={canvas} viewMemory={viewMemory} framed={false} onView={onView} testId="note-canvas">
+                <TableControls tables={tables} view={shownView} run={note.run} readOnly={readOnly} t={t} menuAt={tableMenu} />
+                <Composition caret={caretAt} view={shownView} />
+                <HostCommentMarks marks={hostComments.marks} view={shownView} right={docWidth !== null && diagrams ? (docWidth + diagrams.column) / 2 : null} onActivate={hostComments.activate} t={t} />
+                <PeerPresence marks={peers} view={shownView} />
+                {host.readOnly === true && shownView && readOnlyRects.length ? (
+                  <div className="note-readonly-selection" data-testid="note-readonly-selection">
+                    {readOnlyRects.map((rect, index) => (
+                      <div key={index} style={{ left: (rect.x - shownView.x) * shownView.zoom, top: (rect.y - shownView.y) * shownView.zoom, width: rect.width * shownView.zoom, height: rect.height * shownView.zoom }} />
+                    ))}
+                  </div>
               ) : null}
               <Caret caret={caretAt} view={shownView} readOnly={readOnly} />
               <CodeFlairs blocks={codeBlocks} view={shownView} read={readText} t={t} />
@@ -995,6 +1010,7 @@ export function App({ host }: { host: HostConnection }) {
               <SlashMenu caret={slashCaret} place={caretPlace(caretAt, shownView)} run={note.run} t={t} readOnly={readOnly} />
               <TagMenu caret={slashCaret} place={caretPlace(caretAt, shownView)} run={note.run} tags={noteTags} t={t} readOnly={readOnly} />
             </KitDocumentCanvas>
+            ) : null}
             <NoteScrollbar view={shownView} docHeight={doc?.height ?? 0} onScroll={scrollTo} />
           </div>
           <EditorMenu at={editorMenu} onClose={() => setEditorMenu(null)} run={note.run} selectedText={menuSelectedText} readOnly={readOnly} {...(commentable ? { onComment: commentOnSelection } : {})} phrase={phrase} t={t} />

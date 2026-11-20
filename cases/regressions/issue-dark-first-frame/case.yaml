@@ -1,0 +1,27 @@
+format: 1
+id: regressions/issue-dark-first-frame
+feature: note.platform.color-scheme
+intent: >-
+  A note opened in a dark host paints no light frame: every frame the engine paints from the open
+  (each one kit-editor puts into a canvas) is dark paper, the first one too. The canvas shows the
+  document only once the engine has the host's scheme (`view.scheme`, one command in the worker
+  after the open). Before, the engine opened in the light palette and the canvas painted the note
+  white for a frame or two before the scheme reached it.
+layer: gate
+dimension: platform
+source:
+  kind: issue
+  from: features.yaml gap of note.platform.color-scheme (light paper for a frame on open in dark)
+  license: owned
+input: []
+steps:
+  - exec:
+      cmd: [node, web/tests/scheme.mjs, chromium]
+  - exec:
+      cmd: [node, web/tests/scheme.mjs, webkit]
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+tags: [browser]
+since: "2026-11-19"
+timeout_s: 300
+requires: [chromium, webkit]
