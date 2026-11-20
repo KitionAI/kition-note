@@ -2,6 +2,16 @@
 
 Changes to Kition Note, newest first. A version is the kit package version in `kit.json`.
 
+## 0.1.4
+
+- A host asks a note file for its document id (`document.identity`) and copies a note as a new
+  document (`document.fork`): a `.md` file is the note's text and embeds no replica, so it carries
+  no id and its fork is the same bytes (Kit Process Protocol section 5.6, kition-sdk 6b4d471).
+- The headless program speaks Kit Process Protocol version 1 (`headless.protocol` is
+  `kition-kit/1`), as hosts on kition-sdk from bb1b07b require.
+- Undo after a step whose changes came to nothing (Enter, then Backspace) takes back the typing
+  before it; before, that Undo changed nothing and the typing stayed.
+
 ## 0.1.3
 
 - Math after a coloured highlight keeps the text's colour; before, the formula drawn away from

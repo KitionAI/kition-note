@@ -257,8 +257,8 @@ Manifest (`kit.json`, excerpt):
 },
 "headless": {
   "executable": "kition-note",
-  "protocol": "kition-kit/2",
-  "features": ["view.describe", "document.check", "model.open", "model.import", "model.export", "model.save", "model.describe", "model.batch"]
+  "protocol": "kition-kit/1",
+  "features": ["view.describe", "document.check", "document.identity", "model.open", "model.import", "model.export", "model.save", "model.describe", "model.batch"]
 }
 ```
 

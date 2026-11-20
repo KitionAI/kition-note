@@ -1,0 +1,21 @@
+format: 1
+id: note.platform.document-identity/no-replica
+feature: note.platform.document-identity
+intent: >-
+  Through the real kition-note process: the kit serves document.identity, and a .md file (a saved
+  note, a byte copy of it, an empty note) carries no document id, because the file is the note's
+  text and embeds no replica; document.fork writes the same bytes with no id, leaves the source as
+  it was, and never replaces an existing file (file_conflict).
+layer: gate
+source:
+  kind: synthetic
+  from: bindings/headless/tests/identity.rs (a_note_file_embeds_no_replica_so_it_carries_no_identity_and_forks_unchanged)
+  license: Apache-2.0
+input: []
+steps:
+  - cargo-test: { package: kition-note, test: identity, filter: a_note_file_embeds_no_replica_so_it_carries_no_identity_and_forks_unchanged }
+expected:
+  - actual: out:cargo-test
+    compare: exit
+    value: 0
+since: "2026-11-20"

@@ -1,0 +1,20 @@
+format: 1
+id: regressions/issue-undo-step-that-came-to-nothing
+feature: note.editing
+intent: >-
+  An undo step whose changes come to nothing (Enter, then Backspace) is, on kition-sdk from
+  4b81569, a replica step that changes nothing. The editor skipped it as if the replica kept none,
+  so the next Undo undid that empty step instead of the typing before it, and the typing stayed.
+  Undo of such a step changes nothing, and the Undo after it takes back the step before.
+layer: gate
+dimension: function
+source:
+  kind: probe
+  from: bindings/wasm/src/editor/tests.rs (an_undo_step_that_changed_nothing_undoes_nothing), failing on kition-sdk 6b4d471
+  license: owned
+input: []
+steps:
+  - cargo-test: { package: kition-note-kit, filter: an_undo_step_that_changed_nothing_undoes_nothing }
+expected:
+  - { actual: "out:cargo-test", compare: exit, value: 0 }
+since: "2026-11-20"

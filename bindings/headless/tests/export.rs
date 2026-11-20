@@ -82,7 +82,7 @@ fn issue_agent_export_every_declared_format_exports_through_one_command() {
     let formats: Vec<&str> = manifest["exports"].as_array().unwrap().iter().map(|entry| entry["extension"].as_str().unwrap()).collect();
     assert_eq!(formats, ["html", "pdf"]);
 
-    let mut kit = Headless::<NoteDocument>::with_replica_port(KitInfo::from_manifest(MANIFEST, &[], &[]).unwrap());
+    let mut kit = Headless::<NoteDocument>::with_replica_port(KitInfo::from_manifest(MANIFEST, &[], kition_note_kit::EDITOR_STATE).unwrap());
     assert_eq!(kit.capabilities()["formats"]["export"], json!(formats), "kit.initialize reports the exports");
     let root = std::env::temp_dir().join(format!("kition-note-export-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&root);

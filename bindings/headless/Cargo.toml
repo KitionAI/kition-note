@@ -25,4 +25,6 @@ image = { workspace = true }
 kition-kits = { workspace = true }
 kition-env = { workspace = true }
 kition-kit = { workspace = true }
+# document.identity and document.fork through the real process (tests/identity.rs).
+kition-kit-host = { workspace = true }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }

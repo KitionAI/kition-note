@@ -1,6 +1,6 @@
 format: 1
 kit: note
-updated: "2026-11-18"
+updated: "2026-11-20"
 gate_budget_s: 600
 protected: ["conformance/golden/**"]
 features:
@@ -99,6 +99,14 @@ features:
     gap: "Export, print and the agent's preview stay in the light palette by design."
     cases: [note.platform.color-scheme/follows-host, regressions/issue-dark-first-frame]
     since: "2026-11-18"
+  - id: note.platform.document-identity
+    title: "A host asks a note file for its document id and forks it (document.identity, document.fork; Kit Process Protocol 5.6): a .md embeds no replica, so it carries none and forks unchanged"
+    dimension: [platform, data-safety]
+    priority: P1
+    status: has
+    paths: [bindings/headless/src/main.rs, bindings/headless/tests/identity.rs, kit.json]
+    cases: [note.platform.document-identity/no-replica]
+    since: "2026-11-20"
   - id: note.collab.live
     title: People co-edit a note live and see each other's edits, carets and selections at once
     dimension: [collab, function, data-safety]
@@ -253,9 +261,9 @@ features:
     priority: P1
     status: partial
     commands: [edit.selectAll, edit.cut, edit.indent, edit.outdent, edit.moveLineUp, edit.moveLineDown, edit.deleteParagraph, edit.selectSection, edit.sortLines, edit.trimWhitespace, edit.undo, edit.redo, selection.get, selection.set, selection.replace, selection.where, selection.controlKey]
-    paths: [bindings/wasm/src/lib.rs, web/src/commandIcons.ts]
+    paths: [bindings/wasm/src/lib.rs, bindings/wasm/src/editor.rs, web/src/commandIcons.ts]
     gap: "The engine has these commands; no case yet shows the area working end to end in the editor and surviving save and reopen."
-    cases: [regressions/issue-editor-cut-text]
+    cases: [regressions/issue-editor-cut-text, regressions/issue-undo-step-that-came-to-nothing]
     since: "2026-11-16"
   - id: note.view
     title: "Reading width, scrolling, folding and block lookup"
