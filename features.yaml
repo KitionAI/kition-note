@@ -157,7 +157,7 @@ features:
     commands: [table.read, table.create, table.setCell, table.insertRow, table.insertColumn, table.deleteRow, table.deleteColumn, table.moveRow, table.moveColumn, table.align, table.format, table.geometry]
     paths: [crates/engine/check/src/lib.rs]
     gap: "table.deleteRow, table.deleteColumn, table.moveColumn and table.geometry are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
-    cases: [note.tables/save-reopen, regressions/issue-table-drag-handles, regressions/issue-table-menu-outside-click, regressions/issue-4, regressions/issue-table-create-line]
+    cases: [note.tables/save-reopen, regressions/issue-table-drag-handles, regressions/issue-table-drag-release-race, regressions/issue-table-menu-outside-click, regressions/issue-4, regressions/issue-table-create-line]
     since: "2026-11-16"
   - id: note.links
     title: "Links and wikilinks: list, insert, update, embed, retarget when files move"

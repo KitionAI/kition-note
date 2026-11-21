@@ -69,6 +69,13 @@ const screen = (view: KitCanvasView, x: number, y: number) => ({ left: (x - view
 export function TableControls({ tables, view, run, readOnly, t, menuAt }: { tables: TableGeometry[]; view: KitCanvasView | null; run: NoteRun; readOnly: boolean; t: Strings; menuAt: { table: number; column: number; row: number; x: number; y: number } | null }) {
   const [menu, setMenu] = useState<MenuState | null>(null)
   const [drag, setDrag] = useState<Drag | null>(null)
+  // The drag as the last pointer event left it, ahead of React's render: a release that follows the
+  // last move before React draws it drops where that move went, not where the drawn drag was.
+  const dragNow = useRef<Drag | null>(null)
+  const track = useCallback((next: Drag | null) => {
+    dragNow.current = next
+    setDrag(next)
+  }, [])
   const menuRef = useRef<HTMLDivElement>(null)
   const items = menuItems(t, menu?.row ?? 0)
 
@@ -128,11 +135,11 @@ export function TableControls({ tables, view, run, readOnly, t, menuAt }: { tabl
       if (event.key !== 'Escape') return
       event.preventDefault()
       event.stopPropagation()
-      setDrag(null)
+      track(null)
     }
     window.addEventListener('keydown', keys, true)
     return () => window.removeEventListener('keydown', keys, true)
-  }, [dragging])
+  }, [dragging, track])
 
   /** Runs the selected item (for Enter, from the window's key listener). */
   const chosen = useRef<(() => void) | null>(null)
@@ -179,10 +186,11 @@ export function TableControls({ tables, view, run, readOnly, t, menuAt }: { tabl
                   table={table}
                   view={view}
                   drag={drag?.table === table.table ? drag : null}
-                  start={(next) => setDrag(next)}
-                  move={(next) => setDrag(next)}
+                  current={() => (dragNow.current?.table === table.table ? dragNow.current : null)}
+                  start={track}
+                  move={track}
                   drop={(done) => {
-                    setDrag(null)
+                    track(null)
                     // A column ends up at its boundary's place (less one when it moves right); a body row likewise.
                     const to = done.to > done.from ? done.to - 1 : done.to
                     if (done.kind === 'col' && to !== done.from) act('table.moveColumn', { table: done.table, from: done.from, to })
@@ -239,7 +247,7 @@ export function TableControls({ tables, view, run, readOnly, t, menuAt }: { tabl
  * the header), each drawn under the pointer. A press outlines its column or row; dragging moves
  * the handle along and a bar marks the boundary it goes to; release drops it there.
  */
-function TableHandles({ table, view, drag, start, move, drop, t }: { table: TableGeometry; view: KitCanvasView; drag: Drag | null; start: (drag: Drag) => void; move: (drag: Drag) => void; drop: (drag: Drag) => void; t: Strings }) {
+function TableHandles({ table, view, drag, current, start, move, drop, t }: { table: TableGeometry; view: KitCanvasView; drag: Drag | null; current: () => Drag | null; start: (drag: Drag) => void; move: (drag: Drag) => void; drop: (drag: Drag) => void; t: Strings }) {
   const left = table.columns[0] ?? 0
   const top = table.rows[0]?.top ?? 0
   // Boundaries in screen pixels from the table's top-left: between columns, and between body rows.
@@ -256,20 +264,27 @@ function TableHandles({ table, view, drag, start, move, drop, t }: { table: Tabl
     // Body rows count from 1 (row 0 is the header); their boundaries from 0 are rows 1 and on.
     start({ kind, table: table.table, from: kind === 'col' ? index : index + 1, start: at, pointer: at, to: kind === 'col' ? index : index + 1 })
   }
+  // Moves and the release read the drag as the last event left it (`current`), not as last drawn.
   const motion = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!drag) return
+    const now = current()
+    if (!now) return
     event.stopPropagation()
-    const at = drag.kind === 'col' ? event.clientX : event.clientY
+    const at = now.kind === 'col' ? event.clientX : event.clientY
     const box = event.currentTarget.parentElement?.getBoundingClientRect()
     if (!box) return
-    const offset = at - (drag.kind === 'col' ? box.left : box.top)
-    const boundary = drag.kind === 'col' ? nearestBoundary(columnEdges, offset) : nearestBoundary(rowEdges, offset) + 1
-    move({ ...drag, pointer: at, to: boundary })
+    const offset = at - (now.kind === 'col' ? box.left : box.top)
+    const boundary = now.kind === 'col' ? nearestBoundary(columnEdges, offset) : nearestBoundary(rowEdges, offset) + 1
+    move({ ...now, pointer: at, to: boundary })
   }
   const release = (event: ReactPointerEvent<HTMLDivElement>) => {
     event.stopPropagation()
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
-    if (drag) drop(drag)
+    const now = current()
+    if (now) drop(now)
+  }
+  const cancel = () => {
+    const now = current()
+    if (now) move({ ...now, to: now.from })
   }
   const shift = drag ? drag.pointer - drag.start : 0
   return (
@@ -289,7 +304,7 @@ function TableHandles({ table, view, drag, start, move, drop, t }: { table: Tabl
               onPointerDown={press('col', index)}
               onPointerMove={motion}
               onPointerUp={release}
-              onPointerCancel={() => drag && move({ ...drag, to: drag.from })}
+              onPointerCancel={cancel}
               onMouseDown={(event: ReactMouseEvent) => event.preventDefault()}
             >
               <GripHorizontalIcon size={16} aria-hidden="true" />
@@ -312,7 +327,7 @@ function TableHandles({ table, view, drag, start, move, drop, t }: { table: Tabl
               onPointerDown={press('row', index)}
               onPointerMove={motion}
               onPointerUp={release}
-              onPointerCancel={() => drag && move({ ...drag, to: drag.from })}
+              onPointerCancel={cancel}
               onMouseDown={(event: ReactMouseEvent) => event.preventDefault()}
             >
               <GripVerticalIcon size={16} aria-hidden="true" />

@@ -1,0 +1,28 @@
+format: 1
+id: regressions/issue-table-drag-release-race
+feature: note.tables
+intent: >-
+  A row or column dragged by its handle and released right after the last move goes where that move
+  went. The release used to drop the drag as React had last drawn it; when the last pointer move was
+  not drawn yet (WebKit on Linux, a quick drag), the row stayed where it was. The moves and the
+  release now read the drag as the last pointer event left it.
+layer: gate
+source:
+  kind: issue
+  from: Kition's kit CI on GitHub runners, web/tests/obsidian.mjs webkit "dragging a row handle moves the row"
+  license: owned
+input: []
+steps:
+  - flow:
+      spec: web/tests/obsidian.mjs
+      scenario: dragging a row handle moves the row
+      browsers: [chromium, webkit]
+  - flow:
+      spec: web/tests/obsidian.mjs
+      scenario: dragging a column handle moves the column
+      browsers: [chromium, webkit]
+expected:
+  - actual: out:flow
+    compare: exit
+since: "2026-11-21"
+requires: [chromium, webkit]
