@@ -12,7 +12,7 @@ Thank you for contributing; every change keeps the checks green.
 | `crates/` | The engine (Rust), compiled to WebAssembly for the editor |
 | `bindings/wasm` | The engine behind Kition's `KitDocument` contract |
 | `bindings/headless` | The headless kit executable for Kition's agent |
-| `web/` | The kit's editor (React, on kition-sdk's `@kition/kit-editor`) |
+| `web/` | The kit's editor (React, on kition-sdk's `@kition/sdk/editor`) |
 | `kit.json` | The kit manifest (KHP) |
 | `tools/xtask` | The repository's tasks: `cargo xtask ci`, the check every change passes, and the others |
 | `features.yaml`, `cases/` | The feature catalogue and its cases ([docs/quality.md](../docs/quality.md)) |
