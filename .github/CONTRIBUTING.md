@@ -42,7 +42,7 @@ downloads them there from their upstream sources and checks each file's SHA-256.
 Before you open a pull request, run the check; it must exit 0:
 
 ```sh
-cargo xtask ci
+cargo fmt --all -- --check
 ```
 
 ## Rules
