@@ -8,16 +8,10 @@ export default defineConfig({
   base: './',
   plugins: [dependenciesFromHere(), react()],
   resolve: {
-    // @kition/sdk (its kdm replica and the editor's session) reads replicas with loro-crdt, whose
-    // browser entry loads its WebAssembly itself; the entry Vite's server would pick imports it as
-    // a module, which needs a plugin. Tests run in Node, on loro-crdt's Node entry.
-    alias: process.env.VITEST ? [] : [{ find: /^loro-crdt$/, replacement: 'loro-crdt/browser' }],
     // One React for the page.
     dedupe: ['react', 'react-dom'],
   },
-  // loro-crdt stays unbundled, so its WebAssembly is found next to it.
-  optimizeDeps: { exclude: ['loro-crdt'] },
-  worker: { format: 'es', plugins: () => [dependenciesFromHere()] },
+  worker: { format: 'es' },
   server: {
     port: 5190,
     // The repository (the engine's schema file), and the kition-sdk and Tessera checkouts KITION_LINK=1 links.
