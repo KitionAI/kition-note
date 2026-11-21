@@ -57,11 +57,8 @@ pub(crate) struct Record {
     before: (usize, usize),
     after: (usize, usize),
     revision: u64,
-    /// The revision when the step began: a change of the step moves `revision` on from it.
-    opened: u64,
-    /// The text's hash when the step began, and whether the step wrote nothing to the replica and
-    /// ended with the same text, so the replica keeps no step for it. Changes that come to nothing
-    /// (Enter then Backspace) are a replica step that changes nothing, and undo through it.
+    /// The text's hash when the step began, and whether the step ended with the same text: the
+    /// replica keeps no step for changes that come to nothing (Enter then Backspace).
     start: u64,
     pub(crate) empty: bool,
 }
@@ -1071,7 +1068,7 @@ impl NoteDocument {
         }
         self.editor.undone.clear();
         let start = text_hash(self.body());
-        self.editor.done.push(Record { before, after: before, revision, opened: revision, start, empty: false });
+        self.editor.done.push(Record { before, after: before, revision, start, empty: false });
     }
 
     /// Ends the open undo step: the next change is a step of its own (a move, a click, a command
@@ -1087,7 +1084,7 @@ impl NoteDocument {
                 && record.revision == self.revision
             {
                 record.after = selection;
-                record.empty = record.revision == record.opened && record.start == now;
+                record.empty = record.start == now;
             }
         }
     }
@@ -1132,7 +1129,7 @@ impl NoteDocument {
         true
     }
 
-    /// Undo or Redo of a step that wrote nothing: the replica has no step for it, so it changes
+    /// Undo or Redo of a step that changed nothing: the replica has no step for it, so it changes
     /// nothing either (the step goes to the other list). Answers whether it took one.
     pub(crate) fn skip_empty(&mut self, undo: bool) -> bool {
         if !self.next_record(undo).is_some_and(|record| record.empty) {

@@ -11,6 +11,9 @@ Changes to Kition Note, newest first. A version is the kit package version in `k
   `kition-kit/1`), as hosts on kition-sdk from bb1b07b require.
 - Undo after a step whose changes came to nothing (Enter, then Backspace) takes back the typing
   before it; before, that Undo changed nothing and the typing stayed.
+- kition-sdk 6672663: the replica's undo passes over a group whose changes came to nothing, as
+  it did before 4b81569, so the editor again skips such a step on its own (empty when the text is
+  the same at its end) and the Undo after it takes back the typing before.
 
 ## 0.1.3
 
