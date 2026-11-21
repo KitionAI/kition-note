@@ -7,6 +7,12 @@
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
 
+// Playwright's WebKit reports a Mac (navigator.platform MacIntel, from its Safari user agent) on
+// every operating system, so on Linux the editor (kit-editor's isMac) waits for Cmd+\ while the
+// mode smoke's ControlOrMeta presses Ctrl. Without the override the page reports the platform it
+// runs on, which is what ControlOrMeta follows.
+process.env.PLAYWRIGHT_NO_UA_PLATFORM = '1'
+
 const sdk = process.env.KITION_SDK ?? new URL('../../../kition-sdk', import.meta.url).pathname
 const { runModeSmoke } = await import(new URL('packages/kit-dev-host/src/modeSmoke.mjs', `file://${sdk}/`).href)
 const FORMAT_ROW = ['format.heading1', 'format.heading2', 'format.heading3', 'format.bold', 'format.italic', 'format.strike', 'format.code', 'list.bullet', 'list.numbered', 'list.task', 'format.quote', 'format.link', 'insert.table', 'insert.codeBlock']
