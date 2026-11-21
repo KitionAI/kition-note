@@ -6,7 +6,7 @@
 // checked in the saved file, which changes only in the lines the action is about.
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
-import { canvasReady, focusCanvas } from './canvasHelpers.mjs'
+import { canvasReady, focusCanvas, primaryKey } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
 const server = await createServer({ configFile: new URL('../vite.config.ts', import.meta.url).pathname, server: { port: 0, host: '127.0.0.1' }, logLevel: 'error' })
@@ -16,6 +16,7 @@ const browser = await (which === 'webkit' ? webkit : chromium).launch()
 const context = await browser.newContext({ viewport: { width: 1280, height: 900 } })
 await context.addInitScript(() => localStorage.setItem('kit.note.autosave', 'off'))
 const page = await context.newPage()
+const mod = await primaryKey(page)
 const errors = []
 let failures = 0
 page.on('pageerror', (error) => errors.push(error.message))
@@ -115,7 +116,7 @@ try {
     const savedLines = saved.split('\n').filter((line) => line.startsWith('|'))
     step('every table line gains one cell, nothing else changes', savedLines.length === tableLines.length && savedLines.every((line, index) => line.startsWith(tableLines[index]) && line.split('|').length === tableLines[index].split('|').length + 1) && saved.startsWith('# Test\n\n'), JSON.stringify(savedLines))
     await focusCanvas(page)
-    await page.keyboard.press('ControlOrMeta+z')
+    await page.keyboard.press(`${mod}+z`)
     step('one Undo takes the column back', await until(async () => (await engineText()) === original), JSON.stringify(await engineText()))
   }
 
@@ -145,7 +146,7 @@ try {
     const clicked = { x: box.x + (edges[0] + edges[1]) / 2, y: box.y + (tops[1] + tops[2]) / 2 }
     step('the data edges find the cell the grid has', Math.abs(clicked.x - expected.x) < 2 && Math.abs(clicked.y - expected.y) < 2, `${JSON.stringify(clicked)} vs ${JSON.stringify(expected)}`)
     await page.mouse.click(clicked.x, clicked.y)
-    await page.keyboard.press('ControlOrMeta+z')
+    await page.keyboard.press(`${mod}+z`)
     step('one Undo in the idle cell takes the append back', await until(async () => (await rows()) === 3), String(await rows()))
     // As the gate reads it: the accessible text, once the row count shows the Undo.
     const shown = await kit().getByTestId('note-text').textContent()

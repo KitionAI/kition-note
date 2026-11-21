@@ -9,23 +9,48 @@
 #![allow(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::indexing_slicing)]
 
 use std::path::Path;
+use std::process::Command;
 
 use kition_note_kit::{KitDocument, NoteDocument};
 use serde_json::{Value, json};
+use sha2::{Digest, Sha256};
 
 fn fixtures() -> Vec<(String, Vec<u8>)> {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let mut names: Vec<_> = std::fs::read_dir(root.join("conformance"))
+        .unwrap()
+        .map(|entry| entry.unwrap().path())
+        .filter(|path| path.extension().is_some_and(|ext| ext == "md"))
+        .collect();
+    names.sort();
+    let mut files: Vec<_> =
+        names.iter().map(|path| (format!("conformance/{}", path.file_name().unwrap().to_string_lossy()), std::fs::read(path).unwrap())).collect();
+    files.extend(corpus(&root));
+    files
+}
+
+/// The corpus files `tools/xtask/corpus.json` lists, from `corpus/`; a missing or changed file is
+/// fetched there by its pinned commit, as `cargo xtask corpus` does, so a fresh checkout runs the
+/// whole corpus.
+fn corpus(root: &Path) -> Vec<(String, Vec<u8>)> {
+    let manifest: Value = serde_json::from_str(&std::fs::read_to_string(root.join("tools/xtask/corpus.json")).unwrap()).unwrap();
+    let dir = root.join("corpus");
+    std::fs::create_dir_all(&dir).unwrap();
+    let sha256 = |bytes: &[u8]| Sha256::digest(bytes).iter().map(|byte| format!("{byte:02x}")).collect::<String>();
     let mut files = Vec::new();
-    for dir in ["conformance", "corpus"] {
-        let mut names: Vec<_> = std::fs::read_dir(root.join(dir))
-            .unwrap()
-            .map(|entry| entry.unwrap().path())
-            .filter(|path| path.extension().is_some_and(|ext| ext == "md"))
-            .collect();
-        names.sort();
-        for path in names {
-            files.push((format!("{dir}/{}", path.file_name().unwrap().to_string_lossy()), std::fs::read(&path).unwrap()));
+    for entry in manifest["files"].as_array().unwrap() {
+        let (name, url, hash) = (entry["name"].as_str().unwrap(), entry["url"].as_str().unwrap(), entry["sha256"].as_str().unwrap());
+        let path = dir.join(name);
+        if !std::fs::read(&path).is_ok_and(|bytes| sha256(&bytes) == hash) {
+            // Fetched beside the file, then moved into place: a test running alongside never reads half a file.
+            let partial = dir.join(format!("{name}.{}.part", std::process::id()));
+            let status = Command::new("curl").args(["-fsSL", "--retry", "3", "-o"]).arg(&partial).arg(url).status().unwrap();
+            assert!(status.success(), "curl {url}: {status}");
+            std::fs::rename(&partial, &path).unwrap();
         }
+        let bytes = std::fs::read(&path).unwrap();
+        assert_eq!(sha256(&bytes), hash, "corpus/{name}: the hash differs from corpus.json");
+        files.push((format!("corpus/{name}"), bytes));
     }
     files
 }

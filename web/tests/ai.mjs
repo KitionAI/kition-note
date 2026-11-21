@@ -4,7 +4,7 @@
 // Run it with no HTTP proxy set.
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
-import { canvasReady, caretAfter, focusCanvas, selectText } from './canvasHelpers.mjs'
+import { canvasReady, caretAfter, focusCanvas, primaryKey, selectText } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
 const server = await createServer({ configFile: new URL('../vite.config.ts', import.meta.url).pathname, server: { port: 0, host: '127.0.0.1' }, logLevel: 'error' })
@@ -15,6 +15,7 @@ const context = await browser.newContext({ viewport: { width: 1280, height: 900 
 // These steps check unsaved edits: the note's autosave is off (src/autosave.tsx).
 await context.addInitScript(() => localStorage.setItem('kit.note.autosave', 'off'))
 const page = await context.newPage()
+const mod = await primaryKey(page)
 const errors = []
 let failures = 0
 page.on('pageerror', (error) => errors.push(error.message))
@@ -85,9 +86,9 @@ try {
   step('Accept replaces the reviewed text', await until(async () => (await engineText()) === accepted && (await editorText()) === accepted), JSON.stringify(await engineText()))
   step('the review bar closes', (await kit().getByTestId('note-ai-review').count()) === 0)
   await focusCanvas(page)
-  await page.keyboard.press('ControlOrMeta+z')
+  await page.keyboard.press(`${mod}+z`)
   step('one Undo takes the suggestion back, keeping the typing', await until(async () => (await engineText()) === typed), JSON.stringify(await engineText()))
-  await page.keyboard.press('ControlOrMeta+Shift+z')
+  await page.keyboard.press(`${mod}+Shift+z`)
   step('Redo puts it back', await until(async () => (await engineText()) === accepted))
   await page.evaluate(() => window.aiHost.connection().save())
   const saved = await until(async () => (await page.evaluate(() => window.aiHost.file())) === accepted)

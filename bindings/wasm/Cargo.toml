@@ -32,6 +32,8 @@ base64 = { workspace = true }
 kition-convergence = { workspace = true }
 # The declaration comparison (tests/declarations_independent.rs).
 regex = { workspace = true }
+# The corpus files' pinned hashes (tests/saved.rs, tools/xtask/corpus.json).
+sha2 = "0.10"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 js-sys = "0.3"

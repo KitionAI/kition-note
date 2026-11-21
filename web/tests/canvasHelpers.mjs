@@ -7,6 +7,15 @@
 /** The note's frame in `page`. */
 export const kitFrame = (page) => page.frames().find((frame) => frame !== page.mainFrame())
 
+/**
+ * The modifier the editor's shortcuts take in `page`, `Meta` or `Control`: kit-editor and the note
+ * read Cmd or Ctrl from `navigator.platform`, while Playwright's `ControlOrMeta` follows the
+ * operating system running the test, and the two disagree in WebKit on Linux (it reports a Mac).
+ * The browser's own field editing (select all in an input) follows the operating system:
+ * `ControlOrMeta` there.
+ */
+export const primaryKey = async (page) => ((await page.evaluate(() => /Mac|iPhone|iPad/i.test(navigator.platform))) ? 'Meta' : 'Control')
+
 /** Whether the canvas is up in the note's frame. */
 export const canvasReady = async (page) => (await kitFrame(page).locator('[data-testid="note-canvas"] canvas').count()) > 0
 

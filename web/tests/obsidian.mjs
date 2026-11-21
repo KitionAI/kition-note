@@ -4,10 +4,9 @@
 // checks the text and the caret after. Prints PASS or FAIL per scenario; exits 1 on any FAIL.
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
-import { selectChars } from './canvasHelpers.mjs'
+import { primaryKey, selectChars } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
-const mod = process.platform === 'darwin' ? 'Meta' : 'Control'
 const server = await createServer({ configFile: new URL('../vite.config.ts', import.meta.url).pathname, server: { port: 0, host: '127.0.0.1' }, logLevel: 'error' })
 await server.listen()
 const origin = `http://127.0.0.1:${server.httpServer.address().port}`
@@ -16,6 +15,7 @@ const context = await browser.newContext({ viewport: { width: 1280, height: 900 
 await context.addInitScript(() => localStorage.setItem('kit.note.autosave', 'off'))
 if (which === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write'])
 const page = await context.newPage()
+const mod = await primaryKey(page)
 const errors = []
 let failures = 0
 page.on('pageerror', (error) => errors.push(error.message))
@@ -127,8 +127,8 @@ try {
   // A change in a numbered list renumbers it (measured in Obsidian).
   await scenario('typing a numbered item under one takes the next number', '1. one\n|', type('5. x'), '1. one\n2. x|')
   await scenario('typing in a list renumbers the items after', '1. o|ne\n3. three', type('x'), '1. ox|ne\n2. three')
-  // macOS's Control editing keys.
-  if (process.platform === 'darwin') {
+  // macOS's Control editing keys, where the editor runs as on a Mac.
+  if (mod === 'Meta') {
     await scenario('Ctrl+A goes to the line start', '- item tex|t', press('Control+a'), '|- item text')
     await scenario('Ctrl+K deletes to the line end', 'one |two\nthree', press('Control+k'), 'one |\nthree')
     await scenario('Ctrl+T swaps the characters', 'ab|c', press('Control+t'), 'acb|')

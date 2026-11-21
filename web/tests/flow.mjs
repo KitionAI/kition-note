@@ -6,7 +6,7 @@
 // headless: they are checked in the desktop app.
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
-import { canvasReady, caretAfter as caretAfterIn, clickAtChar, focusCanvas, reveal, selectChars, selectText } from './canvasHelpers.mjs'
+import { canvasReady, caretAfter as caretAfterIn, clickAtChar, focusCanvas, primaryKey, reveal, selectChars, selectText } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
 const sdkDir = process.env.KITION_SDK ?? new URL('../../../kition-sdk', import.meta.url).pathname
@@ -18,6 +18,7 @@ const context = await browser.newContext({ viewport: { width: 1280, height: 900 
 // These steps check unsaved edits: the note's autosave is off (src/autosave.tsx).
 await context.addInitScript(() => localStorage.setItem('kit.note.autosave', 'off'))
 const page = await context.newPage()
+const mod = await primaryKey(page)
 const errors = []
 let failures = 0
 page.on('pageerror', (error) => errors.push(error.message))
@@ -197,8 +198,8 @@ try {
     const ticked = bold.replace('- [ ]', '- [x]')
     step('menus: a click on the task box toggles it', await waitText(ticked), JSON.stringify(await text()))
     await focusCanvas(menusPage)
-    await menusPage.keyboard.press('ControlOrMeta+z')
-    await menusPage.keyboard.press('ControlOrMeta+z')
+    await menusPage.keyboard.press(`${mod}+z`)
+    await menusPage.keyboard.press(`${mod}+z`)
     step('two undos take back the task and the bold, one step each', await waitText(NOTE), JSON.stringify(await text()))
     await frame().getByTestId('note-redo').click()
     await frame().getByTestId('note-redo').click()
@@ -221,7 +222,7 @@ try {
     step('every control has a Kit UI id', problems.length === 0, JSON.stringify(problems).slice(0, 400))
     // Focus hides the menus and the panels; Escape brings them back.
     await app.focus()
-    await menusPage.keyboard.press('ControlOrMeta+Backslash')
+    await menusPage.keyboard.press(`${mod}+Backslash`)
     await menusPage.waitForTimeout(200)
     step('Focus hides the menus and the panels', (await app.getAttribute('data-mode')) === 'focus' && (await frame().getByTestId('note-outline').count()) === 0 && (await frame().getByTestId('note-menu-Format').count()) === 0)
     await menusPage.keyboard.press('Escape')
@@ -316,7 +317,7 @@ try {
     await kit().getByTestId('note-property').first().waitFor()
     const value = kit().locator('[data-testid="note-property"][data-key="title"] [data-testid="note-property-text"]')
     await value.click()
-    await page.keyboard.press('Meta+A')
+    await page.keyboard.press('ControlOrMeta+A')
     await page.keyboard.type('Launch')
     await page.keyboard.press('Enter')
     const valueSet = await until(async () => (await engineText()).includes('title: Launch'))

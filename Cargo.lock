@@ -1099,6 +1099,7 @@ dependencies = [
  "kition-note-view",
  "regex",
  "serde_json",
+ "sha2",
  "unicode-segmentation",
 ]
 

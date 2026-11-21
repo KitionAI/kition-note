@@ -7,7 +7,7 @@
 // Run it with no HTTP proxy set.
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
-import { canvasReady, caretAfter, focusCanvas, kitFrame, selectText } from './canvasHelpers.mjs'
+import { canvasReady, caretAfter, focusCanvas, kitFrame, primaryKey, selectText } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
 const server = await createServer({ configFile: new URL('../vite.config.ts', import.meta.url).pathname, server: { port: 0, host: '127.0.0.1' }, logLevel: 'error' })
@@ -17,6 +17,7 @@ const browser = await (which === 'webkit' ? webkit : chromium).launch()
 const context = await browser.newContext({ viewport: { width: 1280, height: 900 } })
 await context.addInitScript(() => localStorage.setItem('kit.note.autosave', 'off'))
 const page = await context.newPage()
+const MOD = await primaryKey(page)
 const errors = []
 let failures = 0
 page.on('pageerror', (error) => errors.push(error.message))
@@ -33,7 +34,6 @@ const until = async (check, tries = 100) => {
 }
 
 const NOTE = ['# Plan', '', 'Goals for the quarter.', '', 'Closing words.', ''].join('\n')
-const MOD = process.platform === 'darwin' ? 'Meta' : 'Control'
 const kit = () => kitFrame(page)
 const run = (command, params = {}) => page.evaluate(async ([command, params]) => (await window.commentsHost.connection().ai.run([{ command, params }], false)).completed[0].result, [command, params])
 const engineText = async () => (await run('text.read')).text

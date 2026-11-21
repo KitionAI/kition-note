@@ -5,7 +5,7 @@
 // desktop app. SHOT=<dir> writes a screenshot of the editor there.
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
-import { selectChars } from './canvasHelpers.mjs'
+import { primaryKey, selectChars } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
 const server = await createServer({ configFile: new URL('../vite.config.ts', import.meta.url).pathname, server: { port: 0, host: '127.0.0.1' }, logLevel: 'error' })
@@ -15,6 +15,7 @@ const browser = await (which === 'webkit' ? webkit : chromium).launch()
 const context = await browser.newContext({ viewport: { width: 1280, height: 900 } })
 await context.addInitScript(() => localStorage.setItem('kit.note.autosave', 'off'))
 const page = await context.newPage()
+const mod = await primaryKey(page)
 const errors = []
 let failures = 0
 page.on('pageerror', (error) => errors.push(error.message))
@@ -72,10 +73,10 @@ try {
   // Shift+Arrow selects; Cmd/Ctrl+B makes it bold (the engine's command and shortcut).
   await caretAfter('Closing words')
   for (let i = 0; i < 5; i += 1) await page.keyboard.press('Shift+ArrowLeft')
-  await page.keyboard.press(process.platform === 'darwin' ? 'Meta+b' : 'Control+b')
+  await page.keyboard.press(`${mod}+b`)
   step('the shortcut formats the selection', await until(async () => (await engineText()).includes('Closing **words**')), JSON.stringify(await engineText()))
 
-  await page.keyboard.press(process.platform === 'darwin' ? 'Meta+z' : 'Control+z')
+  await page.keyboard.press(`${mod}+z`)
   step('Undo takes the formatting back', await until(async () => (await engineText()).includes('Closing words.')))
 
   // Paste arrives as typed text, line breaks kept.

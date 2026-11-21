@@ -6,7 +6,7 @@
 import { chromium, webkit } from 'playwright'
 import { readFile } from 'node:fs/promises'
 import { createServer } from 'vite'
-import { reveal, selectChars } from './canvasHelpers.mjs'
+import { primaryKey, reveal, selectChars } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
 const server = await createServer({ configFile: new URL('../vite.config.ts', import.meta.url).pathname, server: { port: 0, host: '127.0.0.1' }, logLevel: 'error' })
@@ -17,6 +17,7 @@ const context = await browser.newContext({ viewport: { width: 1600, height: 900 
 // These steps check unsaved edits: the note's autosave is off (src/autosave.tsx).
 await context.addInitScript(() => localStorage.setItem('kit.note.autosave', 'off'))
 const page = await context.newPage()
+const mod = await primaryKey(page)
 const errors = []
 let failures = 0
 page.on('pageerror', (error) => errors.push(error.message))
@@ -209,9 +210,9 @@ try {
       const box = await (await canvasOf('a')).boundingBox()
       await page.mouse.click(box.x + box.width - 20, box.y + 20)
     }
-    await page.keyboard.press('ControlOrMeta+z')
+    await page.keyboard.press(`${mod}+z`)
     step('one Undo takes the merged draft back', await until(async () => (await editorText()) === NOTE && (await engineText()) === NOTE), JSON.stringify(await editorText()))
-    await page.keyboard.press('ControlOrMeta+Shift+z')
+    await page.keyboard.press(`${mod}+Shift+z`)
     step('Redo puts it back', await until(async () => (await editorText()) === withAgent), JSON.stringify(await editorText()))
     // A discarded draft leaves the note as it is.
     await page.evaluate(async () => window.workspaceHost.connection('a').ai.run([{ command: 'text.insert', params: { at: 0, text: 'Unwanted. ' } }], false, { draft: true }))
@@ -288,7 +289,7 @@ try {
     // On the caret's own line a link shows its Markdown; Cmd/Ctrl+click opens it there too.
     await select(await charsBefore('See [[Plan'))
     const before = (await opens()).length
-    await clickChar(await charsBefore('[[Plan#Goals]]', 4), 'a', [process.platform === 'darwin' ? 'Meta' : 'Control'])
+    await clickChar(await charsBefore('[[Plan#Goals]]', 4), 'a', [mod])
     step('Cmd/Ctrl+click opens a link shown as Markdown', await until(async () => (await opens()).length > before), JSON.stringify((await opens()).at(-1)))
     // A heading of this note shows here and sends nothing.
     const sent = (await opens()).length
