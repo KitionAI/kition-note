@@ -2,6 +2,10 @@
 
 Changes to Kition Note, newest first. A version is the kit package version in `kit.json`.
 
+## 0.1.5
+
+- The same kit as 0.1.4, built on kition-sdk 6672663 (the replica's undo passes over an undo group whose changes came to nothing): the 0.1.4 package was built on kition-sdk 6b4d471.
+
 ## 0.1.4
 
 - A host asks a note file for its document id (`document.identity`) and copies a note as a new
