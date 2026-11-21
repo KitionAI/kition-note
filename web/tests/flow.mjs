@@ -6,10 +6,10 @@
 // headless: they are checked in the desktop app.
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
+import { checkUiIds } from '@kition/sdk/dev-host/check-ui-ids'
 import { canvasReady, caretAfter as caretAfterIn, clickAtChar, focusCanvas, primaryKey, reveal, selectChars, selectText } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
-const sdkDir = process.env.KITION_SDK ?? new URL('../../../kition-sdk', import.meta.url).pathname
 const server = await createServer({ configFile: new URL('../vite.config.ts', import.meta.url).pathname, server: { port: 0, host: '127.0.0.1' }, logLevel: 'error' })
 await server.listen()
 const origin = `http://127.0.0.1:${server.httpServer.address().port}`
@@ -217,7 +217,6 @@ try {
     await frame().getByTestId('note-comments-toggle').click()
     step('the comments panel opens beside the outline', (await frame().getByTestId('note-comments').count()) === 1)
     // Ids: every control drawn is one the editor lists (Kit UI protocol section 9).
-    const { checkUiIds } = await import(new URL('packages/kit-dev-host/src/checkUiIds.mjs', `file://${sdkDir}/`).href)
     const problems = await checkUiIds(frame(), await menusPage.evaluate(() => window.devHost.connection().elements()))
     step('every control has a Kit UI id', problems.length === 0, JSON.stringify(problems).slice(0, 400))
     // Focus hides the menus and the panels; Escape brings them back.

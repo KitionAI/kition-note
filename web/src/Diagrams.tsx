@@ -11,8 +11,8 @@
  */
 import DOMPurify from 'dompurify'
 import { useEffect, useRef, useState } from 'react'
-import { createKitStrings, type KitCanvasView } from '@kition/kit-editor'
-import { CodeXmlIcon } from '@kition/tessera-icons/react'
+import { createKitStrings, type KitCanvasView } from '@kition/sdk/editor'
+import { CodeXmlIcon } from '@kition/tessera/icons/react'
 import type { NoteRun } from './useNote'
 import { useWheelToCanvas } from './wheel'
 import type { ColorScheme } from './colorScheme'

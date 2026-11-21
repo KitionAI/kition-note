@@ -6,7 +6,7 @@
  * else the host's export write; printing hands the PDF to the host's print dialog (`files/print`).
  */
 import { useEffect, useState } from 'react'
-import { Button, Dialog, toast, createKitStrings, type HostConnection } from '@kition/kit-editor'
+import { Button, Dialog, toast, createKitStrings, type HostConnection } from '@kition/sdk/editor'
 import type { Session } from './useNote'
 import { message } from './useNote'
 

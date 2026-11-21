@@ -5,9 +5,9 @@
  * (`text.replace` with `expected`, so a stale suggestion is refused), one undo step. The host
  * never gives the kit a key (UI-G2), and the kit never generates in the background (UI-G1).
  */
-import type { KitGenerateParams, KitGeneratePurpose, KitGenerateResult } from '@kition/kit-ui-protocol'
-import { hostRequestErrorReason } from '@kition/kit-ui-protocol'
-import type { HostConnection } from '@kition/kit-editor'
+import type { KitGenerateParams, KitGeneratePurpose, KitGenerateResult } from '@kition/sdk/protocol'
+import { hostRequestErrorReason } from '@kition/sdk/protocol'
+import type { HostConnection } from '@kition/sdk/editor'
 
 export type AssistKind = 'improve' | 'shorten' | 'expand'
 

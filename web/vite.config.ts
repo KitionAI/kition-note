@@ -1,17 +1,17 @@
 import path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
-import { aliases, dependenciesFromHere, repo, sdk, tessera, web } from './sdk.config.ts'
+import { dependenciesFromHere, repo, sdk, tessera, web } from './sdk.config.ts'
 
 // The kit package is served from wherever a host puts it, so every asset path is relative.
 export default defineConfig({
   base: './',
   plugins: [dependenciesFromHere(), react()],
   resolve: {
-    // @kition/kdm (the page's replica, kit-editor's engine worker) reads replicas with loro-crdt, whose
+    // @kition/sdk (its kdm replica and the editor's session) reads replicas with loro-crdt, whose
     // browser entry loads its WebAssembly itself; the entry Vite's server would pick imports it as
     // a module, which needs a plugin. Tests run in Node, on loro-crdt's Node entry.
-    alias: process.env.VITEST ? aliases : [{ find: /^loro-crdt$/, replacement: 'loro-crdt/browser' }, ...aliases],
+    alias: process.env.VITEST ? [] : [{ find: /^loro-crdt$/, replacement: 'loro-crdt/browser' }],
     // One React for the page.
     dedupe: ['react', 'react-dom'],
   },

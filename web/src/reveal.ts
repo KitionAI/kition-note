@@ -14,7 +14,7 @@
  * `selection.set`, and the editor scrolls the selection into view. A view the note does not hold is
  * ignored.
  */
-import type { KitView } from '@kition/kit-editor'
+import type { KitView } from '@kition/sdk/editor'
 import type { NoteRun } from './useNote'
 
 export type Place = { line: number; column?: number }

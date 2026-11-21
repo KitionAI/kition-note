@@ -6,8 +6,8 @@
  * that withholds it leaves the keyboard's Cmd+C, Cmd+X, and Cmd+V).
  */
 import { useEffect, useState } from 'react'
-import { ContextMenu, MenuItem, MenuSeparator, SubMenu, createKitStrings, toast, type ContextMenuPoint } from '@kition/kit-editor'
-import type { Phrases } from '@kition/kit-editor'
+import { ContextMenu, MenuItem, MenuSeparator, SubMenu, createKitStrings, toast, type ContextMenuPoint } from '@kition/sdk/editor'
+import type { Phrases } from '@kition/sdk/editor'
 import { pastedMarkdown } from './pasteHtml'
 import { message, type NoteRun } from './useNote'
 

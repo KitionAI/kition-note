@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseCommentAnchor } from '@kition/kit-ui-protocol'
+import { parseCommentAnchor } from '@kition/sdk/protocol'
 import { AnchorTracker, anchorForSelection, characters, mapRange, relocate } from './commentAnchors'
 
 const NOTE = '# Plan\n\nGoals for the quarter.\n\nClosing words.\n'

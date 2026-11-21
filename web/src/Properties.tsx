@@ -9,9 +9,9 @@
  * Remove (a type is the vault's in Obsidian, not the note's, so there is none to pick).
  */
 import { useEffect, useState, type KeyboardEvent } from 'react'
-import type { KitCanvasView } from '@kition/kit-editor'
-import { ContextMenu, MenuItem, createKitStrings, toast, type ContextMenuPoint } from '@kition/kit-editor'
-import { CalendarIcon, ChevronDownIcon, ClockIcon, CornerUpRightIcon, ExternalLinkIcon, HashIcon, LinkIcon, PencilIcon, ListIcon, PlusIcon, SquareCheckIcon, TagIcon, TextAlignStartIcon, type IconComponent } from '@kition/tessera-icons/react'
+import type { KitCanvasView } from '@kition/sdk/editor'
+import { ContextMenu, MenuItem, createKitStrings, toast, type ContextMenuPoint } from '@kition/sdk/editor'
+import { CalendarIcon, ChevronDownIcon, ClockIcon, CornerUpRightIcon, ExternalLinkIcon, HashIcon, LinkIcon, PencilIcon, ListIcon, PlusIcon, SquareCheckIcon, TagIcon, TextAlignStartIcon, type IconComponent } from '@kition/tessera/icons/react'
 import { message, type NoteRun } from './useNote'
 import { useWheelToCanvas } from './wheel'
 

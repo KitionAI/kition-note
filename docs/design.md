@@ -8,7 +8,7 @@ the `note_check` catalogue, the editor on the engine, and previews and export.
 - The kit is a Rust engine implementing kition-sdk's `KitDocument` over `kition_kit::session`
   (engine contract 2), compiled to WebAssembly for the page and built as the headless
   `kition-note` executable for agents. The editor is the kit's own `web/` on
-  `@kition/kit-editor`, shown by the host in a frame.
+  `@kition/sdk/editor`, shown by the host in a frame.
 - **The stored text is the file.** Open and save without an edit is byte-identical; an edit
   changes only the bytes it is about. Markdown is never regenerated from a parse.
 - **Comments are not written into the `.md`.** They are KDM objects of the replica the host stores.

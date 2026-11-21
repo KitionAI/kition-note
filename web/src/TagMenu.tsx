@@ -5,7 +5,7 @@
  * with the tag and a space.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { createKitStrings, toast } from '@kition/kit-editor'
+import { createKitStrings, toast } from '@kition/sdk/editor'
 import { message, type NoteRun } from './useNote'
 import type { Caret } from './SlashMenu'
 

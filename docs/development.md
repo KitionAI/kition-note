@@ -9,7 +9,7 @@ Note in your own app, start with the [README](../README.md).
 |---|---|
 | `crates/` | The engine (Rust), in groups: `kdm`, `engine`, `formats`, `view` ([Layout](#layout) lists each crate) |
 | `bindings/` | The engine's two outlets: `wasm` (the editor's engine) and `headless` (the `kition-note` executable) |
-| `web/` | The kit's editor (React, on kition-sdk's `@kition/kit-editor`) |
+| `web/` | The kit's editor (React, on kition-sdk's `@kition/sdk/editor`) |
 | `agent/` | The agent guide and the check catalogue |
 | `conformance/` | One fixture per check code, and the agent conformance fixtures |
 | `cases/` | The test cases of the feature catalogue (`features.yaml`, beside `kit.json`, the kit manifest) |
@@ -128,12 +128,13 @@ pnpm build           # type check and the package in web/dist
 pnpm run test:flow   # browser flows in Chromium and WebKit (Playwright; run with no HTTP proxy set)
 ```
 
-The editor installs the published `@kition/*` packages of kition-sdk and Kition Tessera from npm
+The editor installs kition-sdk's `@kition/sdk` and Kition Tessera's `@kition/tessera` from npm
 and the committed lockfile, so it needs no other checkout. To work against local checkouts
 instead, clone `kition-sdk` and `kition-tessera` next to this repository (or set `KITION_SDK` and
-`KITION_TESSERA`), run `pnpm install` in each of them, then run `KITION_LINK=1 pnpm install` here:
-`web/.pnpmfile.cjs` links their packages, and the Vite configuration reads kition-sdk's package
-sources in place. The linked install rewrites `web/pnpm-lock.yaml`; do not commit that.
+`KITION_TESSERA`), run `pnpm install` in each of them and build the two packages (`pnpm build` in
+kition-sdk's `packages/sdk` and kition-tessera's `packages/tessera`: their exports are the built
+`dist/`), then run `KITION_LINK=1 pnpm install` here: `web/.pnpmfile.cjs` links them. The linked
+install rewrites `web/pnpm-lock.yaml`; do not commit that.
 
 The README's screenshots are taken by [`web/scripts/readme-shots.mjs`](../web/scripts/readme-shots.mjs)
 from the development host; it is a tool, not a test. `assets/readme/made-1.png` … `made-4.png` are
@@ -180,7 +181,7 @@ let bytes = document.save(None)?;
 | `crates/formats/export` | HTML, PDF and picture export |
 | `bindings/wasm` | `kition-note-kit`: `NoteDocument` (`KitDocument`, contract 2 session members, extras) |
 | `bindings/headless` | `kition-note`: the same document over the Kit Protocol |
-| `web/` | The kit's editor on `@kition/kit-editor`, relayed to the engine in a Worker |
+| `web/` | The kit's editor on `@kition/sdk/editor`, relayed to the engine in a Worker |
 | `assets/readme/` | The pictures in the README |
 | `agent/` | The agent guide and the check catalogue |
 | `cases/`, `features.yaml`, `conformance/` | The feature catalogue, its test cases, and one fixture per check code |
@@ -192,7 +193,7 @@ let bytes = document.save(None)?;
 - **One engine.** The engine is Rust. It implements the Kition SDK's `KitDocument` contract on
   the SDK's Kit Data Model: a note is one `Note` object whose `body` is the whole `.md` file
   (`crates/kdm/kdm-model/model/schema.json`, schema `kit.note` v1).
-- **In the page.** The editor (`web/`) is built on the SDK's `@kition/kit-editor`. The engine
+- **In the page.** The editor (`web/`) is built on the SDK's `@kition/sdk/editor`. The engine
   runs as WebAssembly in a Web Worker and draws the note; hosts embed the editor in a sandboxed
   frame over the Kit UI protocol.
 - **Headless.** `kition-note` speaks the Kit Protocol of the

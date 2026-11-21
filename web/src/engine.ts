@@ -1,4 +1,4 @@
-import type { KitEngineInfo, KitModuleManifest } from '@kition/kit-editor'
+import type { KitEngineInfo, KitModuleManifest } from '@kition/sdk/editor'
 
 /** The commands that write only comment threads (kit.json `collaboration.comments.commands`): a commenter runs them. */
 export const COMMENT_COMMANDS = ['comment.add', 'comment.reply', 'comment.resolve', 'comment.move', 'comment.delete'] as const

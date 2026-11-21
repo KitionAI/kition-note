@@ -4,8 +4,8 @@
  * anchors to the engine's selection (`selection.get`), or to the whole note without one.
  */
 import { useEffect, useMemo, useState } from 'react'
-import { Button, CommentsPanel, toast, createKitStrings, type CommentsPanelProps, type HostConnection } from '@kition/kit-editor'
-import type { CommentAnchor, CommentThread } from '@kition/kdm'
+import { Button, CommentsPanel, toast, createKitStrings, type CommentsPanelProps, type HostConnection } from '@kition/sdk/editor'
+import type { CommentAnchor, CommentThread } from '@kition/sdk/kdm'
 import { message, type NoteRun, type Session } from '../useNote'
 
 type Strings = ReturnType<typeof createKitStrings>

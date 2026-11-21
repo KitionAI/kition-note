@@ -5,7 +5,7 @@
  * those bounds.
  */
 import { useRef, type PointerEvent as ReactPointerEvent } from 'react'
-import type { KitCanvasView } from '@kition/kit-editor'
+import type { KitCanvasView } from '@kition/sdk/editor'
 
 /** The view's top-left in bounds: centered across the document, its top between the document's top and its end. */
 export function scrollBounds(view: KitCanvasView, doc: { width: number; height: number }, y = view.y) {

@@ -10,7 +10,7 @@
  * from the workspace root with a leading `/`), or a bare name (`[[Plan]]`), which the host
  * resolves (LR4).
  */
-import { openErrorReason, type HostConnection, type KitLinkRef, type KitOpenParams, type KitView } from '@kition/kit-editor'
+import { openErrorReason, type HostConnection, type KitLinkRef, type KitOpenParams, type KitView } from '@kition/sdk/editor'
 
 /** A link's target as `host/open` takes it (Kit UI protocol section 7i): a path or a bare name. */
 export type LinkRef = Pick<KitLinkRef, 'path' | 'name'>

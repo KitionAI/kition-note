@@ -7,9 +7,9 @@
  * when the host serves it, which it does only to a person with comment rights (UI-V4).
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { MessageSquareIcon as MessageSquare } from '@kition/tessera-icons/react'
-import { toast, type HostConnection, type KitCanvasView, type KitEngine } from '@kition/kit-editor'
-import type { KitShownThread } from '@kition/kit-ui-protocol'
+import { MessageSquareIcon as MessageSquare } from '@kition/tessera/icons/react'
+import { toast, type HostConnection, type KitCanvasView, type KitEngine } from '@kition/sdk/editor'
+import type { KitShownThread } from '@kition/sdk/protocol'
 import { AnchorTracker, NOTE_BODY, NOTE_ROOT_ID, anchorForSelection, type TextRange } from './commentAnchors'
 import { message } from './useNote'
 import type { Strings } from './App'

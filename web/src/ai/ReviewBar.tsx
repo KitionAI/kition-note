@@ -5,8 +5,8 @@
  * the suggestion and Try again asks once more. The selection bar offers the rewrites for a
  * selection when the host runs models.
  */
-import { CheckIcon as Check, ExpandIcon as Expand, MessageSquareIcon as MessageSquare, Minimize2Icon as Minimize2, RotateCcwIcon as RotateCcw, SparklesIcon as Sparkles, WandSparklesIcon as WandSparkles, XIcon as X } from '@kition/tessera-icons/react'
-import { Button, createKitStrings } from '@kition/kit-editor'
+import { CheckIcon as Check, ExpandIcon as Expand, MessageSquareIcon as MessageSquare, Minimize2Icon as Minimize2, RotateCcwIcon as RotateCcw, SparklesIcon as Sparkles, WandSparklesIcon as WandSparkles, XIcon as X } from '@kition/tessera/icons/react'
+import { Button, createKitStrings } from '@kition/sdk/editor'
 import { wordDiff, type AssistKind } from './assist'
 
 type Strings = ReturnType<typeof createKitStrings>

@@ -6,8 +6,8 @@
  * picks the document's permissions: `editor`, `commenter` (read-only, may comment), or `viewer`.
  * Never shipped: the package builds `index.html` and `dev.html` only.
  */
-import { mountKit, type KitConnection } from '@kition/kit-host'
-import type { KitCommentAnchor, KitShownThread } from '@kition/kit-ui-protocol'
+import { mountKit, type KitConnection } from '@kition/sdk/host'
+import type { KitCommentAnchor, KitShownThread } from '@kition/sdk/protocol'
 
 type Role = 'editor' | 'commenter' | 'viewer'
 

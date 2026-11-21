@@ -3,7 +3,7 @@
  * answers or refusals, the host action `design.fromRecord`, and `host/openAgent`, over one
  * in-memory note. Never shipped: the package builds `index.html` and `dev.html` only.
  */
-import { KitRpcError, mountKit, type KitConnection, type KitGenerateParams } from '@kition/kit-host'
+import { KitRpcError, mountKit, type KitConnection, type KitGenerateParams } from '@kition/sdk/host'
 
 type Answer = { text: string } | { refuse: string }
 

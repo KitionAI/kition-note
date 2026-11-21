@@ -10,7 +10,7 @@
  * a picture pasted by its web address is downloaded by the host (`host/fetchImage`, capability
  * `fetch-image`) and kept the same way.
  */
-import type { HostConnection } from '@kition/kit-editor'
+import type { HostConnection } from '@kition/sdk/editor'
 
 const EXTENSIONS: Record<string, string> = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/gif': '.gif', 'image/webp': '.webp', 'image/svg+xml': '.svg', 'image/avif': '.avif' }
 const SCHEME = /^[a-z][a-z\d+.-]*:/i

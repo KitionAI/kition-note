@@ -8,7 +8,7 @@
  * the note.
  */
 import { useEffect, useMemo, useState } from 'react'
-import { peerColor, usePresence, type HostConnection, type KitCanvasView, type KitEngine, type KitPeerPresence, type KitPresence, type KitPresenceCaret } from '@kition/kit-editor'
+import { peerColor, usePresence, type HostConnection, type KitCanvasView, type KitEngine, type KitPeerPresence, type KitPresence, type KitPresenceCaret } from '@kition/sdk/editor'
 
 /** `presenceCaret`: where this person is (null fields before they click or type). */
 export type SharedCaret = { selection?: unknown; caret?: unknown; anchor?: unknown }

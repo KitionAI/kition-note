@@ -8,8 +8,8 @@
  * the dragged column or row is outlined, a bar marks where it goes, Escape cancels.
  */
 import { useCallback, useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
-import { GripHorizontalIcon, GripVerticalIcon, PlusIcon as Plus } from '@kition/tessera-icons/react'
-import { createKitStrings, toast, type KitCanvasView } from '@kition/kit-editor'
+import { GripHorizontalIcon, GripVerticalIcon, PlusIcon as Plus } from '@kition/tessera/icons/react'
+import { createKitStrings, toast, type KitCanvasView } from '@kition/sdk/editor'
 import { message, type NoteRun } from './useNote'
 
 type Strings = ReturnType<typeof createKitStrings>

@@ -8,7 +8,7 @@
  * selected, so keys typed after Enter and Escape land after that match.
  */
 import { useEffect, useRef, useState } from 'react'
-import { Button, createKitStrings, toast } from '@kition/kit-editor'
+import { Button, createKitStrings, toast } from '@kition/sdk/editor'
 import { message, type NoteRun } from './useNote'
 
 type Strings = ReturnType<typeof createKitStrings>

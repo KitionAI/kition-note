@@ -10,7 +10,7 @@
  *   `conflict` and the person chooses (`mergeFromDisk`, `keepMine`).
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { toast, useKitSession, createKitStrings, type HostConnection, type KitEngine, type KitSessionOptions } from '@kition/kit-editor'
+import { toast, useKitSession, createKitStrings, type HostConnection, type KitEngine, type KitSessionOptions } from '@kition/sdk/editor'
 import type { describe } from './engine'
 
 export type Session = ReturnType<typeof useKitSession<ReturnType<typeof describe>>>

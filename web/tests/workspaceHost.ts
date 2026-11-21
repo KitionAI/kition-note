@@ -4,9 +4,9 @@
  * can edit one note together, their replicas relayed as a co-editing host does. Never shipped:
  * the package builds `index.html` and `dev.html` only.
  */
-import type { KitPresence } from '@kition/kit-ui-protocol'
-import { KitRpcError, mountKit, type KitConnection, type StoredReplica } from '@kition/kit-host'
-import { resolveLink, type DevOpen } from '@kition/kit-dev-host'
+import type { KitPresence } from '@kition/sdk/protocol'
+import { KitRpcError, mountKit, type KitConnection, type StoredReplica } from '@kition/sdk/host'
+import { resolveLink, type DevOpen } from '@kition/sdk/dev-host'
 
 type File = { bytes: ArrayBuffer; version: number }
 type Slot = 'a' | 'b'

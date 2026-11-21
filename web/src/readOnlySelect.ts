@@ -6,7 +6,7 @@
  * commenter selects a passage to comment on this way; a viewer to copy it.
  */
 import { useCallback, useRef, type PointerEvent as ReactPointerEvent } from 'react'
-import type { KitCanvasView } from '@kition/kit-editor'
+import type { KitCanvasView } from '@kition/sdk/editor'
 import type { NoteRun } from './useNote'
 
 type Point = { x: number; y: number }

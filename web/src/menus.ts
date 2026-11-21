@@ -4,7 +4,7 @@
  * Rows that edit run as engine commands on the engine's selection (`format.bold`, `insert.table`;
  * their shortcuts are the engine's); `kit:` rows run here (panels, exports, find, AI).
  */
-import type { MenuRow } from '@kition/kit-editor'
+import type { MenuRow } from '@kition/sdk/editor'
 
 const row = (path: string[], label: string, command: string, shortcut: string | null = null): MenuRow => ({ path, label, command, shortcut })
 const kit = (path: string[], label: string, name: string, shortcut: string | null = null) => row(path, label, `kit:${name}`, shortcut)

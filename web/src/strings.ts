@@ -1,4 +1,4 @@
-import type { Catalog, Phrases } from '@kition/kit-editor'
+import type { Catalog, Phrases } from '@kition/sdk/editor'
 
 /** The shell's own strings (`en-US` is required; others fall back to it). The editor's are in `locales/`. */
 const enUS: Catalog = {

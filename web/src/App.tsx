@@ -6,7 +6,7 @@
  * engine's selection goes to the system clipboard on copy and cut; paste arrives as typed text).
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react'
-import { MessageSquareIcon as MessageSquare } from '@kition/tessera-icons/react'
+import { MessageSquareIcon as MessageSquare } from '@kition/tessera/icons/react'
 import {
   Button,
   Dialog,
@@ -26,7 +26,7 @@ import {
   type KitView,
   type MenuRow,
   type RasterView,
-} from '@kition/kit-editor'
+} from '@kition/sdk/editor'
 import { DESIGN_ACTION, MAX_SELECTION_CHARS, canAct, canGenerate, generateSuggestion, type AssistKind } from './ai/assist'
 import { ReviewBar, SelectionBar, type Review } from './ai/ReviewBar'
 import { describe, engineManifest } from './engine'

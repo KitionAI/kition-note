@@ -5,7 +5,7 @@
  * Kit UI protocol section 3: a save is the kit's own `host/write` of its document.
  */
 import { useEffect, useRef } from 'react'
-import { isFileChangedError, toast, useKitEditor, useUi, createKitStrings } from '@kition/kit-editor'
+import { isFileChangedError, toast, useKitEditor, useUi, createKitStrings } from '@kition/sdk/editor'
 import { message } from './useNote'
 
 /** How long the note stays unsaved after a change before it saves itself. */

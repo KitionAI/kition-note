@@ -5,7 +5,7 @@
  * Insert rows a Markdown toolbar keeps at hand, and gives way in steps where it is narrow. Menus
  * keep the Format menu (`menus.ts`); the rows run the same engine commands, with the menus' labels.
  */
-import { CommandButton, RibbonGroup, RibbonRow, RibbonStack, useKitEditor } from '@kition/kit-editor'
+import { CommandButton, RibbonGroup, RibbonRow, RibbonStack, useKitEditor } from '@kition/sdk/editor'
 import {
   BoldIcon,
   CodeIcon,
@@ -29,7 +29,7 @@ import {
   TableIcon,
   ChevronUpIcon,
   ChevronDownIcon,
-} from '@kition/tessera-icons/react'
+} from '@kition/tessera/icons/react'
 
 /** A heading level's button: "H1" in the row, its menu label as its name and tooltip. */
 function HeadingButton({ level, primary }: { level: number; primary?: boolean }) {

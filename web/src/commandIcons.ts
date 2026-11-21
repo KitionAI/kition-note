@@ -5,7 +5,7 @@
  * rows (`kit:` in `menus.ts`) are keyed by their name. Single line draws a menu tab's rows as icons
  * alone, so rows side by side never share one (Find and Find and replace, Link and Wikilink).
  */
-import { registerCommandIcons } from '@kition/kit-editor'
+import { registerCommandIcons } from '@kition/sdk/editor'
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -29,7 +29,7 @@ import {
   ShrinkIcon,
   SigmaIcon,
   SuperscriptIcon,
-} from '@kition/tessera-icons/react'
+} from '@kition/tessera/icons/react'
 
 registerCommandIcons({
   "edit.indent": ListIndentIncreaseIcon,

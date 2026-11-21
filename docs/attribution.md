@@ -56,8 +56,9 @@ THE SOFTWARE.
 The full dependency list with versions is `Cargo.lock`; `cargo tree -e normal` shows which crate
 brings in which. When a dependency is added, add its row here in the same change.
 
-The editor in `web/` is built on `@kition/kit-editor` (kition-sdk, Apache-2.0); its npm dependencies
-are listed in `web/package.json` under their own licenses.
+The editor in `web/` is built on `@kition/sdk` (kition-sdk, Apache-2.0) and draws Kition Tessera's
+icons from `@kition/tessera` (Apache-2.0); its npm dependencies are listed in `web/package.json`
+under their own licenses.
 The editor draws Mermaid diagrams with Mermaid (https://mermaid.js.org, MIT, copyright Knut
 Sveidqvist), pinned to the version Obsidian ships (11.13.0) and bundled into the package; its edit
 button draws Lucide's `code-2` icon (ISC). HTML blocks are sanitized with DOMPurify

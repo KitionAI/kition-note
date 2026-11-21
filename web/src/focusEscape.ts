@@ -6,7 +6,7 @@
  * take Escape on the window first) leaves Focus instead (regressions/issue-focus-escape-text-tool).
  */
 import { useEffect, useRef } from 'react'
-import { useFrameDisplay } from '@kition/kit-editor'
+import { useFrameDisplay } from '@kition/sdk/editor'
 
 /** Something open that Escape closes before it leaves Focus. */
 const OPEN = '[role="menu"], [role="dialog"], .kui-dialog-backdrop, .kui-drop-panel'

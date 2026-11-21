@@ -5,7 +5,7 @@
  * command on the line.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { createKitStrings, toast, type KitCanvasView } from '@kition/kit-editor'
+import { createKitStrings, toast, type KitCanvasView } from '@kition/sdk/editor'
 import { message, type NoteRun } from './useNote'
 
 type Strings = ReturnType<typeof createKitStrings>

@@ -12,7 +12,7 @@
  * was (`relocate`). An anchor whose text is gone has no marker, and `comments/locate` answers
  * `false` for it.
  */
-import { ANCHOR_TEXT_LIMIT, type KitCommentAnchor, type KitShownThread } from '@kition/kit-ui-protocol'
+import { ANCHOR_TEXT_LIMIT, type KitCommentAnchor, type KitShownThread } from '@kition/sdk/protocol'
 
 /** The note's root object, whose `body` is the whole Markdown file (`model/schema.json`). */
 export const NOTE_ROOT_ID = 'note'

@@ -5,8 +5,8 @@
  * (`code.blocks`, document pixels).
  */
 import { useEffect, useRef, useState } from 'react'
-import { createKitStrings, type KitCanvasView } from '@kition/kit-editor'
-import { CopyIcon } from '@kition/tessera-icons/react'
+import { createKitStrings, type KitCanvasView } from '@kition/sdk/editor'
+import { CopyIcon } from '@kition/tessera/icons/react'
 
 type Strings = ReturnType<typeof createKitStrings>
 
