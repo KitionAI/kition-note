@@ -5,9 +5,22 @@ name: Package
 # .github/workflows/kit-package.yml; docs/kits.md, section 4b, there). Start it by hand:
 # gh workflow run package.yml
 # A version is published once: bump `version` in kit.json to publish a change.
+# The input `scope` publishes to another npm scope for a rehearsal (for example @kitionstage, as
+# @kitionstage/note and @kitionstage/note-<platform>), with the secret NPM_TOKEN_STAGE.
 
 on:
   workflow_dispatch:
+    inputs:
+      scope:
+        description: The npm scope to publish to
+        required: false
+        default: '@kition'
+        type: string
+      platforms:
+        description: Only these platforms (separated by commas); empty for every platform
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -18,5 +31,8 @@ jobs:
     uses: KitionAI/kition/.github/workflows/kit-package.yml@main
     with:
       kit: note
+      scope: ${{ inputs.scope }}
+      platforms: ${{ inputs.platforms }}
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      NPM_TOKEN_STAGE: ${{ secrets.NPM_TOKEN_STAGE }}
