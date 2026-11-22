@@ -381,7 +381,7 @@ Not drawn yet, and how it shows (counted in every `page.layout` and PDF `file.ex
 | Raw HTML blocks | Their source (kept as HTML in the HTML export) |
 | Syntax highlighting of code; heading anchors and an outline (bookmarks) in the PDF; internal links between notes in the PDF | Plain code; no PDF outline; wikilinks styled only |
 
-The HTML export renders the same blocks with the Obsidian syntax (wikilinks as relative `.md` links, embeds, callouts, highlights, tags, block ids as element ids, footnotes), drops `%%comments%%` and the frontmatter, inlines a stylesheet, and never runs a script (math and Mermaid stay their source; `javascript:` links become `#`); raw HTML in the note is kept. Its golden file is `conformance/export.html` for `conformance/export.md`.
+The HTML export renders the same blocks with the Obsidian syntax (wikilinks as relative `.md` links, embeds, callouts, highlights, tags, block ids as element ids, footnotes), drops `%%comments%%` and the frontmatter, inlines a stylesheet, and never runs a script (math and Mermaid stay their source; `javascript:` links become `#`); raw HTML in the note is kept. Its expected file is `conformance/export.html` for `conformance/export.md`.
 
 ## 7. Known limitations
 

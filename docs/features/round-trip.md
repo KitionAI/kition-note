@@ -1,7 +1,7 @@
-# Round-trip golden suite
+# Round-trip suite
 
 The note's promise is that a file comes back exactly as it was read, plus the edits made to it
-(`docs/design.md` 2.2). `cargo xtask golden` checks it on real files and on synthetic edges.
+(`docs/design.md` 2.2). `cargo xtask round-trip` checks it on real files and on synthetic edges.
 
 ## Corpus
 
@@ -13,7 +13,7 @@ The note's promise is that a file comes back exactly as it was read, plus the ed
 | GitHub READMEs | react, vscode, rust, ohmyzsh, vue core, ollama, uv, excalidraw, logseq, joplin, tensorflow, gitignore |
 
 `cargo xtask corpus` downloads the files by commit and checks each SHA-256. Files land in
-`corpus/`, which is not tracked: corpus files are never committed. `cargo xtask golden` reads them
+`corpus/`, which is not tracked: corpus files are never committed. `cargo xtask round-trip` reads them
 from there.
 
 ## What the suite checks

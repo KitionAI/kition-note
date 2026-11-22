@@ -1,4 +1,4 @@
-//! `cargo xtask corpus` and `cargo xtask golden`: the round-trip golden suite (`docs/features/golden.md`).
+//! `cargo xtask corpus` and `cargo xtask round-trip`: the round-trip suite (`docs/features/round-trip.md`).
 //!
 //! The corpus is real, public Markdown files (`tools/xtask/corpus.json`), fetched by commit into
 //! `corpus/` (not tracked). The suite
@@ -185,7 +185,7 @@ fn first_property(doc: &mut NoteDocument, kind: &str) -> Result<Option<(String, 
 }
 
 /// Runs the suite: the corpus must be complete (`cargo xtask corpus`).
-pub fn golden() -> Result<(), String> {
+pub fn round_trip() -> Result<(), String> {
     let mut round_trip = Tally::default();
     let (mut paragraph, mut heading, mut list) = (Tally::default(), Tally::default(), Tally::default());
     let (mut cell, mut property, mut list_property) = (Tally::default(), Tally::default(), Tally::default());
@@ -256,7 +256,7 @@ pub fn golden() -> Result<(), String> {
     let invalid = NoteDocument::open("broken.md", INVALID_UTF8_FILE)?;
     edges.add(invalid.is_read_only() && invalid.save(None)? == INVALID_UTF8_FILE, "invalid UTF-8".to_owned());
 
-    println!("Golden round trip (corpus: {} files)\n", round_trip.done);
+    println!("Round trip (corpus: {} files)\n", round_trip.done);
     println!("| Check | Clean |");
     println!("|---|---|");
     for (label, tally) in [
@@ -281,7 +281,7 @@ pub fn golden() -> Result<(), String> {
     if round_trip.done != listed {
         return Err(format!("the corpus has {} files, not {listed}", round_trip.done));
     }
-    if failed.is_empty() { Ok(()) } else { Err(format!("golden: not clean: {}", failed.join(", "))) }
+    if failed.is_empty() { Ok(()) } else { Err(format!("round-trip: not clean: {}", failed.join(", "))) }
 }
 
 /// What the corpus's exports could not draw (`docs/design.md` 6.1), summed.

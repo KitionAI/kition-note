@@ -106,7 +106,7 @@ fn the_pdf_is_well_formed_and_deterministic() {
 }
 
 #[test]
-fn the_html_matches_its_golden_file() {
+fn the_html_matches_its_expected_file() {
     let html = export_html(include_str!("../../../../conformance/export.md"), "export.md", true);
     let expected = include_str!("../../../../conformance/export.html");
     assert_eq!(html, expected, "conformance/export.html");

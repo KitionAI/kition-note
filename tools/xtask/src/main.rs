@@ -2,7 +2,7 @@
 //!
 //! External tools (`cargo`, `node`, `curl`) are invoked through `std::process::Command`.
 
-mod golden;
+mod corpus;
 mod perf;
 
 use std::path::{Path, PathBuf};
@@ -17,7 +17,8 @@ commands:
   manifest  kition-sdk's tools/check-manifest.mjs on kit.json (needs node and a kition-sdk
             checkout: KITION_SDK_DIR, or ../kition-sdk beside this repository)
   corpus    fetch the round-trip corpus (tools/xtask/corpus.json) into corpus/ by commit
-  golden    the round-trip golden suite on the corpus and the synthetic edges
+  round-trip
+            the round-trip suite on the corpus and the synthetic edges
   perf      the note's timings on 1 MB in a release build (docs/features/performance.md)
   eval [options]
             the real-model layer: eval cases (maintainers only; kition-sdk tools/eval-cases.mjs)
@@ -37,8 +38,8 @@ fn main() -> ExitCode {
         }
         Some("wasm") => wasm(),
         Some("manifest") => manifest(),
-        Some("corpus") => golden::corpus(),
-        Some("golden") => golden::golden(),
+        Some("corpus") => corpus::corpus(),
+        Some("round-trip") => corpus::round_trip(),
         Some("perf") => perf::perf(),
         Some("perf-measure") => {
             println!("Machine: {}\n", perf::machine());

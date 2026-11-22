@@ -1,11 +1,11 @@
-//! Fixtures for tests, `cargo xtask golden` and `cargo xtask perf`: synthetic edge files, and
+//! Fixtures for tests, `cargo xtask round-trip` and `cargo xtask perf`: synthetic edge files, and
 //! generated Markdown and scattered edits ported from Kition's `documentKdm.bench.spec.ts` and
 //! `documentMerge.spec.ts`. Deterministic: the same seed gives the same text.
 
 use crate::merge::{TextEdit, apply_edits};
 
 /// Synthetic files every note must save back byte for byte without an edit (the edges of the
-/// round-trip golden suite), all valid UTF-8.
+/// round-trip suite), all valid UTF-8.
 pub const EDGE_FILES: &[(&str, &[u8])] = &[
     ("empty", b""),
     ("lf", b"# Plan\n\nBody\n"),

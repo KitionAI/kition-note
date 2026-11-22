@@ -1,5 +1,5 @@
 {
-  "$comment": "The note round-trip corpus: public Markdown files. `cargo xtask corpus` fetches them by commit into corpus/; `cargo xtask golden` checks them.",
+  "$comment": "The note round-trip corpus: public Markdown files. `cargo xtask corpus` fetches them by commit into corpus/; `cargo xtask round-trip` checks them.",
   "files": [
     {
       "name": "obsidian-01.md",

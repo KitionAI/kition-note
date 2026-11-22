@@ -13,9 +13,9 @@ Note in your own app, start with the [README](../README.md).
 | `agent/` | The agent guide and the check catalogue |
 | `conformance/` | One fixture per check code, and the agent conformance fixtures |
 | `cases/` | The test cases of the feature catalogue (`features.yaml`, beside `kit.json`, the kit manifest) |
-| `docs/` | This file, the design, the writing format, gaps, roadmap, the quality reference, attribution; `features/` (the golden suite, performance), `parity/` |
+| `docs/` | This file, the design, the writing format, gaps, roadmap, the quality reference, attribution; `features/` (the round-trip suite, performance), `parity/` |
 | `assets/` | `readme/`: the pictures in the README |
-| `tools/` | `xtask`: `cargo xtask ci`, `wasm`, `manifest`, `corpus`, `golden`, `perf` |
+| `tools/` | `xtask`: `cargo xtask ci`, `wasm`, `manifest`, `corpus`, `round-trip`, `perf` |
 
 ## Quick start
 
@@ -82,10 +82,10 @@ The math face (STIX Two Math) is in the repository, in the vendored latex-rust
 
 ```sh
 cargo build --release -p kition-note   # the headless kit: target/release/kition-note
-cargo xtask corpus                     # fetch the public round-trip corpus into corpus/ (docs/features/golden.md)
+cargo xtask corpus                     # fetch the public round-trip corpus into corpus/ (docs/features/round-trip.md)
 cargo test                             # every crate's tests, including kition-sdk's contract check
 cargo xtask ci                         # fmt, clippy -D warnings, tests, the WebAssembly clippy
-cargo xtask golden                     # byte-identical round trip and one-place edits on the corpus
+cargo xtask round-trip                 # byte-identical round trip and one-place edits on the corpus
 cargo xtask perf                       # timings on 1 MB (docs/features/performance.md)
 ```
 
@@ -185,8 +185,8 @@ let bytes = document.save(None)?;
 | `assets/readme/` | The pictures in the README |
 | `agent/` | The agent guide and the check catalogue |
 | `cases/`, `features.yaml`, `conformance/` | The feature catalogue, its test cases, and one fixture per check code |
-| `tools/xtask/` | `cargo xtask ci`, `wasm`, `manifest`, `corpus`, `golden`, `perf` |
-| `docs/` | Design (`design.md`), the writing format; the golden suite and performance in `docs/features/` |
+| `tools/xtask/` | `cargo xtask ci`, `wasm`, `manifest`, `corpus`, `round-trip`, `perf` |
+| `docs/` | Design (`design.md`), the writing format; the round-trip suite and performance in `docs/features/` |
 
 ## How it fits together
 
