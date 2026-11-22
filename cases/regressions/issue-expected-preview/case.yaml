@@ -1,16 +1,16 @@
 format: 1
-id: regressions/issue-golden-preview
+id: regressions/issue-expected-preview
 feature: note.agent.preview
 intent: >-
   The preview an agent gets of `conformance/basic.md` (KHP A39) is the expected preview
-  `conformance/golden/basic.png`, within `conformance/golden/tolerance.json`, compared as `khp check`
+  `conformance/expected/basic.png`, within `conformance/expected/tolerance.json`, compared as `khp check`
   compares them: drawn by the kit's own engine with the fonts it ships, through the same
-  `view.screenshot` a kits server asks for. Before, conformance/ had no golden previews and no
+  `view.screenshot` a kits server asks for. Before, conformance/ had no expected previews and no
   tolerance, so the agent-ready self-test stopped at the package check.
 layer: gate
 source:
   kind: probe
-  from: "agent readiness review, 2026-11-11 (no golden previews and tolerance.json)"
+  from: "agent readiness review, 2026-11-11 (no expected previews and tolerance.json)"
   license: owned
 input: []
 steps:

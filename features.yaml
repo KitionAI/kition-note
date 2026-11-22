@@ -2,7 +2,7 @@ format: 1
 kit: note
 updated: "2026-11-20"
 gate_budget_s: 600
-protected: ["conformance/golden/**"]
+protected: ["conformance/expected/**"]
 features:
   - id: note.agent.observe
     title: An agent reads the note and answers in it
@@ -44,7 +44,7 @@ features:
     paths: [bindings/headless/build.rs, bindings/headless/src/lib.rs, bindings/headless/src/main.rs, crates/view/**]
     requirements: [AX13]
     gap: "The headless preview (view.screenshot of kition-headless) draws the note within 1024 pixels: it does not yet honour scale, maxSize or target (KHP A39, an SDK change)."
-    cases: [regressions/issue-golden-preview, regressions/issue-headless-shipped-fonts]
+    cases: [regressions/issue-expected-preview, regressions/issue-headless-shipped-fonts]
     since: "2026-11-16"
   - id: note.agent.premises
     title: "An agent's write with basis rests on what it read: refused when another writer changed that, applied when they changed something else"
