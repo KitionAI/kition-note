@@ -97,7 +97,8 @@ kition-sdk's `tools/check-manifest.mjs`; it needs a kition-sdk checkout beside t
 Read [CONTRIBUTING.md](../.github/CONTRIBUTING.md), [AGENTS.md](../AGENTS.md) and
 [quality.md](quality.md) before a change: tests are the spec, every bug fix starts with a failing
 case under `cases/regressions/`, and every feature has an entry in `features.yaml`. `cargo xtask ci`
-is the check every change passes.
+is the check every change passes; it runs, with the editor's tests, in the kit's CI run on GitHub
+(`.github/workflows/ci.yml`), and a change is done when that run is green and it is on `main`.
 
 ## Run the headless kit for an agent
 
