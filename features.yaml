@@ -120,7 +120,7 @@ features:
       Markdown syntax is not shown here). Changes are taken in order (kition-sdk plain model): two
       editors that change the note at once are not merged; the later one's changes are refused as
       stale.
-    cases: [note.collab.live/editor-follows-remote, note.collab.live/two-editors-in-browser, regressions/issue-coedit-save-merged-twice]
+    cases: [note.collab.live/editor-follows-remote, note.collab.live/two-editors-in-browser, regressions/issue-coedit-save-merged-twice, regressions/issue-merge-follows-draft, regressions/issue-repair-after-draft]
     since: "2026-11-16"
   - id: note.text.edit
     title: "Read, find, insert, delete and replace text; write the whole note"
@@ -237,7 +237,7 @@ features:
       by its quote, nearest to where it was; a thread whose quoted text was edited before a reopen
       is not marked then (comments/locate answers false). Threads the note kept in its replica
       before are not shown in such a host.
-    cases: [note.comments.host-anchors/select-comment-marker-open]
+    cases: [note.comments.host-anchors/select-comment-marker-open, regressions/issue-comment-before-keys]
     since: "2026-11-16"
   - id: note.code-diagrams
     title: "Code blocks and diagrams"

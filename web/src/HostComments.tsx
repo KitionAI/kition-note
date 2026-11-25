@@ -11,7 +11,7 @@ import { MessageSquareIcon as MessageSquare } from '@kition/tessera/icons/react'
 import { toast, type HostConnection, type KitCanvasView, type KitEngine } from '@kition/sdk/editor'
 import type { KitShownThread } from '@kition/sdk/protocol'
 import { AnchorTracker, NOTE_BODY, NOTE_ROOT_ID, anchorForSelection, type TextRange } from './commentAnchors'
-import { message } from './useNote'
+import { message, type NoteRun } from './useNote'
 import type { Strings } from './App'
 
 type Rect = { x: number; y: number; width: number; height: number }
@@ -34,9 +34,10 @@ const isRect = (value: unknown): value is Rect => {
 /**
  * Keeps the host's threads on the note's text and places them after every change and every answer
  * of the text tool (`moved`: a fold moves text too); answers `create` (a new thread on the
- * selection) and `activate` (open a thread in the host).
+ * selection) and `activate` (open a thread in the host). `run` is the note's command run, after the
+ * keys still waiting for the engine.
  */
-export function useHostComments(host: HostConnection, doc: KitEngine | null, revision: number, moved: unknown, t: Strings) {
+export function useHostComments(host: HostConnection, doc: KitEngine | null, run: NoteRun, revision: number, moved: unknown, t: Strings) {
   const on = hostKeepsComments(host)
   const tracker = useMemo(() => new AnchorTracker(), [doc])
   /** Bumped whenever the tracker's threads or ranges changed. */
@@ -99,14 +100,19 @@ export function useHostComments(host: HostConnection, doc: KitEngine | null, rev
     }
   }, [doc, moved, on, tracked, tracker])
 
-  /** A new thread in the host on the engine's selection; from the person's gesture only (UI-V1). */
+  /**
+   * A new thread in the host on the engine's selection; from the person's gesture only (UI-V1).
+   * The selection is read after the keys still waiting for the engine (the ordered `run`, not the
+   * engine directly): Comment clicked, or Mod+Alt+M pressed, right after fast Shift+Arrow keys
+   * comments on the whole selection they made, not on the one the engine had reached.
+   */
   const create = useCallback(async () => {
     if (!doc || !canCreateComment(host)) return
     let selection: { from: number; to: number }
     let text: string
     try {
-      selection = JSON.parse(await doc.execute('selection.get', {})) as { from: number; to: number }
-      text = (JSON.parse(await doc.execute('text.read', {})) as { text: string }).text
+      selection = await run<{ from: number; to: number }>('selection.get', {})
+      text = (await run<{ text: string }>('text.read', {})).text
     } catch (error) {
       toast('error', t('commandFailed'), message(error))
       return
@@ -128,7 +134,7 @@ export function useHostComments(host: HostConnection, doc: KitEngine | null, rev
       if ((error as { data?: { reason?: string } })?.data?.reason === 'cancelled') return
       toast('error', t('commentFailed'), message(error))
     }
-  }, [bump, doc, host, t, tracker])
+  }, [bump, doc, host, run, t, tracker])
 
   const activate = useCallback((id: string) => host.activateComment(id), [host])
 

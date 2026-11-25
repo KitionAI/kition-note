@@ -165,6 +165,102 @@ fn a_merged_draft_is_taken_in_and_one_undo_of_the_person_takes_it_back() {
     assert_eq!(doc.editor_text().as_ref(), PLAN);
 }
 
+const GOALS: &str = "# Plan\n\nGoals here\n";
+
+/// A note with the caret after "Goals" and " x" typed there, the typing run still open.
+fn typed_note() -> NoteDocument {
+    let mut doc = NoteDocument::open("plan.md", GOALS.as_bytes()).unwrap();
+    doc.execute("selection.set", json!({ "anchor": 13, "focus": 13 })).unwrap();
+    for typed in [" ", "x"] {
+        kition_kit::tools::KitTools::text(&mut doc, typed, 1.0).unwrap();
+    }
+    assert_eq!(doc.text(), "# Plan\n\nGoals x here\n");
+    assert_eq!((doc.editor.anchor, doc.editor.focus), (15, 15));
+    assert!(doc.editor.typing(), "the typing run is open");
+    doc
+}
+
+#[test]
+fn a_draft_merged_while_the_person_types_is_one_undo_step_and_the_caret_follows_it() {
+    let mut doc = typed_note();
+    let typed = doc.text().to_owned();
+    let before = doc.session.state_hash().unwrap();
+    // The agent's draft, made on the note as it is now, writes before the caret and after it.
+    let since = kition_kit::session::__version(&doc);
+    let mut draft = NoteDocument::open_with_replica("plan.md", &[], &kition_kit::session::__snapshot(&doc).unwrap(), &[]).unwrap();
+    draft.execute("text.insert", json!({ "at": 6, "text": " ahead" })).unwrap();
+    draft.execute("text.insert", json!({ "at": 27, "text": "Done.\n" })).unwrap();
+    let changes = kition_kit::session::__export_changes(&draft, &since).unwrap();
+    let agent = Origin::agent("agent:test");
+    let revision = doc.revision();
+    KitSessionDocument::merge_changes(&mut doc, &changes, &agent).unwrap();
+    let merged = "# Plan ahead\n\nGoals x here\nDone.\n";
+    assert_eq!(doc.text(), merged, "the typed text is kept");
+    assert_eq!(doc.editor_text().as_ref(), merged);
+    assert!(doc.revision() > revision);
+    // The caret stays after the typed "x": moved by the text the draft put before it, not by
+    // what it put after it (the draft's change is two places, not one span).
+    assert_eq!((doc.editor.anchor, doc.editor.focus), (21, 21));
+    assert!(!doc.editor.typing(), "the merge ended the typing run");
+    let after = doc.session.state_hash().unwrap();
+
+    // The person's one Undo takes back the merge only, exactly; the agent's takes back nothing.
+    assert_eq!(doc.execute("edit.undo", json!({ "scope": "agent" })).unwrap()["done"], false);
+    assert_eq!(doc.text(), merged);
+    assert_eq!(doc.execute("edit.undo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.text(), typed);
+    assert_eq!(doc.editor_text().as_ref(), typed);
+    assert_eq!(doc.session.state_hash().unwrap(), before, "the state before the merge, exactly");
+    assert_eq!((doc.editor.anchor, doc.editor.focus), (15, 15), "the selection from before the merge");
+    // Redo brings the merge back exactly, with the selection after it.
+    assert_eq!(doc.execute("edit.redo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.text(), merged);
+    assert_eq!(doc.session.state_hash().unwrap(), after);
+    assert_eq!((doc.editor.anchor, doc.editor.focus), (21, 21));
+    // Then Undo takes back the merge, and the next one the typing run, with its selection.
+    assert_eq!(doc.execute("edit.undo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.text(), typed);
+    assert_eq!(doc.execute("edit.undo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.text(), GOALS);
+    assert_eq!((doc.editor.anchor, doc.editor.focus), (13, 13));
+}
+
+#[test]
+fn a_draft_made_before_the_person_typed_merges_with_the_typing_and_undoes_alone() {
+    // The agent's draft opens a comment thread on the note as it was; meanwhile the person types,
+    // the run still open. Both are there after the merge, and one Undo takes back the thread only.
+    let mut doc = NoteDocument::open("plan.md", GOALS.as_bytes()).unwrap();
+    let since = kition_kit::session::__version(&doc);
+    let mut draft = NoteDocument::open_with_replica("plan.md", &[], &kition_kit::session::__snapshot(&doc).unwrap(), &[]).unwrap();
+    let agent = Origin::agent("agent:test");
+    draft.execute_as("comment.add", json!({ "quote": "Goals", "body": "Which ones?", "created": "2026-11-25T10:00:00Z" }), &agent).unwrap();
+    let changes = kition_kit::session::__export_changes(&draft, &since).unwrap();
+    doc.execute("selection.set", json!({ "anchor": 13, "focus": 13 })).unwrap();
+    for typed in [" ", "x"] {
+        kition_kit::tools::KitTools::text(&mut doc, typed, 1.0).unwrap();
+    }
+    let typed = "# Plan\n\nGoals x here\n";
+    assert_eq!(doc.text(), typed);
+    assert!(doc.editor.typing(), "the typing run is open");
+    let before = doc.session.state_hash().unwrap();
+    KitSessionDocument::merge_changes(&mut doc, &changes, &agent).unwrap();
+    assert_eq!(doc.text(), typed, "the typed text is kept");
+    assert_eq!((doc.editor.anchor, doc.editor.focus), (15, 15), "the merge leaves the text and the caret");
+    let threads = doc.execute("comment.threads", json!({})).unwrap();
+    assert_eq!(threads["threads"].as_array().map(Vec::len), Some(1));
+    assert_eq!(threads["threads"][0]["comments"][0]["body"], "Which ones?");
+
+    assert_eq!(doc.execute("edit.undo", json!({ "scope": "agent" })).unwrap()["done"], false);
+    assert_eq!(doc.execute("edit.undo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.execute("comment.threads", json!({})).unwrap()["threads"], json!([]));
+    assert_eq!(doc.text(), typed, "Undo takes back the merge, not the typing");
+    assert_eq!(doc.session.state_hash().unwrap(), before);
+    assert_eq!((doc.editor.anchor, doc.editor.focus), (15, 15));
+    assert_eq!(doc.execute("edit.undo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.text(), GOALS);
+    assert_eq!((doc.editor.anchor, doc.editor.focus), (13, 13));
+}
+
 #[test]
 fn a_restored_state_is_taken_in_and_one_undo_takes_it_back() {
     let mut doc = plan();
@@ -323,4 +419,29 @@ fn inspect_from_the_view_s_chunks_matches_the_whole_note_indexed() {
     assert_eq!(inspected["tables"][0]["line"], json!(ix.lines.line_of(ix.tables[0].range.start) + 1));
     assert_eq!(inspected["properties"].as_array().map(Vec::len), Some(2));
     assert_eq!(inspected["heading"], json!("One"));
+}
+
+#[test]
+fn an_agents_reply_is_shown_from_the_objects_it_names_only() {
+    // `modelReply` (kition-sdk `__model_reply`) reads the tool ids of the objects a reply names,
+    // never the whole note's: a reply naming one of many threads comes back as the full read shows
+    // it, and one naming none comes back unchanged.
+    let mut doc = plan();
+    let added: Vec<String> = (0..200)
+        .map(|index| {
+            let answer = doc
+                .execute("comment.add", json!({ "quote": "Goals", "body": format!("Comment {index}"), "created": "2026-11-25T10:00:00Z" }))
+                .unwrap();
+            answer["thread"].as_str().unwrap().to_owned()
+        })
+        .collect();
+    let thread = added[100].clone();
+    let full = kition_kit::kdm::tool_ids::ToolIds::of_replica(doc.session.replica());
+    let mut threads = serde_json::Map::new();
+    threads.insert(thread.clone(), json!({ "open": true }));
+    let naming = json!({ "thread": thread, "threads": threads, "note": "Goals" });
+    let shown: serde_json::Value = serde_json::from_str(&kition_kit::session::__model_reply(&doc, &naming.to_string()).unwrap()).unwrap();
+    assert_eq!(shown, full.show_json(&naming));
+    let none = json!({ "words": 3, "outline": [{ "path": ["Plan"], "line": 1 }], "text": "Goals" });
+    assert_eq!(kition_kit::session::__model_reply(&doc, &none.to_string()).unwrap(), none.to_string());
 }

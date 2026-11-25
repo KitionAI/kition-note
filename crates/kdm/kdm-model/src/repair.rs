@@ -1,11 +1,13 @@
-//! Keeps a note's comment threads (rule M23) whole after merges. Ported from Kition's
-//! `packages/document-editor/src/kdm/documentComments.ts`.
+//! Keeps a note's comment threads (rule M23) whole after a merged draft, an import or an undo.
+//! Ported from Kition's `packages/document-editor/src/kdm/documentComments.ts`.
 //!
-//! Each command keeps the threads whole on its own replica, but concurrent ones may not: two
-//! people deleting the two comments of a thread leave it with none, and a reply to a thread
-//! someone else deleted is a comment in no thread. Deleting the last comment of a thread deletes
-//! it, so the repair does the same, and deletes comments no thread holds. Every replica that
-//! merges the same changes repairs them the same way.
+//! Each command keeps the threads whole, but what it is merged with or taken back over may not: an
+//! agent's draft deleting one comment of a thread while the person deletes the other leaves the
+//! thread with none (the list merge takes both removals, kition-sdk data model 6.6 rule D6), and
+//! the person's Undo of the step that opened a thread deletes it while a reply added since stays,
+//! a comment in no thread. Deleting the last comment of a thread deletes it, so the repair does
+//! the same, and deletes comments no thread holds. (A draft replying to a thread the document
+//! deleted meanwhile is refused by the merge, rule D8.)
 
 use std::collections::BTreeSet;
 

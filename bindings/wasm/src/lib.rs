@@ -716,23 +716,27 @@ impl KitSessionDocument for NoteDocument {
         Ok(damage)
     }
 
-    /// A draft merged in (`mergeChanges`, one step of the person's Undo), taken in as a command's
-    /// change is: the open typing run ends first, the revision moves, the selection follows the
-    /// text and the projection's ids follow it.
+    /// A draft merged in (`mergeChanges`, one step of the person's Undo for an agent's or a
+    /// person's origin, M12a): the open typing run ends first, so the merge is a step of its own;
+    /// the revision moves; the selection follows each place the draft changed and the editor
+    /// records the step (`took_in`), so one Undo takes back the merge and puts the selection back;
+    /// the projection's ids follow the text.
     fn merge_changes(&mut self, bytes: &[u8], origin: &Origin) -> Result<Damage, String> {
         self.stop_typing();
+        let before = (self.editor.anchor, self.editor.focus);
         let damage = self.session.merge_changes(bytes, origin)?;
-        self.changed(&damage);
+        self.took_in(&damage, before, UndoScope::of(origin.kind).is_some());
         drop(self.ids());
         Ok(damage)
     }
 
     /// An earlier state written over the note (`restoreState`, Kit UI protocol `replica/restore`),
-    /// taken in as a merged draft is.
+    /// taken in as a merged draft is; a step of the person's Undo for a person's origin.
     fn restore_state(&mut self, snapshot: &[u8], origin: &Origin) -> Result<Damage, String> {
         self.stop_typing();
+        let before = (self.editor.anchor, self.editor.focus);
         let damage = self.session.restore_state(snapshot, origin)?;
-        self.changed(&damage);
+        self.took_in(&damage, before, UndoScope::of(origin.kind) == Some(UndoScope::Person));
         drop(self.ids());
         Ok(damage)
     }

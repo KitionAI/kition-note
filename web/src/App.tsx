@@ -230,7 +230,7 @@ export function App({ host }: { host: HostConnection }) {
   const peers = useNotePresence(host, doc, change.revision, overlays)
   // A host that keeps comment threads itself (Kit UI protocol section 7k): its threads marked on
   // the text, and a new one on the selection is the host's. Otherwise the note's own (the panel).
-  const hostComments = useHostComments(host, doc, change.revision, overlays, t)
+  const hostComments = useHostComments(host, doc, note.run, change.revision, overlays, t)
   const commentable = canCreateComment(host)
   const createComment = hostComments.create
   const commentOnSelection = useCallback(() => void createComment(), [createComment])

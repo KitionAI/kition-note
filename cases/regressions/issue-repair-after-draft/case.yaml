@@ -1,0 +1,28 @@
+format: 1
+id: regressions/issue-repair-after-draft
+feature: note.collab.live
+intent: >-
+  The comment-thread repair lost its only tests that make it change anything when the two-replica
+  tests went. The states it repairs still arise on one line of changes: an agent's draft deleting
+  one comment of a thread while the person deletes the other leaves it empty through the list
+  merge (the repair deletes it), and the person's Undo of a thread leaves the reply an agent added
+  since in no thread (the repair deletes it). A draft replying to a thread the person deleted
+  meanwhile is refused by the merge (rule D8) and changes nothing.
+layer: unit
+dimension: collab
+source:
+  kind: issue
+  from: independent review of the plain-model round (2026-11-25)
+  license: owned
+input: []
+steps:
+  - cargo-test:
+      package: kition-note-kdm
+      filter: draft
+  - cargo-test:
+      package: kition-note-kdm
+      test: undoing_a_thread_takes_the_reply_an_agent_added_since_with_it
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-25"
+timeout_s: 300

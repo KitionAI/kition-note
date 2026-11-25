@@ -1339,3 +1339,30 @@ fn the_host_s_color_scheme_repaints_the_note_and_keeps_its_place() {
     doc.execute("view.scheme", json!({ "scheme": "light" })).unwrap();
     assert_eq!(doc.render(0.0, 0.0, 1.0, 200, 120).unwrap(), light, "back to the same light pixels");
 }
+
+#[test]
+fn every_shift_arrow_counts_when_the_host_calls_between_two_keys() {
+    // Kit-editor runs an agent's step (`ai/run`, `ai/inspect`) between two keys in an editor state
+    // of the agent's own: the person's state is read, the agent's put in place, and the person's
+    // put back (kition-sdk `kitEngine.worker.ts`, `inAgentState`). Each key still moves the
+    // selection one character: after 21 keys it is the 21 characters before the caret.
+    let text = "# Plan\n\nGoals for the quarter.\n\nClosing words.\n";
+    let mut doc = note(text);
+    at(&mut doc, 29, 29);
+    let mut agent: Option<serde_json::Value> = None;
+    for pressed in 1..=21 {
+        doc.key("ArrowLeft", shift(), 1.0).unwrap();
+        let person = doc.editor_state();
+        if let Some(state) = &agent {
+            doc.restore_editor_state(state).unwrap();
+        }
+        doc.inspect().unwrap();
+        doc.execute("selection.get", json!({})).unwrap();
+        agent = Some(doc.editor_state());
+        doc.restore_editor_state(&person).unwrap();
+        assert_eq!((doc.editor.anchor, doc.editor.focus), (29, 29 - pressed), "after key {pressed}");
+    }
+    let selection = doc.execute("selection.get", json!({})).unwrap();
+    assert_eq!((selection["from"].clone(), selection["to"].clone()), (json!(8), json!(29)));
+    assert_eq!(selection["text"], "Goals for the quarter");
+}

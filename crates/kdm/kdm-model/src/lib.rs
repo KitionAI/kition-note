@@ -149,7 +149,7 @@ pub fn apply_text_edits(tx: &mut Tx<'_>, edits: &[TextEdit]) -> Result<()> {
 }
 
 /// Writes the difference from `current` (the body now) to `target` as small edits: lines that did
-/// not change are not touched, so concurrent edits elsewhere survive.
+/// not change are not touched.
 pub fn write_body(tx: &mut Tx<'_>, current: &str, target: &str) -> Result<bool> {
     let (a, b): (Vec<char>, Vec<char>) = (current.chars().collect(), target.chars().collect());
     let edits = diff_text(&a, &b);
@@ -188,8 +188,9 @@ impl KitModel for NoteModel {
         Ok(Damage::Full)
     }
 
-    /// Concurrent comment commands may leave a thread without comments, or a reply in a deleted
-    /// thread.
+    /// After a merged draft, an import or an undo (the SDK's repair): a draft and the person
+    /// deleting the comments of one thread between them leave it with none, and the person's Undo
+    /// of a thread leaves the replies added since in no thread (`repair_comment_threads`).
     fn validate(tx: &mut Tx<'_>, _changed: &BTreeSet<ObjectId>) -> Result<bool> {
         Ok(repair_comment_threads(tx)?)
     }

@@ -3,8 +3,8 @@
 
 use std::time::Instant;
 
-use kition_kit::kdm::comment::{AnchorRange, CommentAnchor, NewComment, add_thread, reply, threads};
-use kition_kit::kdm::comment::{COMMENT_THREAD_TYPE_JSON, COMMENT_TYPE_JSON};
+use kition_kit::kdm::comment::{AnchorRange, CommentAnchor, NewComment, add_thread, delete_comment, delete_thread, reply, threads};
+use kition_kit::kdm::comment::{COMMENT_THREAD_TYPE, COMMENT_THREAD_TYPE_JSON, COMMENT_TYPE, COMMENT_TYPE_JSON};
 use kition_kit::session::{KitSession, MemoryBlobs};
 
 use super::*;
@@ -166,4 +166,77 @@ fn repair_leaves_whole_threads_alone() {
     let (repaired, _) = first.execute(&Origin::system("repair"), |_, tx| Ok(repair_comment_threads(tx)?)).unwrap();
     assert!(!repaired);
     assert_eq!(threads(first.replica()).unwrap()[0].comments.len(), 2);
+}
+
+fn agent() -> Origin {
+    Origin::agent("agent:test")
+}
+
+/// A draft of `session` (an agent's, made now) and the version it was made at.
+fn draft_of(session: &KitSession<NoteModel>) -> (KitSession<NoteModel>, kition_kit::kdm::Version) {
+    (session.fork(ActorId::random(), Box::new(MemoryBlobs::default())).unwrap(), session.version())
+}
+
+/// The thread's id and its comments' ids.
+fn thread_ids(session: &KitSession<NoteModel>) -> (ObjectId, Vec<ObjectId>) {
+    let found = threads(session.replica()).unwrap();
+    let thread = &found[0];
+    (thread.id.clone(), thread.comments.iter().map(|comment| comment.id.clone()).collect())
+}
+
+#[test]
+fn a_draft_and_the_person_deleting_the_two_comments_of_a_thread_leave_no_empty_thread() {
+    // An agent's draft deletes the first comment while the person deletes the second: each leaves
+    // the thread one comment, and the list merge (data model 6.6, D6) takes both removals in. The
+    // repair after the merge deletes the thread left with none.
+    let mut doc = with_thread(2);
+    let (thread, comments) = thread_ids(&doc);
+    let (mut draft, since) = draft_of(&doc);
+    draft.execute(&agent(), |_, tx| Ok(delete_comment(tx, &thread, &comments[0])?)).unwrap();
+    doc.execute(&person(), |_, tx| Ok(delete_comment(tx, &thread, &comments[1])?)).unwrap();
+    assert_eq!(thread_ids(&doc), (thread.clone(), vec![comments[0].clone()]), "the person's delete leaves the thread");
+    let changes = draft.export_changes(&since).unwrap();
+    doc.merge_changes(&changes, &agent()).unwrap();
+    assert!(threads(doc.replica()).unwrap().is_empty());
+    assert_eq!(doc.replica().objects_of_type(COMMENT_THREAD_TYPE), Vec::<ObjectId>::new(), "no empty thread");
+    assert_eq!(doc.replica().objects_of_type(COMMENT_TYPE), Vec::<ObjectId>::new());
+    assert_eq!(doc.model().body(), "# Plan\n\nGoals\n");
+}
+
+#[test]
+fn a_draft_replying_to_a_thread_the_person_deleted_meanwhile_is_refused() {
+    // The reply would be a comment in no thread: the merge refuses it (D8, the draft writes the
+    // thread's list; the document deleted the thread) and changes nothing.
+    let mut doc = with_thread(1);
+    let (thread, _) = thread_ids(&doc);
+    let (mut draft, since) = draft_of(&doc);
+    draft.execute(&agent(), |_, tx| Ok(reply(tx, &thread, &said("Next quarter."))?)).unwrap();
+    doc.execute(&person(), |_, tx| Ok(delete_thread(tx, &thread)?)).unwrap();
+    let before = doc.state_hash().unwrap();
+    let changes = draft.export_changes(&since).unwrap();
+    let error = doc.merge_changes(&changes, &agent()).unwrap_err().to_string();
+    assert_eq!(
+        error,
+        format!(
+            "stale: the draft collides with the document's changes since it was made: {thread} (the draft changes it; the document deleted it; rule D8)"
+        )
+    );
+    assert_eq!(doc.state_hash().unwrap(), before);
+    assert_eq!(doc.replica().objects_of_type(COMMENT_THREAD_TYPE), Vec::<ObjectId>::new());
+    assert_eq!(doc.replica().objects_of_type(COMMENT_TYPE), Vec::<ObjectId>::new(), "no orphan reply");
+}
+
+#[test]
+fn undoing_a_thread_takes_the_reply_an_agent_added_since_with_it() {
+    // The person's Undo of the step that opened the thread deletes it, and the agent's later reply
+    // would be a comment in no thread: the repair after the undo deletes it.
+    let mut doc = with_thread(1);
+    let (thread, _) = thread_ids(&doc);
+    doc.execute(&agent(), |_, tx| Ok(reply(tx, &thread, &said("An agent's reply"))?)).unwrap();
+    assert_eq!(thread_ids(&doc).1.len(), 2);
+    assert!(doc.undo().unwrap().0);
+    assert!(threads(doc.replica()).unwrap().is_empty());
+    assert_eq!(doc.replica().objects_of_type(COMMENT_THREAD_TYPE), Vec::<ObjectId>::new());
+    assert_eq!(doc.replica().objects_of_type(COMMENT_TYPE), Vec::<ObjectId>::new(), "no orphan reply");
+    assert_eq!(doc.model().body(), "# Plan\n\nGoals\n");
 }

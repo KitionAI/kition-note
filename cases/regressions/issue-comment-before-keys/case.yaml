@@ -1,0 +1,29 @@
+format: 1
+id: regressions/issue-comment-before-keys
+feature: note.comments.host-anchors
+intent: >-
+  Comment (the selection bar's button, or Mod+Alt+M) right after fast Shift+ArrowLeft keys sent
+  comment.create with the selection one key short (9-29 for 8-29 in a slow CI runner): the page
+  read the selection from the engine directly, before the keys still waiting on the page had
+  reached it. It now reads it through the editor's ordered command run, after them. The browser
+  test presses 200 Shift+ArrowLeft while the host reads the selection through its AI bridge, then
+  Mod+Alt+M at once, and checks the anchor covers all 200 characters; a native test checks that a
+  host call between two keys (the agent's editor state put in place and the person's put back)
+  loses no key.
+layer: gate
+dimension: collab
+source:
+  kind: issue
+  from: web/tests/comments.mjs failed twice in a runner pool (the first thread's anchor 9-29)
+  license: owned
+input: []
+steps:
+  - exec:
+      cmd: [node, web/tests/comments.mjs, chromium]
+  - cargo-test:
+      package: kition-note-kit
+      test: every_shift_arrow_counts_when_the_host_calls_between_two_keys
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-25"
+timeout_s: 300

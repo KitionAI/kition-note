@@ -1,0 +1,29 @@
+format: 1
+id: regressions/issue-merge-follows-draft
+feature: note.collab.live
+intent: >-
+  A draft merged while the person types, writing before the caret and after it, moved the caret
+  to the end of everything between the two places (the merge was followed as one span), and the
+  person's Undo of the merge cleared the editor's undo records, so the Undo of the typing after it
+  no longer put its selection back. The merge now moves the selection along each place it
+  changed, as another person's change does, and is recorded as the person's undo step: one Undo
+  takes back the merge only, exactly, with the selection from before it, and the next one the
+  typing run.
+layer: unit
+dimension: collab
+source:
+  kind: issue
+  from: independent review of the plain-model round (2026-11-25)
+  license: owned
+input: []
+steps:
+  - cargo-test:
+      package: kition-note-kit
+      test: a_draft_merged_while_the_person_types_is_one_undo_step_and_the_caret_follows_it
+  - cargo-test:
+      package: kition-note-kit
+      test: a_draft_made_before_the_person_typed_merges_with_the_typing_and_undoes_alone
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-25"
+timeout_s: 300

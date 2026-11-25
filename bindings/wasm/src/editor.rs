@@ -446,6 +446,12 @@ impl Editor {
         Ok(())
     }
 
+    /// Whether an undo step is open (a typing run).
+    #[cfg(test)]
+    pub(crate) fn typing(&self) -> bool {
+        self.step.is_some()
+    }
+
     /// The text the offsets refer to.
     pub(crate) fn text(&self) -> &str {
         &self.text
@@ -910,6 +916,37 @@ impl<'a> Scalars<'a> {
 }
 
 impl NoteDocument {
+    /// Takes in a change the person accepts whole (a merged draft, a restored state; `before`: the
+    /// selection before it). It may touch several places at once, so the selection, folds and undo
+    /// records move with it as with another person's change ([`Editor::follow_remote`]), not as one
+    /// span. When it is a step of the person's Undo (`persons_step`) the editor records it, so
+    /// Undo puts back the selection from before it and the steps below keep theirs; otherwise the
+    /// records stay the replica's last steps, as after another person's change.
+    pub(crate) fn took_in(&mut self, damage: &kition_kit::session::Damage, before: (usize, usize), persons_step: bool) {
+        let start = text_hash(self.editor.text());
+        let revision = self.revision;
+        let stale = self.editor.done.last().is_some_and(|record| record.revision != revision);
+        let text = self.session.model().body().to_owned();
+        self.editor.follow_remote(&text);
+        self.changed(damage);
+        if *damage == kition_kit::session::Damage::None {
+            return;
+        }
+        if !persons_step {
+            self.editor.keep_records(revision, self.revision);
+            return;
+        }
+        if stale {
+            self.editor.done.clear();
+        }
+        if self.editor.done.len() >= RECORDS {
+            self.editor.done.remove(0);
+        }
+        self.editor.undone.clear();
+        let after = (self.editor.anchor, self.editor.focus);
+        self.editor.done.push(Record { before, after, revision: self.revision, start, empty: false });
+    }
+
     /// The note's text, shared until it changes (see `shared_text`).
     pub(crate) fn editor_text(&self) -> std::sync::Arc<str> {
         if let Some((revision, text)) = self.shared_text.borrow().as_ref()

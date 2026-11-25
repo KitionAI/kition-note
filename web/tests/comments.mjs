@@ -170,6 +170,43 @@ try {
     return box !== undefined && Math.abs(box.x - start.x) < 3 && Math.abs(box.y - start.y) < 6
   }), JSON.stringify({ stored, boxes: await rangeBoxes() }))
 
+  // Mod+Alt+M pressed right after 200 Shift+ArrowLeft, while the host reads the selection through
+  // its AI bridge (the agent's editor state put aside and back between keys): the thread is on all
+  // 200 characters. Comment read the selection from the engine before the keys still waiting on the
+  // page had reached it, one key short (regressions/issue-comment-before-keys).
+  {
+    const line = Array.from({ length: 40 }, (_, index) => `word${index}`).join(' ')
+    await page.evaluate(() => {
+      window.commentsHost.threads = []
+    })
+    step('opens a note with a long line', await open('editor', `# Long\n\n${line}\n`))
+    await caretAfter(page, run, engineText, line)
+    const sentBefore = (await hostState()).created.length
+    let polling = true
+    let polls = 0
+    const poller = (async () => {
+      while (polling) {
+        await run('selection.get').catch(() => undefined)
+        polls += 1
+      }
+    })()
+    for (let i = 0; i < 200; i += 1) await page.keyboard.press('Shift+ArrowLeft')
+    await page.keyboard.press(`${MOD}+Alt+KeyM`)
+    const sentNow = await until(async () => (await hostState()).created.length === sentBefore + 1)
+    polling = false
+    await poller
+    const end = charsBefore(`# Long\n\n${line}\n`, line) + [...line].length
+    const anchor = (await hostState()).created[sentBefore]?.anchor
+    step('Mod+Alt+M right after 200 Shift+ArrowLeft sends comment.create', sentNow)
+    step(
+      'on all 200 characters the keys selected',
+      JSON.stringify(anchor) === JSON.stringify({ ids: ['note'], range: { start: end - 200, end }, quote: line.slice(-200) }),
+      JSON.stringify({ anchor, polls }),
+    )
+    const selected = await run('selection.get')
+    step('the selection is 200 characters', selected.text === line.slice(-200), JSON.stringify(selected))
+  }
+
   // A commenter (read-only, may comment) starts threads; a viewer is offered none.
   step('opens the note as a commenter', await open('commenter'))
   await dragSelect('Goals for the quarter')
