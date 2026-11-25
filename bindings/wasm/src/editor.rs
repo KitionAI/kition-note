@@ -920,14 +920,21 @@ impl NoteDocument {
     /// selection before it). It may touch several places at once, so the selection, folds and undo
     /// records move with it as with another person's change ([`Editor::follow_remote`]), not as one
     /// span. When it is a step of the person's Undo (`persons_step`) the editor records it, so
-    /// Undo puts back the selection from before it and the steps below keep theirs; otherwise the
+    /// Undo puts back the selection from before it and the steps below keep theirs (unmoved: they
+    /// are undone on the text before it); otherwise the
     /// records stay the replica's last steps, as after another person's change.
     pub(crate) fn took_in(&mut self, damage: &kition_kit::session::Damage, before: (usize, usize), persons_step: bool) {
         let start = text_hash(self.editor.text());
         let revision = self.revision;
         let stale = self.editor.done.last().is_some_and(|record| record.revision != revision);
         let text = self.session.model().body().to_owned();
+        // The person's steps below this one stay on the text before it: Undo takes this one back
+        // first, so their selections are not moved with it (another person's change moves them).
+        let below = persons_step.then(|| self.editor.done.clone());
         self.editor.follow_remote(&text);
+        if let Some(below) = below {
+            self.editor.done = below;
+        }
         self.changed(damage);
         if *damage == kition_kit::session::Damage::None {
             return;
@@ -2418,7 +2425,7 @@ impl NoteDocument {
     pub(crate) fn run_editor(&mut self, command: &str, params: &Value) -> Result<Value, String> {
         let text = self.editor_text();
         match command {
-            "selection.get" => {
+            "select.get" => {
                 let (from, to) = self.editor.ordered();
                 let line = text.get(..self.editor.focus).map_or(0, |before| before.matches('\n').count()) + 1;
                 let (line_start, _) = line_around(&text, self.editor.focus);
@@ -2436,7 +2443,7 @@ impl NoteDocument {
                     "caret": self.caret_rect(),
                 }))
             }
-            "selection.set" => {
+            "select.set" => {
                 let byte = |name: &str| -> Result<usize, String> {
                     let index = params.get(name).and_then(Value::as_u64).ok_or_else(|| format!("invalid-params: {name} is required"))?;
                     let index = usize::try_from(index).unwrap_or(usize::MAX);
@@ -2476,7 +2483,7 @@ impl NoteDocument {
                 Ok(json!({}))
             }
             "image.wanted" => Ok(json!({ "images": self.view().wanted_pictures(), "drawn": self.view().drawn_pictures() })),
-            "selection.controlKey" => {
+            "select.controlKey" => {
                 let name = params.get("key").and_then(Value::as_str).ok_or("invalid-params: key is required")?.to_ascii_lowercase();
                 self.editor.engaged = true;
                 // Page Up and Page Down (which the frame keeps to itself), Shift selecting.
@@ -2504,7 +2511,7 @@ impl NoteDocument {
                 let active = callout && (line.min(caret)..=line.max(caret)).all(in_callout);
                 Ok(json!({ "callout": callout, "active": active }))
             }
-            "selection.where" => {
+            "select.where" => {
                 let index = params.get("at").and_then(Value::as_u64).ok_or("invalid-params: at is required")?;
                 let at = text.char_indices().nth(usize::try_from(index).unwrap_or(usize::MAX)).map_or(text.len(), |(byte, _)| byte);
                 let caret = self.view().caret(at);
@@ -2530,7 +2537,7 @@ impl NoteDocument {
                 self.pictures.set(self.pictures.get() + 1);
                 Ok(json!({ "drawn": decoded.is_some() }))
             }
-            "selection.replace" => {
+            "select.replace" => {
                 let insert = params.get("text").and_then(Value::as_str).ok_or("invalid-params: text is required")?.to_owned();
                 let (from, to) = self.editor.ordered();
                 // A paste: a step of its own, which the typing after it joins (as Obsidian's). Plain
@@ -2640,7 +2647,7 @@ impl NoteDocument {
                 }
                 Ok(json!({ "changed": changed, "scheme": name }))
             }
-            "properties.view" => {
+            "property.view" => {
                 // The front matter as Obsidian's properties block, for the editor to draw: null
                 // while it is edited as its source. Asking hands its drawing to the editor.
                 if self.view.borrow_mut().set_properties_overlaid(true) {
@@ -2688,7 +2695,7 @@ impl NoteDocument {
                     "to": scalars.at(block.code.end),
                 })).collect::<Vec<_>>() }))
             }
-            "diagrams.view" => {
+            "diagram.view" => {
                 // The blocks the editor draws (Mermaid diagrams, HTML blocks): those away from the
                 // caret not sized yet, and those drawn between `top` and `bottom` (document
                 // heights).
@@ -2803,16 +2810,16 @@ impl NoteDocument {
             "edit.deleteParagraph" => self.delete_paragraph().map(|()| json!({})),
             "format.comment" => self.toggle_comment().map(|()| json!({})),
             "format.quote" => self.toggle_prefix("> ").map(|()| json!({})),
-            "insert.wikilink" => self.surround_to_end("[[", "]]").map(|()| json!({})),
-            "insert.embed" => self.surround_to_end("![[", "]]").map(|()| json!({})),
-            "insert.image" => self.surround("![", "]()").map(|()| json!({})),
-            "insert.tag" => {
+            "wikilink.insert" => self.surround_to_end("[[", "]]").map(|()| json!({})),
+            "embed.insert" => self.surround_to_end("![[", "]]").map(|()| json!({})),
+            "image.insert" => self.surround("![", "]()").map(|()| json!({})),
+            "tag.insert" => {
                 // A `#` before the selection, the caret after it (as Obsidian's Add tag).
                 let (from, _) = self.editor.ordered();
                 self.replace(from, from, "#", false)?;
                 Ok(json!({}))
             }
-            "insert.footnote" => {
+            "footnote.insert" => {
                 let used = text.matches("[^").count();
                 let label = format!("[^{}]", used / 2 + 1);
                 let (_, to) = self.editor.ordered();
@@ -2829,10 +2836,10 @@ impl NoteDocument {
                 self.editor.focus = caret + label.len();
                 Ok(json!({}))
             }
-            "insert.mathBlock" => self.fence_lines("$$").map(|()| json!({})),
-            "insert.callout" => self.insert_callout().map(|()| json!({})),
-            "insert.date" | "insert.timestamp" => {
-                let pattern = if command == "insert.date" { "YYYY-MM-DD" } else { "YYYY-MM-DD HH:mm" };
+            "mathBlock.insert" => self.fence_lines("$$").map(|()| json!({})),
+            "callout.insert" => self.insert_callout().map(|()| json!({})),
+            "date.insert" | "timestamp.insert" => {
+                let pattern = if command == "date.insert" { "YYYY-MM-DD" } else { "YYYY-MM-DD HH:mm" };
                 // The local date: the page's time zone, or the offset the caller gives.
                 let offset = match params.get("utcOffset") {
                     None | Some(Value::Null) => None,
@@ -2887,9 +2894,9 @@ impl NoteDocument {
                 }
                 Ok(json!({}))
             }
-            "insert.codeBlock" => self.fence_lines("```").map(|()| json!({})),
-            "insert.rule" => self.insert_at_caret("---\n", 4).map(|()| json!({})),
-            "insert.table" => self.insert_at_caret("|     |     |\n| --- | --- |\n|     |     |\n", 1).map(|()| json!({})),
+            "codeBlock.insert" => self.fence_lines("```").map(|()| json!({})),
+            "rule.insert" => self.insert_at_caret("---\n", 4).map(|()| json!({})),
+            "table.insert" => self.insert_at_caret("|     |     |\n| --- | --- |\n|     |     |\n", 1).map(|()| json!({})),
             other => Err(format!("unknown command {other}")),
         }
     }
