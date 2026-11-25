@@ -22,7 +22,7 @@
 //!   text, wherever it is now; `relocated` when it finds other text elsewhere or none (renamed
 //!   away, deleted); `changed` when others edited it in place.
 //!
-//! A write by no place (`block.append` and `table.create` at the end of the note) holds the same
+//! A write by no place (`block.append` and `table.add` at the end of the note) holds the same
 //! comparison as a content premise ([`content_at`]). `note.write` and `file.setLineEndings`
 //! rewrite the whole body and hold the root whole. Comment commands hold the thread or comment
 //! they name by id.
@@ -82,7 +82,7 @@ pub const ADDRESSES: &[Addresses] = &[
     places("property.set", &["key"]),
     places("property.delete", &["key", "occurrence"]),
     places("property.rename", &["key"]),
-    places("table.create", &["line", "heading", "position"]),
+    places("table.add", &["line", "heading", "position"]),
     places("table.setCell", &["table", "row", "column"]),
     places("table.insertRow", &["table", "at"]),
     places("table.insertColumn", &["table", "at"]),
@@ -94,7 +94,7 @@ pub const ADDRESSES: &[Addresses] = &[
     places("table.format", TABLE),
     places("link.insert", &["at"]),
     places("link.update", &["line", "index"]),
-    places("links.retarget", &["from"]),
+    places("link.retarget", &["from"]),
     places("comment.add", ANCHOR),
     Addresses { command: "comment.reply", targets: Some("thread"), objects: &[], object_types: THREAD, places: &[] },
     Addresses { command: "comment.resolve", targets: Some("thread"), objects: &[], object_types: THREAD, places: &[] },
@@ -205,7 +205,7 @@ pub enum Fact {
 const CARRIES: &[&str] = &["section.move"];
 
 /// Writes whose place is a section's extent or end ([`landing`]).
-const SECTIONED: &[&str] = &["section.replace", "section.insert", "section.delete", "section.move", "block.append", "table.create"];
+const SECTIONED: &[&str] = &["section.replace", "section.insert", "section.delete", "section.move", "block.append", "table.add"];
 
 /// The rule of a step's address: by name when every place it gives is a name (a heading path, a
 /// property key, a block id) and no occurrence counts among names.

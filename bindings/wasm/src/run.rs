@@ -300,7 +300,7 @@ pub fn read(model: &NoteModel, replica: &Replica, id: &str, params: &Value, ids:
                 }))
             }
         },
-        "links.list" => {
+        "link.list" => {
             let kinds = texts(params, "kinds")?;
             let wanted = |kind: &str| kinds.as_ref().is_none_or(|kinds| kinds.iter().any(|wanted| wanted == kind));
             let files = HostFiles;
@@ -344,7 +344,7 @@ pub fn read(model: &NoteModel, replica: &Replica, id: &str, params: &Value, ids:
             }
             Ok(json!({ "links": out }))
         }
-        "tasks.list" => {
+        "task.list" => {
             let within = match heading_ref(params, "heading", "line", false)? {
                 Some(heading) => Some(kition_note_edit::find_heading(&ix, &heading).map_err(err)?.section.clone()),
                 None => None,
@@ -870,7 +870,7 @@ pub fn plan(text: &str, ix: &Index, id: &str, params: &Value) -> Result<Option<P
                 _ => props::rename(ix, key, need_text(params, "to")?).map_err(err)?,
             }
         }
-        "table.create" => {
+        "table.add" => {
             let columns = need_number(params, "columns")?;
             let header = texts(params, "header")?.unwrap_or_default();
             let place = match (number(params, "line")?, texts(params, "heading")?) {
@@ -968,7 +968,7 @@ pub fn plan(text: &str, ix: &Index, id: &str, params: &Value) -> Result<Option<P
             plan.reads.push(links::find(ix, line, index).map_err(err)?.range.clone());
             links::update(text, ix, line, index, need_text(params, "destination")?, text_of(params, "text")?).map_err(err)?
         }
-        "links.retarget" => {
+        "link.retarget" => {
             let (edits, count) = links::retarget(text, ix, need_text(params, "from")?, need_text(params, "to")?).map_err(err)?;
             plan.result.insert("links".into(), json!(count));
             edits

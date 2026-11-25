@@ -64,9 +64,9 @@ fn writes(doc: &mut NoteDocument) -> Vec<(&'static str, Value)> {
     let text = doc.text().to_owned();
     let length = text.chars().count();
     let headings = read(doc, "outline.read", json!({}))["headings"].as_array().cloned().unwrap_or_default();
-    let tasks = read(doc, "tasks.list", json!({}))["tasks"].as_array().cloned().unwrap_or_default();
+    let tasks = read(doc, "task.list", json!({}))["tasks"].as_array().cloned().unwrap_or_default();
     let tables = read(doc, "table.read", json!({}))["tables"].as_u64().unwrap_or(0);
-    let links = read(doc, "links.list", json!({ "kinds": ["wikilink", "markdown"] }))["links"].as_array().cloned().unwrap_or_default();
+    let links = read(doc, "link.list", json!({ "kinds": ["wikilink", "markdown"] }))["links"].as_array().cloned().unwrap_or_default();
     let properties = read(doc, "property.list", json!({}))["properties"].as_array().cloned().unwrap_or_default();
     let mut writes = vec![
         ("text.insert", json!({ "at": length / 2, "text": "X" })),
@@ -74,7 +74,7 @@ fn writes(doc: &mut NoteDocument) -> Vec<(&'static str, Value)> {
         ("note.write", json!({ "markdown": format!("{text}\nAppended by note.write.\n") })),
         ("block.append", json!({ "markdown": "Appended." })),
         ("property.set", json!({ "key": "c8", "value": ["a", "b"] })),
-        ("table.create", json!({ "columns": 2, "rows": 2, "header": ["A", "B"] })),
+        ("table.add", json!({ "columns": 2, "rows": 2, "header": ["A", "B"] })),
         ("link.insert", json!({ "at": length, "destination": "Other note" })),
         ("comment.add", json!({ "from": 0, "to": length.min(5), "body": "A comment." })),
         ("file.setLineEndings", json!({ "eol": "crlf" })),
@@ -110,7 +110,7 @@ fn writes(doc: &mut NoteDocument) -> Vec<(&'static str, Value)> {
     }
     if let Some(link) = links.first() {
         writes.push(("link.update", json!({ "line": link["line"], "index": link["index"], "destination": "Renamed" })));
-        writes.push(("links.retarget", json!({ "from": link["destination"], "to": "Elsewhere" })));
+        writes.push(("link.retarget", json!({ "from": link["destination"], "to": "Elsewhere" })));
     }
     if let Some(property) = properties.first() {
         writes.push(("property.rename", json!({ "key": property["key"], "to": "renamed-key" })));

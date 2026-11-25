@@ -78,7 +78,7 @@ Structure is therefore never stored. Headings, sections, tables, properties, lin
 - Threads are KDM objects of the replica, so they converge with the text and travel through sync like any change; a commenter role may write only them.
 - **The `.md` never holds them.** The replica is stored by the host and reached by the editor through the Kit UI protocol's `replicaRead`/`replicaWrite`. A note opened without its replica has no comments.
 - Anchors are `{ object: <Note id>, field: "body", range: { start, end }, quote }`. All comment commands run in the Rust engine, so stored ranges are always **Unicode scalar** offsets; the editor converts for display. Ranges are hints: on read the engine relocates each thread by its `quote` near the stored range.
-- **A host that keeps threads itself** (Kit UI protocol capability `comment-anchors`) gets none of these: the editor lists `comment-anchors`, a selection's Comment (selection bar, context menu, Mod+Alt+M) sends `host/service` `comment.create` with the anchor `{ ids: ["note"], range: { start, end }, quote }` (scalar offsets of `body`, the quote at most 500 characters), and the kit's own comments panel is hidden. The editor marks each open thread of `comments/show` (a tint over its text from `presenceLocate`, a marker right of the column) and sends `comments/activated` on a marker's click. The host stores an anchor as it was made, so the editor keeps it on the text (`web/src/commentAnchors.ts`): while the note is open each range moves through every change (the common start and end of the text before and after), and an arriving anchor is found by its quote nearest to its range; `comments/locate` answers from the same ranges. `comment.create` is served only to a person with comment rights, so a viewer is offered no Comment; a read-only person selects with the mouse through `selection.set` (`web/src/readOnlySelect.ts`), since kit-editor refuses the text tool's gestures there.
+- **A host that keeps threads itself** (Kit UI protocol capability `comment-anchors`) gets none of these: the editor lists `comment-anchors`, a selection's Comment (selection bar, context menu, Mod+Alt+M) sends `host/service` `comment.create` with the anchor `{ ids: ["note"], range: { start, end }, quote }` (scalar offsets of `body`, the quote at most 500 characters), and the kit's own comments panel is hidden. The editor marks each open thread of `comments/show` (a tint over its text from `presenceLocate`, a marker right of the column) and sends `comments/activated` on a marker's click. The host stores an anchor as it was made, so the editor keeps it on the text (`web/src/commentAnchors.ts`): while the note is open each range moves through every change (the common start and end of the text before and after), and an arriving anchor is found by its quote nearest to its range; `comments/locate` answers from the same ranges. `comment.create` is served only to a person with comment rights, so a viewer is offered no Comment; a read-only person selects with the mouse through `select.set` (`web/src/readOnlySelect.ts`), since kit-editor refuses the text tool's gestures there.
 - Headless: the executable serves the replica methods (`model.open`, `model.import`, `model.export`, `model.save`), so a host that stores the replica can give the agent the same threads.
 
 ### 2.5 Identity, open and save
@@ -127,7 +127,7 @@ Verified by the editor's co-editing tests (`bindings/wasm/src/coedit_tests.rs`, 
   | `section`, `task` | string | An object id from `projection.read` (`section:3`, `task:2`), which follows its object through edits while the note is open |
   | `blockId` | string | An Obsidian block id (`^risk-1`), without the caret |
   | `key` | string | A top-level frontmatter key |
-  | `table` | integer, from 0 | A table's index in document order, as `table.read`, `note_inspect` and `tasks.list` number them |
+  | `table` | integer, from 0 | A table's index in document order, as `table.read`, `note_inspect` and `task.list` number them |
   | `row`, `column` | integers, from 0 | `row` 0 is the header row, 1… the body rows (the delimiter row is not addressable); `column` from the left |
   | `quote` | string | Text to find; the first occurrence unless `occurrence` (from 1) is given |
 
@@ -135,7 +135,7 @@ Verified by the editor's co-editing tests (`bindings/wasm/src/coedit_tests.rs`, 
 - **Minimal span**: a command rewrites only the source span of what it addresses and keeps the surrounding style (table padding and outer pipes, list markers, YAML list style, quoting, line endings). Formatting the whole construct is always a separate, explicit command (`table.format`).
 - **Errors** are typed reasons: `invalid-params`, `not-found`, `ambiguous`, `out-of-range`, `stale`, `read-only`, `refused` (with a `code` such as `note.property-complex` when a check code describes why). An empty `params` answers a typed error and changes nothing.
 - **Schemas**: every command carries a `ParameterSchemaSpec`, including the read-only ones; descriptions are one English sentence.
-- **No file-like parameter names.** kition-headless treats a parameter named `path`, `paths`, `folder`, `dir`, `directory`, `output`, `outputDir`, `file`, `files` or `target` as file access and hides the command from agents (`FILE_PARAMS`). So the heading address is `heading` (not `path`), a link's destination is `destination` (not `target`), `section.move` names its target heading `toHeading` or `toLine`, and `table.create` takes `line`. A test (`every_agent_command_has_a_schema_and_no_file_parameter`) keeps it so.
+- **No file-like parameter names.** kition-headless treats a parameter named `path`, `paths`, `folder`, `dir`, `directory`, `output`, `outputDir`, `file`, `files` or `target` as file access and hides the command from agents (`FILE_PARAMS`). So the heading address is `heading` (not `path`), a link's destination is `destination` (not `target`), `section.move` names its target heading `toHeading` or `toLine`, and `table.add` takes `line`. A test (`every_agent_command_has_a_schema_and_no_file_parameter`) keeps it so.
 
 ### 3.2 Document commands
 
@@ -150,8 +150,8 @@ Verified by the editor's co-editing tests (`bindings/wasm/src/coedit_tests.rs`, 
 | `block.read` | `blockId` | R | yes | The block's Markdown, line and range |
 | `property.list` | — | R | yes | Typed values (`string`, `number`, `boolean`, `date`, `datetime`, `list`), each key's line range and style, `complex: true` for keys the engine will not rewrite |
 | `table.read` | `table` | R | yes | Header, alignment, rows as cell text, line range; `tables: n` without `table` |
-| `links.list` | `kinds?` (`wikilink`, `markdown`, `embed`, `tag`, `blockId`) | R | yes | Every link with `line`, `index` (in the line), target, alias, and resolution state (`resolved`, `missing`, `missing-anchor`, `unknown` without host access) |
-| `tasks.list` | `heading?` or `line?` | R | yes | Task items with `line`, `done`, text, block id |
+| `link.list` | `kinds?` (`wikilink`, `markdown`, `embed`, `tag`, `blockId`) | R | yes | Every link with `line`, `index` (in the line), target, alias, and resolution state (`resolved`, `missing`, `missing-anchor`, `unknown` without host access) |
+| `task.list` | `heading?` or `line?` | R | yes | Task items with `line`, `done`, text, block id |
 | `text.find` | `find`, `regex?` (default `false`), `caseSensitive?`, `unit?`, `limit?` | R | yes | Matches with ranges and lines |
 | `projection.read` | `kinds?` | R | yes | The note's sections, tasks, tables, properties and links with their ids, label and first line |
 | `comment.threads` | — | R | yes | Threads with their relocated range now |
@@ -179,7 +179,7 @@ Verified by the editor's co-editing tests (`bindings/wasm/src/coedit_tests.rs`, 
 | `property.delete` | `key`, `occurrence?` | | yes | `occurrence` removes one of duplicated keys (fix for `note.frontmatter-duplicate-key`) |
 | `property.rename` | `key`, `to` | | yes | Changes only the key token |
 | **Tables** | | | | |
-| `table.create` | `line` (insert before it) or `heading` with `position`, `columns`, `rows?`, `header?` (array of strings) | | yes | Written in the note's dominant table style, or `\| a \| b \|` with `---` when it has none |
+| `table.add` | `line` (insert before it) or `heading` with `position`, `columns`, `rows?`, `header?` (array of strings) | | yes | Written in the note's dominant table style, or `\| a \| b \|` with `---` when it has none |
 | `table.setCell` | `table`, `row`, `column`, `text`, `expected?` | | yes | Rewrites only the cell's span; pads only when that row's cells were padded; escapes `\|` |
 | `table.insertRow` | `table`, `at` (row index), `cells?` | | yes | |
 | `table.insertColumn` | `table`, `at` (column index), `header?`, `align?` | | yes | Touches each row once, keeping each row's spacing |
@@ -192,7 +192,7 @@ Verified by the editor's co-editing tests (`bindings/wasm/src/coedit_tests.rs`, 
 | **Links** | | | | |
 | `link.insert` | `at`, `unit?`, `destination` (a link text, for example `Plan` or `docs/plan.md#Risks`), `text?`, `style?` (`wikilink` default, `markdown`), `embed?` | | yes | `destination` is document content, not a file request (no handle needed) |
 | `link.update` | `line`, `index` (from 0), `destination`, `text?` | | yes | Changes one link's destination; fix for `note.broken-anchor` |
-| `links.retarget` | `from`, `to` (old and new link targets) | | no | Run by the host as a `system` change on every linking note when a file is renamed; rewrites wikilinks, Markdown links and embeds, keeping aliases and anchors |
+| `link.retarget` | `from`, `to` (old and new link targets) | | no | Run by the host as a `system` change on every linking note when a file is renamed; rewrites wikilinks, Markdown links and embeds, keeping aliases and anchors |
 | **Comments** (manifest `collaboration.comments.commands`) | | | | |
 | `comment.add` | `body`, then one of: `from`+`to` (+`unit?`), `quote` (+`occurrence?`), `heading` or `line` (the heading line), nothing (the whole note); `author?`, `name?`, `created?` | | yes | An agent's comment is written as the agent's principal |
 | `comment.reply` | `thread`, `body`, `author?`, `name?` | | yes | |
@@ -204,7 +204,7 @@ Verified by the editor's co-editing tests (`bindings/wasm/src/coedit_tests.rs`, 
 | `edit.undo` | `scope?` (`person`, `agent`) | | yes | In the undo scope `scope` names, else the scope of the origin it runs as: the person's Undo keeps the agent's steps, and an agent's undo takes back only its own |
 | `edit.redo` | `scope?` (`person`, `agent`) | | yes | Like `edit.undo` |
 
-The editor has further commands of its own that act on the selection or the view (`selection.*`, `format.*`, `list.*`, `insert.*`, most `edit.*`, `view.*`, and the table and diagram geometry it draws from); `kit.json` excludes them from agents. Tags, callouts and plain lists have no document commands of their own: tags are listed by `links.list` (`kind: tag`, also the `tags` property) and counted with callouts by `note_inspect`; list items are added with `block.append` or `section.insert` and checked with `task.toggle`.
+The editor has further commands of its own that act on the selection or the view (`selection.*`, `format.*`, `list.*`, `insert.*`, most `edit.*`, `view.*`, and the table and diagram geometry it draws from); `kit.json` excludes them from agents. Tags, callouts and plain lists have no document commands of their own: tags are listed by `link.list` (`kind: tag`, also the `tags` property) and counted with callouts by `note_inspect`; list items are added with `block.append` or `section.insert` and checked with `task.toggle`.
 
 Not commands: selection, viewport and fold state (the editor's own state, reported to the host as text ranges); link resolution for embeds (the binding asks the host for a handle and the engine reads it through the lent file); the links answer for the host's link index (`linksOf()`, an engine extra declared in `kit.json` `extras`).
 
@@ -253,7 +253,7 @@ Manifest (`kit.json`, excerpt):
   "objectModel": true,
   "layout": true,
   "export": { "command": "file.export", "data": "data" },
-  "exclude": ["links.retarget", "comment.move", "comment.delete", "selection.get", "…"]
+  "exclude": ["link.retarget", "comment.move", "comment.delete", "select.get", "…"]
 },
 "headless": {
   "executable": "kition-note",
@@ -308,7 +308,7 @@ The fixtures with bytes an editor cannot type (`0xFF`, CR) are written by `xtask
 ### 4.3 What is deliberately not a diagnostic
 
 - Markdown style lint (list marker consistency, trailing spaces, line length): opinion, not breakage.
-- Unresolved links when the host cannot answer: state `unknown` in `links.list`, no diagnostic.
+- Unresolved links when the host cannot answer: state `unknown` in `link.list`, no diagnostic.
 - Obsidian settings in `.obsidian/` (attachment folder, link format): not read.
 - Authoring errors of a command (bad table coordinates, ambiguous path): command errors (3.1), not check results.
 - Blocks wider than the page column: reported by `page.layout` and `note_inspect` `layout: true`, not by `check`.
@@ -332,7 +332,7 @@ The engine lays out, draws, and edits the note; `web/` is kit-editor's frame aro
 - **Math and diagrams.** Math (`$…$`, `$$…$$`) is laid out in the engine (`crates/view/view/src/math.rs`)
   and drawn as formulas away from the caret. Mermaid diagrams and HTML blocks are drawn by the
   editor over the canvas (`web/src/Diagrams.tsx`): the engine asks for the blocks it has no size
-  for (`diagrams.view`) and keeps each one's room once it is measured (`diagram.set`).
+  for (`diagram.view`) and keeps each one's room once it is measured (`diagram.set`).
 - **Tables.** A GFM table is a grid: pipes and the delimiter row take no room, cells wrap in their
   columns, and caret stops carry a cell and a line offset. The editor puts the table controls
   over the canvas from `table.geometry` (append buttons on the edge rails, the column menu) and

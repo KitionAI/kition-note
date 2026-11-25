@@ -100,7 +100,7 @@ for (const name of names) {
   await page.waitForTimeout(1500)
   // (The editor counts in code points.)
   const anchor = caretAt === null ? 1e9 : [...text.slice(0, caretAt)].length
-  await page.evaluate(async (at) => window.devHost.connection().ai.run([{ command: 'selection.set', params: { anchor: at } }], false), anchor)
+  await page.evaluate(async (at) => window.devHost.connection().ai.run([{ command: 'select.set', params: { anchor: at } }], false), anchor)
   const folds = process.env.FOLD ? 'view.foldAll' : 'view.unfoldAll'
   await page.evaluate(async (command) => window.devHost.connection().ai.run([{ command, params: {} }], false), folds)
   await page.waitForTimeout(800)

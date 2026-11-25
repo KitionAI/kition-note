@@ -111,7 +111,7 @@ export function useHostComments(host: HostConnection, doc: KitEngine | null, run
     let selection: { from: number; to: number }
     let text: string
     try {
-      selection = await run<{ from: number; to: number }>('selection.get', {})
+      selection = await run<{ from: number; to: number }>('select.get', {})
       text = (await run<{ text: string }>('text.read', {})).text
     } catch (error) {
       toast('error', t('commandFailed'), message(error))

@@ -43,9 +43,9 @@ const run = (command, params = {}) => page.evaluate(async ([command, params]) =>
 /** What the engine holds (`text.read`), as the agent sees it. */
 const engineText = async () => (await run('text.read')).text
 const caretAfter = (text) => caretAfterIn(page, run, engineText, text)
-/** The caret (`selection.get`) and whether the editor shows it (`data-view` on the editor). */
+/** The caret (`select.get`) and whether the editor shows it (`data-view` on the editor). */
 async function caret() {
-  const selection = await run('selection.get')
+  const selection = await run('select.get')
   const view = (await kit().getByTestId('note-editor').getAttribute('data-view'))?.split(',').map(Number)
   const [x, y, width, height] = view ?? [0, 0, 0, 0]
   const at = selection.caret
@@ -212,7 +212,7 @@ try {
     step('the outline lists the headings', (await rows.allInnerTexts()).join('|') === 'Plan|Risks', (await rows.allInnerTexts()).join('|'))
     await rows.nth(1).click()
     await menusPage.waitForTimeout(200)
-    const where = await runHere('selection.get')
+    const where = await runHere('select.get')
     step('an outline row puts the caret on its heading', where.line === 5, JSON.stringify(where))
     await frame().getByTestId('note-comments-toggle').click()
     step('the comments panel opens beside the outline', (await frame().getByTestId('note-comments').count()) === 1)
@@ -231,7 +231,7 @@ try {
     await menusPage.goto(`${origin}/dev.html?locale=en-US&modes=classic,focus`)
     await menusPage.waitForFunction(() => document.getElementById('status')?.textContent?.includes(' open in '), null, { timeout: 90000 })
     await frame().getByTestId('ribbon-tab-Insert').click()
-    step('Classic draws the Insert tab as a ribbon', (await frame().getByTestId('note-cmd-insert.table').count()) === 1)
+    step('Classic draws the Insert tab as a ribbon', (await frame().getByTestId('note-cmd-table.insert').count()) === 1)
     await menusPage.close()
   }
 
@@ -246,7 +246,7 @@ try {
     await setFile(NAME, outside)
     const followed = await until(async () => (await engineText()) === outside, 100)
     step("a clean note takes its file's change from disk", followed && (await kit().getByTestId('note-disk-changed').count()) === 0, JSON.stringify(await engineText()))
-    step('it is merged in place: the caret stays where it was', (await run('selection.get')).focus === goals, JSON.stringify(await run('selection.get')))
+    step('it is merged in place: the caret stays where it was', (await run('select.get')).focus === goals, JSON.stringify(await run('select.get')))
     const state = await page.evaluate(() => window.devHost.connection().state())
     step('and the note stays saved', state.dirty === false, JSON.stringify(state))
     // Keep mine: the note stays as it is and the next save writes over the file.
@@ -300,7 +300,7 @@ try {
   await focusCanvas(page)
   // The host shows the first line at a column past its end: the caret goes to the line's end.
   await reveal(page, 'body:1:100')
-  await until(async () => (await run('selection.get')).line === 1 && (await run('selection.get')).column > 1)
+  await until(async () => (await run('select.get')).line === 1 && (await run('select.get')).column > 1)
   await page.keyboard.type('X')
   await page.keyboard.press('End')
   await page.keyboard.press('Enter')
@@ -336,9 +336,9 @@ try {
     const removed = await until(async () => !/\nstatus:/.test(await engineText()))
     step("a property's icon menu removes it", removed, JSON.stringify(await engineText()))
     await reveal(page, 'body:1:1')
-    await until(async () => (await run('selection.get')).line > 1, 30)
-    const { caret: at } = await run('selection.get')
-    step('the caret given the front matter goes past it', (await run('selection.get')).line > 1, JSON.stringify(at))
+    await until(async () => (await run('select.get')).line > 1, 30)
+    const { caret: at } = await run('select.get')
+    step('the caret given the front matter goes past it', (await run('select.get')).line > 1, JSON.stringify(at))
   }
 
   // Hovering a heading shows its fold chevron in the margin; the pointer leaving the note takes
@@ -347,7 +347,7 @@ try {
     const HOVER = 'text\n\n# Head\n\nmore\n'
     await page.evaluate(async (text) => window.devHost.open('Hover.md', new TextEncoder().encode(text).buffer), HOVER)
     await until(async () => (await canvasReady(page)) && (await engineText().catch(() => '')) === HOVER, 300)
-    const at = await run('selection.where', { at: HOVER.indexOf('Head') })
+    const at = await run('select.where', { at: HOVER.indexOf('Head') })
     const [x, y, , , zoom] = (await kit().getByTestId('note-editor').getAttribute('data-view')).split(',').map(Number)
     const box = await kit().locator('[data-testid="note-canvas"] canvas').first().boundingBox()
     const left = box.x + (at.x - x) * zoom

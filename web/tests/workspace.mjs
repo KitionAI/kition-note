@@ -59,7 +59,7 @@ const charsBefore = async (text, offset = 0, slot = 'a') => {
 }
 /** Clicks the canvas on the character `index`, where it is drawn now (the caret stays where it is). */
 async function clickChar(index, slot = 'a', modifiers = []) {
-  const at = await command('selection.where', { at: index }, slot)
+  const at = await command('select.where', { at: index }, slot)
   const point = await pagePoint(slot, at.x + 3, at.y + at.height / 2)
   for (const key of modifiers) await page.keyboard.down(key)
   await page.mouse.click(point.x, point.y)
@@ -71,7 +71,7 @@ const select = (anchor, focus = anchor, slot = 'a') => selectChars(page, (name, 
 async function showLine(line, column = 1, slot = 'a') {
   const lines = (await engineText(slot)).split('\n').length
   await reveal(page, `body:${line}:${column}`, slot)
-  await until(async () => (await command('selection.get', {}, slot)).line === Math.min(line, lines))
+  await until(async () => (await command('select.get', {}, slot)).line === Math.min(line, lines))
 }
 /** Focuses the canvas, then puts the caret after `text` as the host shows a place. */
 async function caretAfter(text, slot = 'a') {
@@ -152,7 +152,7 @@ try {
     await page.keyboard.type('Top line from A. ')
     step('the text reaches the second editor', await until(async () => (await editorText('b')).includes('Top line from A.')))
     const beforeCaret = async (slot) => {
-      const got = await command('selection.get', {}, slot)
+      const got = await command('select.get', {}, slot)
       return [...(await engineText(slot))].slice(0, got.focus).join('')
     }
     step("the second editor's caret stays on its word", (await beforeCaret('b')).endsWith('Closing words (B)'), JSON.stringify((await beforeCaret('b')).slice(-30)))
@@ -293,7 +293,7 @@ try {
     const sent = (await opens()).length
     const line = async () => {
       const all = await engineText()
-      const at = (await command('selection.get')).line
+      const at = (await command('select.get')).line
       return all.split('\n')[at - 1]
     }
     await clickLink('[[#Far away]]', 4)
@@ -337,7 +337,7 @@ try {
     }
     step('and draws it', await until(async () => (await drawn()).some((name) => name.includes('pasted-')), 100), JSON.stringify(await command('image.wanted')))
     // Dropped on the first line: kept the same way, linked where it was dropped.
-    const first = await command('selection.where', { at: 0 })
+    const first = await command('select.where', { at: 0 })
     const point = await pagePoint('a', first.x + 1, first.y + first.height / 2)
     await kitFrame.evaluate(([base64, x, y]) => {
       const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0))

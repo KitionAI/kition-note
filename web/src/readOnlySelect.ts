@@ -1,7 +1,7 @@
 /**
  * Selecting with the mouse in a read-only note (a viewer's, a commenter's): kit-editor refuses the
  * engine's text tool every gesture there (its pointer may edit), so a press and drag over the note
- * set the selection through the engine's `selection.set`, a viewing command, as the text tool would
+ * set the selection through the engine's `select.set`, a viewing command, as the text tool would
  * have: the press puts the caret at the point, the drag moves the selection's other end. A
  * commenter selects a passage to comment on this way; a viewer to copy it.
  */
@@ -17,8 +17,8 @@ export function useReadOnlySelect(on: boolean, view: () => KitCanvasView | null,
   /** The character at `point` (document pixels): the caret goes there and its place is read back. */
   const charAt = useCallback(
     async (point: Point) => {
-      await run('selection.set', point)
-      return (await run<{ focus: number }>('selection.get', {})).focus
+      await run('select.set', point)
+      return (await run<{ focus: number }>('select.get', {})).focus
     },
     [run],
   )
@@ -33,7 +33,7 @@ export function useReadOnlySelect(on: boolean, view: () => KitCanvasView | null,
     try {
       const focus = await charAt(point)
       if (state.anchor === null) state.anchor = focus
-      else await run('selection.set', { anchor: state.anchor, focus })
+      else await run('select.set', { anchor: state.anchor, focus })
       shown()
     } catch {
       // A refused or failed read leaves the selection as it was.

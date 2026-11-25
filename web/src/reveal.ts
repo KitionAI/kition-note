@@ -11,7 +11,7 @@
  * - `blockId`: an Obsidian block id, without the caret.
  *
  * The line it names is selected (at the column, the caret goes there) through the engine's
- * `selection.set`, and the editor scrolls the selection into view. A view the note does not hold is
+ * `select.set`, and the editor scrolls the selection into view. A view the note does not hold is
  * ignored.
  */
 import type { KitView } from '@kition/sdk/editor'
@@ -79,7 +79,7 @@ export async function revealView(view: KitView, run: NoteRun): Promise<boolean> 
 export async function showPlace(place: Place | null, run: NoteRun): Promise<boolean> {
   if (!place || !Number.isInteger(place.line) || place.line < 1) return false
   try {
-    await run('selection.set', { line: place.line, ...(place.column !== undefined ? { column: place.column } : {}) })
+    await run('select.set', { line: place.line, ...(place.column !== undefined ? { column: place.column } : {}) })
     return true
   } catch {
     return false

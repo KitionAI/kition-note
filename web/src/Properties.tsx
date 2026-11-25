@@ -1,6 +1,6 @@
 /**
  * The front matter as Obsidian's properties block, drawn over the canvas where the engine keeps
- * its room (`properties.view`, document pixels): a Properties heading, a row a key with its
+ * its room (`property.view`, document pixels): a Properties heading, a row a key with its
  * type's icon, its name, and its value (tags and lists as pills, a checkbox, a date), and an
  * Add property row. Everything is edited in the block, as Obsidian's (the caret never enters the
  * front matter): a key renames its property (emptied, deletes it), a value is set where it is

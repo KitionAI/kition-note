@@ -105,7 +105,7 @@ fn task_toggle_by_block_id_finds_the_task_the_id_marks() {
     assert!(doc.text().contains("- [x] Alone\n"), "{}", doc.text());
 }
 
-/// `cases/regressions/issue-table-create-line`: `table.create` by line inserts before a line that
+/// `cases/regressions/issue-table-create-line`: `table.add` by line inserts before a line that
 /// starts a block; a line inside a code block, the front matter or a table is refused instead of
 /// writing the table into the code, the properties or the other table.
 #[test]
@@ -113,28 +113,28 @@ fn table_create_by_line_refuses_lines_inside_other_blocks() {
     let text = "---\ntitle: Plan\n---\n# Plan\n\n```rust\nfn main() {}\n```\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\nEnd.\n";
     for line in [1, 2, 3, 7, 8, 11, 12] {
         let mut doc = open(text);
-        let error = doc.execute("table.create", json!({ "line": line, "columns": 2 })).unwrap_err();
+        let error = doc.execute("table.add", json!({ "line": line, "columns": 2 })).unwrap_err();
         assert!(error.starts_with("invalid-params:"), "line {line}: {error}");
         assert_eq!(doc.text(), text, "line {line}");
     }
     // Before the fence, before the other table and before a paragraph it lands as before.
     for (line, before) in [(6, "```rust"), (10, "| A | B |"), (14, "End.")] {
         let mut doc = open(text);
-        run(&mut doc, "table.create", json!({ "line": line, "columns": 2, "header": ["X", "Y"] }));
+        run(&mut doc, "table.add", json!({ "line": line, "columns": 2, "header": ["X", "Y"] }));
         let at = doc.text().find("| X | Y |").unwrap();
         assert!(doc.text()[at..].contains(&format!("\n\n{before}")), "line {line}:\n{}", doc.text());
         assert!(doc.text().contains("```rust\nfn main() {}\n```\n"), "line {line}:\n{}", doc.text());
     }
 }
 
-/// `cases/regressions/issue-link-escaping`: `link.update` and `links.retarget` write what they are
+/// `cases/regressions/issue-link-escaping`: `link.update` and `link.retarget` write what they are
 /// given as Markdown reads it back: a destination with spaces, parentheses or angle brackets in an
 /// angle-bracket destination (escaped inside it), or percent-encoded where the link is written so;
 /// link text with brackets escaped. A wikilink cannot escape `]]` or `|`, so they are refused.
 #[test]
 fn link_writes_escape_what_they_write() {
     let destination = |doc: &mut NoteDocument, line: u64| {
-        let links = run(doc, "links.list", json!({}));
+        let links = run(doc, "link.list", json!({}));
         links["links"].as_array().unwrap().iter().find(|link| link["line"] == line).cloned().unwrap()
     };
     let text = "See [the site](https://example.com/site).\n\nA [[timeline]] link and ![chart](chart.png).\n\nAlso [doc](my%20doc.md).\n";
@@ -143,15 +143,15 @@ fn link_writes_escape_what_they_write() {
     run(&mut doc, "link.update", json!({ "line": 1, "index": 0, "destination": "notes/a (draft).md", "text": "the x](y site" }));
     let link = destination(&mut doc, 1);
     assert_eq!(link["destination"], "notes/a (draft).md", "{}", doc.text());
-    // links.list answers the text as written.
+    // link.list answers the text as written.
     assert_eq!(link["text"], "the x\\](y site", "{}", doc.text());
     assert!(doc.text().ends_with("link and ![chart](chart.png).\n\nAlso [doc](my%20doc.md).\n"), "{}", doc.text());
 
     let mut doc = open(text);
     run(&mut doc, "link.update", json!({ "line": 1, "index": 0, "destination": "a <b>.md" }));
-    // links.list answers the destination as written; the file it names is read back unescaped.
+    // link.list answers the destination as written; the file it names is read back unescaped.
     assert_eq!(destination(&mut doc, 1)["destination"], "a \\<b\\>.md", "{}", doc.text());
-    assert_eq!(run(&mut doc, "links.retarget", json!({ "from": "a <b>.md", "to": "c.md" }))["links"], 1, "{}", doc.text());
+    assert_eq!(run(&mut doc, "link.retarget", json!({ "from": "a <b>.md", "to": "c.md" }))["links"], 1, "{}", doc.text());
     assert!(doc.text().starts_with("See [the site](<c.md>)."), "{}", doc.text());
 
     let mut doc = open(text);
@@ -160,20 +160,20 @@ fn link_writes_escape_what_they_write() {
     assert_eq!(doc.text(), text);
 
     let mut doc = open(text);
-    let answer = run(&mut doc, "links.retarget", json!({ "from": "chart.png", "to": "img/a)b.png" }));
+    let answer = run(&mut doc, "link.retarget", json!({ "from": "chart.png", "to": "img/a)b.png" }));
     assert_eq!(answer["links"], 1);
     let images: Vec<Value> =
-        run(&mut doc, "links.list", json!({}))["links"].as_array().unwrap().iter().filter(|link| link["kind"] == "image").cloned().collect();
+        run(&mut doc, "link.list", json!({}))["links"].as_array().unwrap().iter().filter(|link| link["kind"] == "image").cloned().collect();
     assert_eq!(images.len(), 1, "the image is still an image:\n{}", doc.text());
     assert_eq!(images[0]["destination"], "img/a)b.png", "{}", doc.text());
 
     let mut doc = open(text);
-    run(&mut doc, "links.retarget", json!({ "from": "my doc.md", "to": "your (new) doc.md" }));
+    run(&mut doc, "link.retarget", json!({ "from": "my doc.md", "to": "your (new) doc.md" }));
     assert!(doc.text().contains("[doc](your%20%28new%29%20doc.md)"), "percent-encoded as written:\n{}", doc.text());
     assert_eq!(destination(&mut doc, 5)["kind"], "markdown", "{}", doc.text());
 
     let mut doc = open(text);
-    let error = doc.execute("links.retarget", json!({ "from": "timeline", "to": "a|b" })).unwrap_err();
+    let error = doc.execute("link.retarget", json!({ "from": "timeline", "to": "a|b" })).unwrap_err();
     assert!(error.starts_with("invalid-params:"), "{error}");
     assert_eq!(doc.text(), text);
 
@@ -212,7 +212,7 @@ fn comment_author_is_the_caller() {
 }
 
 fn select(doc: &mut NoteDocument, anchor: usize, focus: usize) {
-    run(doc, "selection.set", json!({ "anchor": anchor, "focus": focus }));
+    run(doc, "select.set", json!({ "anchor": anchor, "focus": focus }));
 }
 
 /// `cases/regressions/issue-editor-list-front-matter`: the editor's list, quote and heading
@@ -271,7 +271,7 @@ fn insert_date_uses_the_local_time() {
     let date = |offset: i64| {
         let mut doc = open("Today: \n");
         select(&mut doc, 7, 7);
-        run(&mut doc, "insert.date", json!({ "utcOffset": offset }));
+        run(&mut doc, "date.insert", json!({ "utcOffset": offset }));
         doc.text().trim_start_matches("Today: ").trim_end().to_owned()
     };
     // Fourteen hours ahead of UTC and twelve behind are always on different dates.
@@ -281,7 +281,7 @@ fn insert_date_uses_the_local_time() {
     let stamp = |offset: i64| {
         let mut doc = open("At \n");
         select(&mut doc, 3, 3);
-        run(&mut doc, "insert.timestamp", json!({ "utcOffset": offset }));
+        run(&mut doc, "timestamp.insert", json!({ "utcOffset": offset }));
         doc.text().trim_start_matches("At ").trim_end().to_owned()
     };
     let (utc, plus_ninety) = (stamp(0), stamp(90));
@@ -289,7 +289,7 @@ fn insert_date_uses_the_local_time() {
     assert_eq!((minutes(&plus_ninety) - minutes(&utc)).rem_euclid(24 * 60), 90, "{utc} {plus_ninety}");
     // Out of range offsets are refused.
     let mut doc = open("x\n");
-    let error = doc.execute("insert.date", json!({ "utcOffset": 100_000 })).unwrap_err();
+    let error = doc.execute("date.insert", json!({ "utcOffset": 100_000 })).unwrap_err();
     assert!(error.starts_with("invalid-params:"), "{error}");
 }
 

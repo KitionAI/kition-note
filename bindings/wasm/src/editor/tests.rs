@@ -17,7 +17,7 @@ fn note(text: &str) -> NoteDocument {
 }
 
 fn at(doc: &mut NoteDocument, anchor: usize, focus: usize) {
-    doc.execute("selection.set", json!({ "anchor": anchor, "focus": focus })).unwrap();
+    doc.execute("select.set", json!({ "anchor": anchor, "focus": focus })).unwrap();
 }
 
 fn key(doc: &mut NoteDocument, name: &str) {
@@ -197,7 +197,7 @@ fn a_change_to_several_lines_undoes_in_one_step() {
 #[test]
 fn a_mixed_ending_note_keeps_each_line_s_ending() {
     let mut doc = note("one\r\ntwo\nthree\r\n");
-    doc.execute("selection.set", json!({ "line": 1, "column": 100 })).unwrap();
+    doc.execute("select.set", json!({ "line": 1, "column": 100 })).unwrap();
     KitTools::text(&mut doc, "X", 1.0).unwrap();
     key(&mut doc, "End");
     key(&mut doc, "Enter");
@@ -231,9 +231,9 @@ fn a_picture_line_draws_its_picture_once_its_bytes_arrive() {
 fn a_click_on_a_link_drawn_as_a_link_asks_to_open_it() {
     let text = "# Links\n\n| Doc | Note |\n|---|---|\n| [[Plan]] | x |\n\nEnd\n";
     let mut doc = note(text);
-    doc.execute("selection.set", json!({ "line": 7, "column": 1 })).unwrap();
+    doc.execute("select.set", json!({ "line": 7, "column": 1 })).unwrap();
     let index = text[..text.find("[[Plan]]").unwrap() + 3].chars().count();
-    let at = doc.execute("selection.where", json!({ "at": index })).unwrap();
+    let at = doc.execute("select.where", json!({ "at": index })).unwrap();
     let event = ToolPointer {
         action: PointerAction::Down,
         x: at["x"].as_f64().unwrap() + 2.0,
@@ -245,7 +245,7 @@ fn a_click_on_a_link_drawn_as_a_link_asks_to_open_it() {
     let response = doc.pointer(&event).unwrap();
     assert!(format!("{:?}", response.requests).contains("openLink"), "{:?}", response.requests);
     // The host moves the caret (a heading of this note); the press's drag leaves it there.
-    doc.execute("selection.set", json!({ "line": 1, "column": 1 })).unwrap();
+    doc.execute("select.set", json!({ "line": 1, "column": 1 })).unwrap();
     doc.pointer(&ToolPointer { action: PointerAction::Drag, ..event }).unwrap();
     doc.pointer(&ToolPointer { action: PointerAction::Up, ..event }).unwrap();
     assert_eq!((doc.editor.anchor, doc.editor.focus), (0, 0), "a press that opened a link selects nothing");
@@ -255,7 +255,7 @@ fn a_click_on_a_link_drawn_as_a_link_asks_to_open_it() {
 fn a_folded_heading_hides_its_section_and_the_caret_unfolds_it() {
     let text = "# One\n\nfirst body\n\n## Two\n\nsecond body\n\n# Three\n\nthird\n";
     let mut doc = note(text);
-    doc.execute("selection.set", json!({ "line": 1, "column": 1 })).unwrap();
+    doc.execute("select.set", json!({ "line": 1, "column": 1 })).unwrap();
     let before = doc.view().caret(text.find("# Three").unwrap()).top;
     doc.execute("view.fold", json!({})).unwrap();
     let after = doc.view().caret(text.find("# Three").unwrap()).top;
@@ -267,7 +267,7 @@ fn a_folded_heading_hides_its_section_and_the_caret_unfolds_it() {
     assert!(doc.editor.focus >= text.find("# Three").unwrap(), "Down lands past the fold: {}", doc.editor.focus);
     // A search hit inside the fold opens it.
     let inside = text[..text.find("second").unwrap()].chars().count();
-    doc.execute("selection.set", json!({ "anchor": inside })).unwrap();
+    doc.execute("select.set", json!({ "anchor": inside })).unwrap();
     assert!(!doc.view().is_hidden(text.find("second").unwrap()), "the fold opened for the caret");
     doc.execute("view.foldAll", json!({})).unwrap();
     assert!(doc.view().is_hidden(text.find("third").unwrap()));
@@ -275,13 +275,13 @@ fn a_folded_heading_hides_its_section_and_the_caret_unfolds_it() {
     assert!(!doc.view().is_hidden(text.find("first").unwrap()));
     // Toggle fold folds the caret's own line only (measured in Obsidian): from a section's body
     // nothing folds; on a heading, mid text, the caret stays, and reading it keeps the fold.
-    doc.execute("selection.set", json!({ "anchor": inside })).unwrap();
+    doc.execute("select.set", json!({ "anchor": inside })).unwrap();
     doc.execute("view.fold", json!({})).unwrap();
     assert!(!doc.view().is_hidden(text.find("second").unwrap()), "nothing folds from a body line");
     let two = text[..text.find("## Two").unwrap() + 4].chars().count();
-    doc.execute("selection.set", json!({ "anchor": two })).unwrap();
+    doc.execute("select.set", json!({ "anchor": two })).unwrap();
     doc.execute("view.fold", json!({})).unwrap();
-    doc.execute("selection.get", json!({})).unwrap();
+    doc.execute("select.get", json!({})).unwrap();
     assert!(doc.view().is_hidden(text.find("second").unwrap()), "the fold stays");
     assert_eq!(doc.editor.focus, text.find("## Two").unwrap() + 4, "the caret stays where it was");
 }
@@ -300,10 +300,10 @@ fn a_list_item_with_children_folds_them_as_obsidian_does() {
     // Toggle fold from a child folds nothing (measured in Obsidian); from the item it folds its
     // children, the caret where it was.
     let child = text[..text.find("child two").unwrap()].chars().count();
-    doc.execute("selection.set", json!({ "anchor": child })).unwrap();
+    doc.execute("select.set", json!({ "anchor": child })).unwrap();
     doc.execute("view.fold", json!({})).unwrap();
     assert!(!doc.view().is_hidden(text.find("child two").unwrap()), "nothing folds from a child");
-    doc.execute("selection.set", json!({ "anchor": 3 })).unwrap();
+    doc.execute("select.set", json!({ "anchor": 3 })).unwrap();
     doc.execute("view.fold", json!({})).unwrap();
     for hidden in ["child one", "child two"] {
         assert!(doc.view().is_hidden(text.find(hidden).unwrap()), "{hidden} is folded away");
@@ -343,7 +343,7 @@ fn hovering_a_heading_shows_its_chevron_and_a_link_takes_the_pointing_hand() {
     let text = "# Title\n\nSee [[Plan]] here\n";
     let mut doc = note(text);
     let at = |doc: &mut NoteDocument, index: usize| {
-        let where_ = doc.execute("selection.where", json!({ "at": index })).unwrap();
+        let where_ = doc.execute("select.where", json!({ "at": index })).unwrap();
         (where_["x"].as_f64().unwrap(), where_["y"].as_f64().unwrap() + where_["height"].as_f64().unwrap() / 2.0)
     };
     let hover = |doc: &mut NoteDocument, (x, y): (f64, f64)| {
@@ -374,7 +374,7 @@ fn a_mermaid_block_keeps_its_diagrams_room_once_the_editor_sizes_it() {
     let text = "Intro\n\n```mermaid\ngraph TD\n  A --> B\n```\n\nAfter\n";
     let mut doc = note(text);
     at(&mut doc, text.len(), text.len());
-    let view = doc.execute("diagrams.view", json!({})).unwrap();
+    let view = doc.execute("diagram.view", json!({})).unwrap();
     assert_eq!(view["wanted"], json!([{ "kind": "mermaid", "source": "graph TD\n  A --> B" }]));
     assert_eq!(view["diagrams"], json!([]));
     let (height, revision) = (doc.height(), doc.revision());
@@ -382,17 +382,17 @@ fn a_mermaid_block_keeps_its_diagrams_room_once_the_editor_sizes_it() {
     assert_eq!(set["changed"], json!(true));
     assert!(doc.revision() > revision, "the editor draws again");
     assert!(doc.height() > height, "the diagram takes its room");
-    let view = doc.execute("diagrams.view", json!({})).unwrap();
+    let view = doc.execute("diagram.view", json!({})).unwrap();
     assert_eq!(view["wanted"], json!([]));
     let drawn = &view["diagrams"][0];
     assert_eq!((drawn["width"].as_f64(), drawn["height"].as_f64()), (Some(263.0), Some(2000.0)));
     assert_eq!(drawn["code"], json!(text.find("graph").unwrap()));
     // Only the diagrams in the asked heights.
-    assert_eq!(doc.execute("diagrams.view", json!({ "top": 5000, "bottom": 6000 })).unwrap()["diagrams"], json!([]));
+    assert_eq!(doc.execute("diagram.view", json!({ "top": 5000, "bottom": 6000 })).unwrap()["diagrams"], json!([]));
     // The caret in the block shows its source.
     let code = text.find("graph").unwrap();
     at(&mut doc, code, code);
-    assert_eq!(doc.execute("diagrams.view", json!({})).unwrap()["diagrams"], json!([]));
+    assert_eq!(doc.execute("diagram.view", json!({})).unwrap()["diagrams"], json!([]));
     assert!(doc.execute("diagram.set", json!({ "source": "x" })).is_err());
 }
 
@@ -403,7 +403,7 @@ fn reads_between_keystrokes_keep_the_typing_run_one_undo_step() {
     for c in "hello world".chars() {
         KitTools::text(&mut doc, &c.to_string(), 1.0).unwrap();
         // What the editor's overlays read after every keystroke.
-        for read in ["code.blocks", "diagrams.view", "properties.view", "table.geometry", "selection.get"] {
+        for read in ["code.blocks", "diagram.view", "property.view", "table.geometry", "select.get"] {
             doc.execute(read, json!({})).unwrap();
         }
     }
@@ -867,7 +867,7 @@ fn macos_control_keys_edit_as_in_obsidian() {
         let caret = text.chars().position(|c| c == '‸').unwrap();
         at(&mut doc, caret, caret);
         for letter in letters.chars() {
-            doc.execute("selection.controlKey", json!({ "key": letter.to_string() })).unwrap();
+            doc.execute("select.controlKey", json!({ "key": letter.to_string() })).unwrap();
         }
         marked(&doc)
     };
@@ -886,7 +886,7 @@ fn macos_control_keys_edit_as_in_obsidian() {
     assert_eq!(control("ab‸c", "o"), "ab‸\nc");
     let mut doc = note("o ne two");
     at(&mut doc, 1, 3);
-    doc.execute("selection.controlKey", json!({ "key": "k" })).unwrap();
+    doc.execute("select.controlKey", json!({ "key": "k" })).unwrap();
     assert_eq!(marked(&doc), "o‸e two", "a selection goes");
 }
 
@@ -945,24 +945,24 @@ fn a_bracket_over_several_lines_types_its_pair() {
 #[test]
 fn insert_commands_place_their_blocks_as_obsidian_s() {
     for (text, command, want) in [
-        ("a‸", "insert.codeBlock", "```\na‸\n```"),
-        ("‹a\nb›", "insert.codeBlock", "```\n‹a\nb›\n```"),
-        ("a ‹b› c", "insert.codeBlock", "```\na ‹b› c\n```"),
-        ("a\n‸", "insert.codeBlock", "a\n```\n‸\n```"),
-        ("a‸", "insert.mathBlock", "$$\na‸\n$$"),
-        ("‸", "insert.mathBlock", "$$\n‸\n$$"),
-        ("a\n‸", "insert.rule", "a\n\n---\n‸"),
-        ("‸", "insert.rule", "\n---\n‸"),
-        ("ab‸c", "insert.rule", "ab\n\n---\n‸c"),
-        ("a\n‸", "insert.callout", "a\n\n> [!‹NOTE›] Title\n> Contents\n"),
-        ("a‸", "insert.callout", "> [!‹NOTE›]\n> a"),
-        ("‹a\nb›", "insert.callout", "> [!‹NOTE›]\n> a\n> b"),
-        ("a‸", "insert.table", "a\n\n|‸     |     |\n| --- | --- |\n|     |     |\n"),
-        ("‸", "insert.table", "\n|‸     |     |\n| --- | --- |\n|     |     |\n"),
-        ("a ‹b›", "insert.wikilink", "a [[b‸]]"),
-        ("a ‹b›", "insert.embed", "a ![[b‸]]"),
-        ("a ‸", "insert.wikilink", "a [[‸]]"),
-        ("a ‹b›", "insert.tag", "a #‸b"),
+        ("a‸", "codeBlock.insert", "```\na‸\n```"),
+        ("‹a\nb›", "codeBlock.insert", "```\n‹a\nb›\n```"),
+        ("a ‹b› c", "codeBlock.insert", "```\na ‹b› c\n```"),
+        ("a\n‸", "codeBlock.insert", "a\n```\n‸\n```"),
+        ("a‸", "mathBlock.insert", "$$\na‸\n$$"),
+        ("‸", "mathBlock.insert", "$$\n‸\n$$"),
+        ("a\n‸", "rule.insert", "a\n\n---\n‸"),
+        ("‸", "rule.insert", "\n---\n‸"),
+        ("ab‸c", "rule.insert", "ab\n\n---\n‸c"),
+        ("a\n‸", "callout.insert", "a\n\n> [!‹NOTE›] Title\n> Contents\n"),
+        ("a‸", "callout.insert", "> [!‹NOTE›]\n> a"),
+        ("‹a\nb›", "callout.insert", "> [!‹NOTE›]\n> a\n> b"),
+        ("a‸", "table.insert", "a\n\n|‸     |     |\n| --- | --- |\n|     |     |\n"),
+        ("‸", "table.insert", "\n|‸     |     |\n| --- | --- |\n|     |     |\n"),
+        ("a ‹b›", "wikilink.insert", "a [[b‸]]"),
+        ("a ‹b›", "embed.insert", "a ![[b‸]]"),
+        ("a ‸", "wikilink.insert", "a [[‸]]"),
+        ("a ‹b›", "tag.insert", "a #‸b"),
     ] {
         assert_eq!(after(text, &[&format!("run:{command}")]), want, "{command} on {text:?}");
     }
@@ -974,7 +974,7 @@ fn drag_selection(text: &str, from: usize, to: usize, press: usize, drop: usize,
     let mut doc = note(text);
     at(&mut doc, from, to);
     let place = |doc: &mut NoteDocument, index: usize| {
-        let at = doc.execute("selection.where", json!({ "at": index })).unwrap();
+        let at = doc.execute("select.where", json!({ "at": index })).unwrap();
         (at["x"].as_f64().unwrap() + 0.5, at["y"].as_f64().unwrap() + at["height"].as_f64().unwrap() / 2.0)
     };
     let mods = ToolMods { alt, ..ToolMods::default() };
@@ -1133,8 +1133,8 @@ fn large_note_timings() {
         key(&mut doc, "Backspace");
     }
     let started = std::time::Instant::now();
-    doc.execute("selection.get", json!({})).unwrap();
-    eprintln!("selection.get {:?}", started.elapsed());
+    doc.execute("select.get", json!({})).unwrap();
+    eprintln!("select.get {:?}", started.elapsed());
     // What a host asks after each step: the revision and the summary (after an edit, then again).
     KitTools::text(&mut doc, "z", 1.0).unwrap();
     // INSPECTS=n types and reads the summary n times more first (to profile it).
@@ -1161,7 +1161,7 @@ fn end_and_home_on_a_wrapped_row_go_as_obsidian_s() {
     let mut doc = note(text);
     doc.execute("view.width", json!({ "width": 700 })).unwrap();
     // Where the second row starts.
-    let top = |doc: &mut NoteDocument, at: usize| doc.execute("selection.where", json!({ "at": at })).unwrap()["y"].as_f64().unwrap();
+    let top = |doc: &mut NoteDocument, at: usize| doc.execute("select.where", json!({ "at": at })).unwrap()["y"].as_f64().unwrap();
     let first = top(&mut doc, 0);
     let second = (1..text.len()).find(|at| top(&mut doc, *at) > first + 2.0).unwrap();
     assert_eq!(&text[second - 1..second], " ", "rows break after a space");
@@ -1198,7 +1198,7 @@ fn end_in_a_table_cell_stays_at_its_text_s_end() {
 fn undo_selection_and_the_remaining_default_keys_as_obsidian_s() {
     // Measured in Obsidian: Cmd+U takes the caret back before the last moves (moves soon after
     // each other are one step), and after an edit undoes it; Cmd+Shift+U redoes.
-    let control = |doc: &mut NoteDocument, name: &str| doc.execute("selection.controlKey", json!({ "key": name })).unwrap();
+    let control = |doc: &mut NoteDocument, name: &str| doc.execute("select.controlKey", json!({ "key": name })).unwrap();
     let mut doc = note("one two");
     at(&mut doc, 7, 7);
     doc.key("ArrowLeft", alt(), 1.0).unwrap();
@@ -1282,7 +1282,7 @@ fn a_point_in_a_callout_says_so_and_whether_the_caret_is_in_it() {
     let mut doc = note(text);
     let end = text.chars().count();
     at(&mut doc, end, end);
-    let body = doc.execute("selection.where", json!({ "at": text.find("body").unwrap() + 1 })).unwrap();
+    let body = doc.execute("select.where", json!({ "at": text.find("body").unwrap() + 1 })).unwrap();
     let point = json!({ "x": body["x"].as_f64().unwrap(), "y": body["y"].as_f64().unwrap() + 4.0 });
     assert_eq!(doc.execute("view.blockAt", point.clone()).unwrap(), json!({ "callout": true, "active": false }));
     let inside = text.find("body").unwrap();
@@ -1290,7 +1290,7 @@ fn a_point_in_a_callout_says_so_and_whether_the_caret_is_in_it() {
     // With the caret in it the callout shows its Markdown: no callout drawn there, so the menu opens.
     let answer = doc.execute("view.blockAt", point).unwrap();
     assert!(answer["callout"] == false || answer["active"] == true, "{answer}");
-    let intro = doc.execute("selection.where", json!({ "at": 1 })).unwrap();
+    let intro = doc.execute("select.where", json!({ "at": 1 })).unwrap();
     let outside = json!({ "x": intro["x"].as_f64().unwrap(), "y": intro["y"].as_f64().unwrap() + 4.0 });
     assert_eq!(doc.execute("view.blockAt", outside).unwrap()["callout"], false);
 }
@@ -1303,7 +1303,7 @@ fn a_task_box_under_the_pointer_takes_the_arrow() {
         doc.pointer(&ToolPointer { action: PointerAction::Move, x, y, mods: ToolMods::default(), pressure: 0.0, zoom: 1.0 }).unwrap()
     };
     let at = |doc: &mut NoteDocument, index: usize| {
-        let where_ = doc.execute("selection.where", json!({ "at": index })).unwrap();
+        let where_ = doc.execute("select.where", json!({ "at": index })).unwrap();
         (where_["x"].as_f64().unwrap(), where_["y"].as_f64().unwrap() + where_["height"].as_f64().unwrap() / 2.0)
     };
     // The box is drawn where the hidden `[ ]` is: its middle, then its left edge.
@@ -1326,13 +1326,13 @@ fn the_host_s_color_scheme_repaints_the_note_and_keeps_its_place() {
     let revision = doc.revision();
     let light = doc.render(0.0, 0.0, 1.0, 200, 120).unwrap();
     assert_eq!(&light[0..4], &[255, 255, 255, 255], "the light paper");
-    let caret = doc.execute("selection.where", json!({ "at": 20 })).unwrap();
+    let caret = doc.execute("select.where", json!({ "at": 20 })).unwrap();
     let answer = doc.execute("view.scheme", json!({ "scheme": "dark" })).unwrap();
     assert_eq!(answer["changed"], json!(true));
     assert_ne!(doc.revision(), revision, "the canvas repaints");
     let dark = doc.render(0.0, 0.0, 1.0, 200, 120).unwrap();
     assert_eq!(&dark[0..4], &[30, 30, 30, 255], "the dark paper");
-    assert_eq!(doc.execute("selection.where", json!({ "at": 20 })).unwrap(), caret, "nothing moves");
+    assert_eq!(doc.execute("select.where", json!({ "at": 20 })).unwrap(), caret, "nothing moves");
     assert!(!doc.dirty(), "the scheme is not an edit");
     assert_eq!(doc.execute("view.scheme", json!({ "scheme": "dark" })).unwrap()["changed"], json!(false));
     assert!(doc.execute("view.scheme", json!({ "scheme": "sepia" })).unwrap_err().starts_with("invalid-params"));
@@ -1357,12 +1357,12 @@ fn every_shift_arrow_counts_when_the_host_calls_between_two_keys() {
             doc.restore_editor_state(state).unwrap();
         }
         doc.inspect().unwrap();
-        doc.execute("selection.get", json!({})).unwrap();
+        doc.execute("select.get", json!({})).unwrap();
         agent = Some(doc.editor_state());
         doc.restore_editor_state(&person).unwrap();
         assert_eq!((doc.editor.anchor, doc.editor.focus), (29, 29 - pressed), "after key {pressed}");
     }
-    let selection = doc.execute("selection.get", json!({})).unwrap();
+    let selection = doc.execute("select.get", json!({})).unwrap();
     assert_eq!((selection["from"].clone(), selection["to"].clone()), (json!(8), json!(29)));
     assert_eq!(selection["text"], "Goals for the quarter");
 }

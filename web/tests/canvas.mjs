@@ -97,7 +97,7 @@ try {
     await page.keyboard.press('Enter')
     await page.keyboard.type('/tab')
     const menu = kit().getByTestId('note-slash')
-    step('typing / opens the slash menu, filtered', await until(async () => (await menu.count()) === 1 && (await kit().getByTestId('note-slash-item').first().getAttribute('data-command')) === 'insert.table'))
+    step('typing / opens the slash menu, filtered', await until(async () => (await menu.count()) === 1 && (await kit().getByTestId('note-slash-item').first().getAttribute('data-command')) === 'table.insert'))
     await page.keyboard.press('Enter')
     // The table Obsidian's Insert table makes: two empty columns (measured).
     step('Enter runs it: the /query goes and a table comes', await until(async () => (await engineText()).includes('|     |     |\n| --- | --- |') && !(await engineText()).includes('/tab')), JSON.stringify(await engineText()))
@@ -137,7 +137,7 @@ try {
     await page.keyboard.press('ArrowRight')
     await page.waitForTimeout(800)
     const before = await pixels()
-    const line = async () => (await run('selection.get')).line
+    const line = async () => (await run('select.get')).line
     const startLine = await line()
     await page.waitForTimeout(800)
     const settled = await pixels()
@@ -153,7 +153,7 @@ try {
 
   // The fold chevron beside a heading hides its section; a second click shows it again.
   {
-    const heading = await run('selection.where', { at: 0 })
+    const heading = await run('select.where', { at: 0 })
     const [vx, vy, , , zoom] = (await kit().getByTestId('note-editor').getAttribute('data-view')).split(',').map(Number)
     const box = await kit().locator('[data-testid="note-canvas"] canvas').first().boundingBox()
     const chevron = { x: box.x + (heading.x - 16 - vx) * zoom, y: box.y + (heading.y + heading.height / 2 - vy) * zoom }
@@ -161,12 +161,12 @@ try {
     await page.mouse.click(chevron.x, chevron.y)
     // A byte the fold hides has its caret drawn at the folded heading's end (Obsidian's fold).
     const folded = async () => {
-      const where = await run('selection.where', { at: body })
+      const where = await run('select.where', { at: body })
       return where.y === heading.y && where.x > heading.x
     }
     step('the chevron folds the heading\'s section', await until(folded))
     await page.mouse.click(chevron.x, chevron.y)
-    step('a second click unfolds it', await until(async () => (await run('selection.where', { at: body })).y > heading.y))
+    step('a second click unfolds it', await until(async () => (await run('select.where', { at: body })).y > heading.y))
   }
 
   // An input method (Chromium drives one over CDP): the text being composed shows at the caret,

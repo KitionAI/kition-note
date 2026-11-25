@@ -146,9 +146,9 @@ features:
     dimension: [function]
     priority: P0
     status: has
-    commands: [property.list, property.set, property.delete, property.rename, properties.view]
+    commands: [property.list, property.set, property.delete, property.rename, property.view]
     paths: [crates/engine/check/src/lib.rs]
-    gap: "properties.view (the editor's properties panel) is covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
+    gap: "property.view (the editor's properties panel) is covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
     cases: [note.properties/save-reopen, regressions/issue-3]
     since: "2026-11-16"
   - id: note.tables
@@ -156,7 +156,7 @@ features:
     dimension: [function]
     priority: P0
     status: has
-    commands: [table.read, table.create, table.setCell, table.insertRow, table.insertColumn, table.deleteRow, table.deleteColumn, table.moveRow, table.moveColumn, table.align, table.format, table.geometry]
+    commands: [table.read, table.add, table.setCell, table.insertRow, table.insertColumn, table.deleteRow, table.deleteColumn, table.moveRow, table.moveColumn, table.align, table.format, table.geometry]
     paths: [crates/engine/check/src/lib.rs]
     gap: "table.deleteRow, table.deleteColumn, table.moveColumn and table.geometry are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
     cases: [note.tables/save-reopen, regressions/issue-table-drag-handles, regressions/issue-table-drag-release-race, regressions/issue-table-menu-outside-click, regressions/issue-4, regressions/issue-table-create-line]
@@ -166,9 +166,9 @@ features:
     dimension: [function]
     priority: P0
     status: has
-    commands: [links.list, links.retarget, link.insert, link.update, insert.wikilink, insert.embed]
+    commands: [link.list, link.retarget, link.insert, link.update, wikilink.insert, embed.insert]
     paths: [web/src/commandIcons.ts, crates/engine/check/src/lib.rs]
-    gap: "insert.wikilink and insert.embed are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
+    gap: "wikilink.insert and embed.insert are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
     cases: [note.links/save-reopen, regressions/issue-link-escaping]
     since: "2026-11-16"
   - id: note.tasks
@@ -176,7 +176,7 @@ features:
     dimension: [function]
     priority: P0
     status: has
-    commands: [tasks.list, task.toggle, list.toggleCheckbox]
+    commands: [task.list, task.toggle, list.toggleCheckbox]
     cases: [note.tasks/save-reopen, regressions/issue-task-box-cursor, regressions/issue-task-toggle-block-id]
     since: "2026-11-16"
   - id: note.format
@@ -194,9 +194,9 @@ features:
     dimension: [function]
     priority: P0
     status: has
-    commands: [insert.image, insert.tag, insert.table, insert.mathBlock, insert.callout, insert.footnote, insert.date, insert.timestamp, insert.codeBlock, insert.rule, template.expand]
+    commands: [image.insert, tag.insert, table.insert, mathBlock.insert, callout.insert, footnote.insert, date.insert, timestamp.insert, codeBlock.insert, rule.insert, template.expand]
     paths: [web/src/commandIcons.ts]
-    gap: "insert.image, insert.tag, insert.date, insert.timestamp and template.expand are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
+    gap: "image.insert, tag.insert, date.insert, timestamp.insert and template.expand are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs."
     cases: [note.insert/save-reopen, regressions/issue-editor-local-date]
     since: "2026-11-16"
   - id: note.images
@@ -244,7 +244,7 @@ features:
     dimension: [function]
     priority: P1
     status: partial
-    commands: [code.blocks, diagrams.view, diagram.set]
+    commands: [code.blocks, diagram.view, diagram.set]
     gap: "The engine has these commands; no case yet shows the area working end to end in the editor and surviving save and reopen."
     since: "2026-11-16"
   - id: note.export
@@ -262,7 +262,7 @@ features:
     dimension: [function]
     priority: P1
     status: partial
-    commands: [edit.selectAll, edit.cut, edit.indent, edit.outdent, edit.moveLineUp, edit.moveLineDown, edit.deleteParagraph, edit.selectSection, edit.sortLines, edit.trimWhitespace, edit.undo, edit.redo, selection.get, selection.set, selection.replace, selection.where, selection.controlKey]
+    commands: [edit.selectAll, edit.cut, edit.indent, edit.outdent, edit.moveLineUp, edit.moveLineDown, edit.deleteParagraph, edit.selectSection, edit.sortLines, edit.trimWhitespace, edit.undo, edit.redo, select.get, select.set, select.replace, select.where, select.controlKey]
     paths: [bindings/wasm/src/lib.rs, bindings/wasm/src/editor.rs, web/src/commandIcons.ts]
     gap: "The engine has these commands; no case yet shows the area working end to end in the editor and surviving save and reopen."
     cases: [regressions/issue-editor-cut-text, regressions/issue-undo-step-that-came-to-nothing]

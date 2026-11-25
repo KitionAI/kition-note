@@ -71,10 +71,10 @@ fn the_caret_follows_a_session_batch() {
     let mut doc = note();
     // The caret after "north".
     let end = NOTE.chars().count() - 1;
-    doc.execute("selection.set", json!({ "anchor": end, "focus": end })).unwrap();
+    doc.execute("select.set", json!({ "anchor": end, "focus": end })).unwrap();
     session_batch(&mut doc, &json!({ "ops": [{ "op": "text.insert", "target": "root", "field": "body", "index": 0, "text": "Draft\n\n" }] }), false)
         .unwrap();
-    doc.execute("selection.replace", json!({ "text": "!" })).unwrap();
+    doc.execute("select.replace", json!({ "text": "!" })).unwrap();
     assert_eq!(doc.text(), "Draft\n\n# quarterly business review\n\nrevenue grew in the north!\n");
 }
 

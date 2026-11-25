@@ -239,9 +239,9 @@ try {
     const first = await cell(1, 0)
     await page.mouse.click(first.x, first.y)
     await page.keyboard.press('Home')
-    const before = await run('selection.get')
+    const before = await run('select.get')
     await page.keyboard.press('ArrowDown')
-    const after = await run('selection.get')
+    const after = await run('select.get')
     step('ArrowDown in a wrapped cell stays in it', after.line === before.line && after.focus > before.focus, `${JSON.stringify(before)} -> ${JSON.stringify(after)}`)
   }
 

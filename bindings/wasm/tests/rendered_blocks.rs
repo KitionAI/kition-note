@@ -1,7 +1,7 @@
 //! Regression: the note's own render (thumbnails, previews, a host
 //! without the editor) draws what the editor otherwise draws over it: the front matter as the
 //! properties block, and the text open comment threads are anchored to, tinted. Once the editor
-//! asks for the properties block (`properties.view`), it draws it and the render leaves its room
+//! asks for the properties block (`property.view`), it draws it and the render leaves its room
 //! blank. A test binary of its own: fonts are the process's.
 #![allow(clippy::unwrap_used, clippy::panic, clippy::indexing_slicing)]
 
@@ -30,7 +30,7 @@ fn count(doc: &NoteDocument, top: u32, bottom: u32) -> (usize, usize) {
 fn heading_top(doc: &mut NoteDocument) -> u32 {
     let text = std::str::from_utf8(NOTE).unwrap();
     let at = text[..text.find("# Monday").unwrap()].chars().count();
-    let caret = doc.execute("selection.where", json!({ "at": at })).unwrap();
+    let caret = doc.execute("select.where", json!({ "at": at })).unwrap();
     caret["y"].as_f64().map_or(0, |top| top as u32)
 }
 
@@ -56,7 +56,7 @@ fn properties_and_comment_anchors_are_drawn() {
     assert!(one > 50 && one < two, "a resolved thread is not tinted ({one} of {two})");
 
     // The editor draws the properties block itself once it asks for it.
-    let view = doc.execute("properties.view", json!({})).unwrap();
+    let view = doc.execute("property.view", json!({})).unwrap();
     assert!(view["rows"].as_array().is_some_and(|rows| rows.len() == 4), "{view}");
     let (ink, _) = count(&doc, 80, top);
     assert!(ink < 20, "the editor's overlay draws it, not the render ({ink})");

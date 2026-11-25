@@ -38,7 +38,7 @@ await page.waitForTimeout(2500)
 const kit = page.frames().find((f) => f !== page.mainFrame())
 await kit.locator('[data-testid="note-canvas"] canvas').first().click({ position: { x: 600, y: 600 } })
 const chars = (s) => [...s].length
-await page.evaluate(async ([a, f]) => window.devHost.connection().ai.run([{ command: 'selection.set', params: { anchor: a, focus: f } }], false), [chars(TEXT.slice(0, from)), chars(TEXT.slice(0, to))])
+await page.evaluate(async ([a, f]) => window.devHost.connection().ai.run([{ command: 'select.set', params: { anchor: a, focus: f } }], false), [chars(TEXT.slice(0, from)), chars(TEXT.slice(0, to))])
 await page.mouse.move(1, 1)
 await page.waitForTimeout(1000)
 await kit.getByTestId('note-editor').screenshot({ path: `${out}/kition.png` })

@@ -780,7 +780,7 @@ pub const SPECS: &[Spec] = &[
         false,
     ),
     spec(
-        "links.list",
+        "link.list",
         "List links, tags and block ids",
         "Lists the note's wikilinks, Markdown links, embeds, images, URLs, tags and block ids with their line and, for links, whether the target exists; `kinds` limits the list.",
         "{ kinds?: (\"wikilink\" | \"markdown\" | \"embed\" | \"image\" | \"url\" | \"tag\" | \"blockId\")[] }",
@@ -794,7 +794,7 @@ pub const SPECS: &[Spec] = &[
         false,
     ),
     spec(
-        "tasks.list",
+        "task.list",
         "List tasks",
         "Lists the task items (`- [ ]`, `- [x]`) with line, text, done and block id, in the whole note or one section. Use it to get the line `task.toggle` takes.",
         "{ heading?: string[], line?: number, section?: string } (all tasks by default)",
@@ -1067,13 +1067,13 @@ pub const SPECS: &[Spec] = &[
     spec(
         "task.toggle",
         "Check or uncheck a task",
-        "Checks or unchecks the task at `line` (from 1) or carrying `blockId`; `done` sets it, otherwise it flips. Answers whether it is checked now. Get lines from `tasks.list`.",
+        "Checks or unchecks the task at `line` (from 1) or carrying `blockId`; `done` sets it, otherwise it flips. Answers whether it is checked now. Get lines from `task.list`.",
         "{ line?: number, blockId?: string, task?: string, done?: boolean }",
         || {
             schema(&[
                 ("line", integer("The task's line, from 1.")),
                 ("blockId", string("The task's block id, instead of line.")),
-                ("task", string("The task's id from tasks.list (\"task:2\"), instead of line or blockId.")),
+                ("task", string("The task's id from task.list (\"task:2\"), instead of line or blockId.")),
                 ("done", boolean("Checked or not; flips it by default.")),
             ])
         },
@@ -1115,7 +1115,7 @@ pub const SPECS: &[Spec] = &[
     ),
     // Tables
     spec(
-        "table.create",
+        "table.add",
         "Insert a table",
         "Inserts a new table of `columns` columns (with optional header cells and `rows` empty body rows) before a line, at a section position, or at the end of the note, and answers its table index.",
         "{ line?: number, heading?: string[], position?: \"before\" | \"after\" | \"start\" | \"end\", columns: number, rows?: number, header?: string[] } (the end of the note by default)",
@@ -1277,7 +1277,7 @@ pub const SPECS: &[Spec] = &[
     spec(
         "link.update",
         "Change a link",
-        "Changes the destination (and the text, when given) of the `index`-th link on `line`, as `links.list` numbers them; nothing else of the link changes.",
+        "Changes the destination (and the text, when given) of the `index`-th link on `line`, as `link.list` numbers them; nothing else of the link changes.",
         "{ line: number, index: number, destination: string, text?: string }",
         || {
             schema(&[
@@ -1291,7 +1291,7 @@ pub const SPECS: &[Spec] = &[
         true,
     ),
     private(spec(
-        "links.retarget",
+        "link.retarget",
         "Retarget links to a renamed file",
         "Rewrites every link and embed to the file `from` so it points at `to`, as after a rename, and answers how many it rewrote; the host runs it.",
         "{ from: string, to: string }",
@@ -1405,7 +1405,7 @@ pub const SPECS: &[Spec] = &[
     ),
     // The editor's commands: they act on the selection, which only the editor has (never an agent's).
     private(spec(
-        "selection.get",
+        "select.get",
         "Read the selection",
         "Answers the editor's selection: anchor and focus positions, the selected text, the caret's line and column, the line's text before it, and where the caret is drawn.",
         "{}",
@@ -1414,7 +1414,7 @@ pub const SPECS: &[Spec] = &[
         false,
     )),
     private(spec(
-        "selection.set",
+        "select.set",
         "Set the selection",
         "Sets the editor's selection by anchor and focus positions, selects a line, puts the caret at a line and column, or at a point of the document.",
         "{ anchor?: number, focus?: number, line?: number, column?: number, x?: number, y?: number }",
@@ -1451,7 +1451,7 @@ pub const SPECS: &[Spec] = &[
         false,
     )),
     private(spec(
-        "diagrams.view",
+        "diagram.view",
         "The Mermaid diagrams to draw and where",
         "Answers the Mermaid diagrams and HTML blocks the editor still has to size, those drawn between `top` and `bottom` with their boxes, and the column width.",
         "{ top?: number, bottom?: number }",
@@ -1469,7 +1469,7 @@ pub const SPECS: &[Spec] = &[
         false,
     )),
     private(spec(
-        "properties.view",
+        "property.view",
         "The front matter as a properties block",
         "Answers the front matter as the editor's properties block (each row's key, kind, values and position), or null when the note shows none.",
         "{}",
@@ -1496,7 +1496,7 @@ pub const SPECS: &[Spec] = &[
         false,
     )),
     private(spec(
-        "selection.replace",
+        "select.replace",
         "Replace the selection",
         "Replaces the editor's selection with `text`; with `paste: true` it is pasted text, and an address pasted over a selection links it.",
         "{ text: string, paste?: boolean }",
@@ -1532,7 +1532,7 @@ pub const SPECS: &[Spec] = &[
         false,
     )),
     private(spec(
-        "selection.where",
+        "select.where",
         "Where a character is drawn",
         "Answers where the character at text position `at` is drawn on the page (x, top and height, in document pixels).",
         "{ at: number }",
@@ -1586,7 +1586,7 @@ pub const SPECS: &[Spec] = &[
         true,
     )),
     private(spec(
-        "selection.controlKey",
+        "select.controlKey",
         "A macOS Control editing key",
         "Runs a macOS Control editing key (`key`, for example `a`, `e`, `k`, `t`, `o`) or Page Up and Page Down on the editor's caret, as macOS text fields do.",
         "{ key: string, shift?: boolean }",
@@ -1885,7 +1885,7 @@ pub const SPECS: &[Spec] = &[
         nothing,
     ),
     editor_item(
-        "insert.wikilink",
+        "wikilink.insert",
         "Wikilink",
         "Wraps the editor's selection in a wikilink (`[[…]]`), or inserts an empty one to type a note name into.",
         &["Insert"],
@@ -1894,7 +1894,7 @@ pub const SPECS: &[Spec] = &[
         nothing,
     ),
     editor_item(
-        "insert.embed",
+        "embed.insert",
         "Embed",
         "Wraps the editor's selection in an embed (`![[…]]`), or inserts an empty one.",
         &["Insert"],
@@ -1903,7 +1903,7 @@ pub const SPECS: &[Spec] = &[
         nothing,
     ),
     editor_item(
-        "insert.image",
+        "image.insert",
         "Image",
         "Inserts a Markdown image (`![…]()`) at the editor's caret, the selection as its alt text.",
         &["Insert"],
@@ -1911,9 +1911,9 @@ pub const SPECS: &[Spec] = &[
         true,
         nothing,
     ),
-    editor_item("insert.tag", "Tag", "Inserts a tag sign (`#`) before the editor's selection to type a tag into.", &["Insert"], None, true, nothing),
+    editor_item("tag.insert", "Tag", "Inserts a tag sign (`#`) before the editor's selection to type a tag into.", &["Insert"], None, true, nothing),
     editor_item(
-        "insert.table",
+        "table.insert",
         "Table",
         "Inserts an empty two-column table (header, delimiter and one body row) at the editor's caret.",
         &["Insert"],
@@ -1922,7 +1922,7 @@ pub const SPECS: &[Spec] = &[
         nothing,
     ),
     editor_item(
-        "insert.mathBlock",
+        "mathBlock.insert",
         "Math Block",
         "Puts the lines the editor's selection covers between `$$` fences, or inserts an empty math block.",
         &["Insert"],
@@ -1931,7 +1931,7 @@ pub const SPECS: &[Spec] = &[
         nothing,
     ),
     editor_item(
-        "insert.callout",
+        "callout.insert",
         "Callout",
         "Puts the lines the editor's selection covers in a note callout (`> [!NOTE]`), or inserts a new one with a title and contents.",
         &["Insert"],
@@ -1940,7 +1940,7 @@ pub const SPECS: &[Spec] = &[
         nothing,
     ),
     editor_item(
-        "insert.footnote",
+        "footnote.insert",
         "Footnote",
         "Inserts a footnote reference at the editor's caret and its definition at the end of the note, the caret there.",
         &["Insert"],
@@ -1949,7 +1949,7 @@ pub const SPECS: &[Spec] = &[
         nothing,
     ),
     with_utc_offset(editor_item(
-        "insert.date",
+        "date.insert",
         "Date",
         "Puts today's local date (YYYY-MM-DD) in place of the editor's selection.",
         &["Insert"],
@@ -1958,7 +1958,7 @@ pub const SPECS: &[Spec] = &[
         nothing,
     )),
     with_utc_offset(editor_item(
-        "insert.timestamp",
+        "timestamp.insert",
         "Date and Time",
         "Puts the current local date and time (YYYY-MM-DD HH:mm) in place of the editor's selection.",
         &["Insert"],
@@ -1967,7 +1967,7 @@ pub const SPECS: &[Spec] = &[
         nothing,
     )),
     editor_item(
-        "insert.codeBlock",
+        "codeBlock.insert",
         "Code Block",
         "Puts the lines the editor's selection covers between ``` fences, or inserts an empty code block.",
         &["Insert"],
@@ -1975,7 +1975,7 @@ pub const SPECS: &[Spec] = &[
         true,
         nothing,
     ),
-    editor_item("insert.rule", "Horizontal Rule", "Inserts a horizontal rule (`---`) at the editor's caret.", &["Insert"], None, true, nothing),
+    editor_item("rule.insert", "Horizontal Rule", "Inserts a horizontal rule (`---`) at the editor's caret.", &["Insert"], None, true, nothing),
     // Undo scopes (KitModel 1.1 M12a, engine rule E14a): an agent's undo takes back only its own steps.
     Spec {
         menu: Some(&["Edit"]),
@@ -2099,9 +2099,9 @@ pub fn is_editor(id: &str) -> bool {
                 | "edit.moveLineDown"
                 | "edit.deleteParagraph"
                 | "code.blocks"
-                | "diagrams.view"
+                | "diagram.view"
                 | "diagram.set"
-                | "properties.view"
+                | "property.view"
                 | "table.geometry"
                 | "view.width"
                 | "view.scheme"

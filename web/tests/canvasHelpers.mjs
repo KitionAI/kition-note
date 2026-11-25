@@ -1,7 +1,7 @@
 // Helpers for the flow tests on the engine's canvas: the engine holds and draws the note, so a
 // test reads its text through the host's AI bridge, moves the person's caret as the host shows a
 // place (`document/reveal`, a line and a column) and extends it with the keyboard, then types with
-// the keyboard into kit-editor's text field. (An agent's `selection.set` through `ai/run` runs in
+// the keyboard into kit-editor's text field. (An agent's `select.set` through `ai/run` runs in
 // an editor state of the agent's own, Kit UI protocol C3b: it never moves the person's selection.)
 
 /** The note's frame in `page`. */
@@ -55,17 +55,17 @@ export async function selectChars(page, run, anchor, focus = anchor, slot = 'a')
   const path = `body:${line}:${anchor - lineStart + 1}`
   const holds = async (wanted) => {
     for (let i = 0; i < 100; i += 1) {
-      const now = await run('selection.get')
+      const now = await run('select.get')
       if (now.anchor === wanted.anchor && now.focus === wanted.focus) return true
       await page.waitForTimeout(20)
     }
     return false
   }
   await reveal(page, path, slot)
-  if (!(await holds({ anchor, focus: anchor }))) throw new Error(`the host's reveal of ${path} did not put the caret at ${anchor}: ${JSON.stringify(await run('selection.get'))}`)
+  if (!(await holds({ anchor, focus: anchor }))) throw new Error(`the host's reveal of ${path} did not put the caret at ${anchor}: ${JSON.stringify(await run('select.get'))}`)
   const key = focus > anchor ? 'Shift+ArrowRight' : 'Shift+ArrowLeft'
   for (let i = 0; i < Math.abs(focus - anchor); i += 1) await page.keyboard.press(key)
-  if (!(await holds({ anchor, focus }))) throw new Error(`Shift+Arrow did not select ${anchor} to ${focus}: ${JSON.stringify(await run('selection.get'))}`)
+  if (!(await holds({ anchor, focus }))) throw new Error(`Shift+Arrow did not select ${anchor} to ${focus}: ${JSON.stringify(await run('select.get'))}`)
 }
 
 /**
@@ -93,7 +93,7 @@ export async function selectText(page, run, read, wanted) {
  */
 export async function clickAtChar(page, run, index) {
   const at = await page.evaluate(async (index) => {
-    const steps = [{ command: 'selection.set', params: { anchor: index } }, { command: 'selection.get', params: {} }]
+    const steps = [{ command: 'select.set', params: { anchor: index } }, { command: 'select.get', params: {} }]
     const { completed } = await window.devHost.connection().ai.run(steps, false)
     return completed[1].result.caret
   }, index)

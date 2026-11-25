@@ -13,6 +13,6 @@ import { runModeSmoke } from '@kition/sdk/dev-host/mode-smoke'
 // runs on, which is what ControlOrMeta follows.
 process.env.PLAYWRIGHT_NO_UA_PLATFORM = '1'
 
-const FORMAT_ROW = ['format.heading1', 'format.heading2', 'format.heading3', 'format.bold', 'format.italic', 'format.strike', 'format.code', 'list.bullet', 'list.numbered', 'list.task', 'format.quote', 'format.link', 'insert.table', 'insert.codeBlock']
+const FORMAT_ROW = ['format.heading1', 'format.heading2', 'format.heading3', 'format.bold', 'format.italic', 'format.strike', 'format.code', 'list.bullet', 'list.numbered', 'list.task', 'format.quote', 'format.link', 'table.insert', 'codeBlock.insert']
 const line = { tab: 'Format', primary: FORMAT_ROW.map((command) => `note-cmd-${command}`), min: 12 }
 await runModeSmoke({ kit: 'kit.note', line, config: new URL('../vite.config.ts', import.meta.url).pathname, browser: process.argv[2] === 'webkit' ? webkit : chromium, createServer })

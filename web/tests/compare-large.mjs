@@ -131,10 +131,10 @@ await measure('Kition', page, {
     const kit = page.frames().find((frame) => frame !== page.mainFrame())
     const box = await kit.locator('[data-testid="note-canvas"] canvas').first().boundingBox()
     await page.mouse.click(box.x + box.width / 2, box.y + 40)
-    await run('selection.set', { anchor: [...text.slice(0, middle + HEADING.length)].length })
+    await run('select.set', { anchor: [...text.slice(0, middle + HEADING.length)].length })
     await page.waitForTimeout(800)
   },
-  line: async () => (await run('selection.get')).before ?? '',
+  line: async () => (await run('select.get')).before ?? '',
   scroll: async () => {
     const kit = page.frames().find((frame) => frame !== page.mainFrame())
     const box = await kit.locator('[data-testid="note-canvas"] canvas').first().boundingBox()

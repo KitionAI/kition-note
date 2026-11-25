@@ -4,7 +4,7 @@
  * size from the column's left edge (a block that does not parse shows Mermaid's error as code);
  * an HTML block as its HTML (`<details>` folds), sanitized, and without anything it would load
  * from the network (the kit loads nothing from it, UI-K1). The engine asks for the blocks it has
- * no size for (`diagrams.view`), keeps each one's room once it is measured (`diagram.set`, again
+ * no size for (`diagram.view`), keeps each one's room once it is measured (`diagram.set`, again
  * when an HTML block changes size), and reports where the drawn ones are; they are drawn over the
  * canvas there. A click on one leaves the caret where it is, as in Obsidian; its edit button puts
  * the caret at the start of its source.
@@ -292,7 +292,7 @@ export function Diagrams({
                   event.stopPropagation()
                 }}
                 onClick={() => {
-                  void run('selection.set', { anchor: diagram.code })
+                  void run('select.set', { anchor: diagram.code })
                   // The keyboard goes to the note's source (an embedded editor takes it only on a click like this).
                   ;(document.querySelector('[data-testid="kit-text-sink"]') as HTMLElement | null)?.focus({ preventScroll: true })
                 }}

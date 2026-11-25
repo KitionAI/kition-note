@@ -49,13 +49,13 @@ const HEADINGS: Array<[string, string, number]> = [
   ['Body', 'format.paragraph', 0],
 ]
 const INSERT: Row[] = [
-  ['Footnote', 'insert.footnote', null],
-  ['Table', 'insert.table', null],
-  ['Callout', 'insert.callout', null],
-  ['Horizontal rule', 'insert.rule', null],
+  ['Footnote', 'footnote.insert', null],
+  ['Table', 'table.insert', null],
+  ['Callout', 'callout.insert', null],
+  ['Horizontal rule', 'rule.insert', null],
   null,
-  ['Code block', 'insert.codeBlock', null],
-  ['Maths block', 'insert.mathBlock', null],
+  ['Code block', 'codeBlock.insert', null],
+  ['Maths block', 'mathBlock.insert', null],
 ]
 
 const MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
@@ -112,7 +112,7 @@ export function EditorMenu({
   useEffect(() => {
     if (!at) return
     setLevel(null)
-    void run<{ before?: string }>('selection.get', {})
+    void run<{ before?: string }>('select.get', {})
       .then((answer) => {
         const hashes = /^(#{1,6}) /.exec(answer.before ?? '')
         const marked = /^(?:\s*(?:[-*+]|\d+[.)])\s|>)/.test(answer.before ?? '')
@@ -147,13 +147,13 @@ export function EditorMenu({
           data.setData('text/html', html)
           const markdown = pastedMarkdown(data)
           if (markdown !== null) {
-            await run('selection.replace', { text: markdown })
+            await run('select.replace', { text: markdown })
             return
           }
         }
       }
       const text = await navigator.clipboard.readText()
-      if (text) await run('selection.replace', { text, paste: true })
+      if (text) await run('select.replace', { text, paste: true })
     } catch (error) {
       toast('error', t('commandFailed'), message(error))
     }
@@ -162,7 +162,7 @@ export function EditorMenu({
     <ContextMenu at={at} onClose={onClose} label={phrase('Edit')} testId="note-context-menu">
       {readOnly ? null : (
         <>
-          <MenuItem label={phrase('Add link')} onSelect={command('insert.wikilink')} testId="note-menu-insert.wikilink" />
+          <MenuItem label={phrase('Add link')} onSelect={command('wikilink.insert')} testId="note-menu-wikilink.insert" />
           <MenuItem label={phrase('Add external link')} shortcut={shortcutLabel('Mod+K')} onSelect={command('format.link')} testId="note-menu-format.link" />
           <MenuSeparator />
           <SubMenu label="Format" path="context/format" testId="note-menu-format">

@@ -27,8 +27,8 @@ fn ids(doc: &mut NoteDocument, kind: &str) -> Vec<(String, String)> {
 
 /// The person types: `text` over the selection from `from` to `to` (characters).
 fn typed(doc: &mut NoteDocument, from: usize, to: usize, text: &str) {
-    doc.execute("selection.set", json!({ "anchor": from, "focus": to })).unwrap();
-    doc.execute("selection.replace", json!({ "text": text })).unwrap();
+    doc.execute("select.set", json!({ "anchor": from, "focus": to })).unwrap();
+    doc.execute("select.replace", json!({ "text": text })).unwrap();
 }
 
 fn at(doc: &NoteDocument, find: &str) -> usize {

@@ -1,7 +1,7 @@
 /**
  * The note's comments (rule M23): threads beside the text in the replica, never in the `.md`. The
  * threads are the engine's (`comment.threads`), drawn by kit-editor's `CommentsPanel`; a new thread
- * anchors to the engine's selection (`selection.get`), or to the whole note without one.
+ * anchors to the engine's selection (`select.get`), or to the whole note without one.
  */
 import { useEffect, useMemo, useState } from 'react'
 import { Button, CommentsPanel, toast, createKitStrings, type CommentsPanelProps, type HostConnection } from '@kition/sdk/editor'
@@ -90,7 +90,7 @@ export function NoteComments({ host, session, run, t }: { host: HostConnection; 
   /** A new thread at the engine's selection (Unicode characters), or on the whole note. */
   const startThread = async () => {
     const anchor: CommentAnchor = { object: NOTE_ROOT_ID, field: NOTE_BODY }
-    const selection = await run<{ from: number; to: number; text: string }>('selection.get', {}).catch(() => null)
+    const selection = await run<{ from: number; to: number; text: string }>('select.get', {}).catch(() => null)
     if (selection && selection.to > selection.from) setPending({ ...anchor, range: { start: selection.from, end: selection.to }, quote: selection.text })
     else setPending(anchor)
   }

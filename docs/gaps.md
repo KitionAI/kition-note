@@ -20,9 +20,9 @@ land work, then this list. The comparison with the target application is in
 
 - `note.collab.live`: A typing run is one undo step only until another person's change to the text comes in (the replica's undo group ends at an import that touches the same text); the run then undoes in two steps. Peers' carets are placed in this person's own layout (their active line's Markdown syntax is not shown here).
 - `note.format`: The other formats (highlight and its colour, clear, link, paragraph, the other heading levels, comment, lists) are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs.
-- `note.insert`: insert.image, insert.tag, insert.date, insert.timestamp and template.expand are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs.
-- `note.links`: insert.wikilink and insert.embed are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs.
-- `note.properties`: properties.view (the editor's properties panel) is covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs.
+- `note.insert`: image.insert, tag.insert, date.insert, timestamp.insert and template.expand are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs.
+- `note.links`: wikilink.insert and embed.insert are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs.
+- `note.properties`: property.view (the editor's properties panel) is covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs.
 - `note.structure`: section.delete and block.setId are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs.
 - `note.tables`: table.deleteRow, table.deleteColumn, table.moveColumn and table.geometry are covered by the command and editor tests, not by the round trip in bindings/wasm/src/round_trip_tests.rs.
 

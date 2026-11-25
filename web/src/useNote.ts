@@ -52,7 +52,7 @@ export function useNote(session: Session, host: HostConnection, bridge: NoteSess
       await engine.invoke<string>('mergeFile', new Uint8Array(bytes))
       // An engine call is no change to kit-editor: a command through the session refreshes the editor
       // (the canvas repaints the merged note).
-      if (latest.current.doc === engine) await latest.current.run('selection.get', {}).catch(() => undefined)
+      if (latest.current.doc === engine) await latest.current.run('select.get', {}).catch(() => undefined)
     },
     [host],
   )

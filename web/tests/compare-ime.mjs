@@ -133,12 +133,12 @@ async function inKition(before, list) {
   const { text, anchor, focus } = parse(before)
   const now = [...(await run('text.read')).text].length
   await run('text.replace', { from: 0, to: now, text })
-  await run('selection.set', { anchor, focus })
+  await run('select.set', { anchor, focus })
   await page.waitForTimeout(100)
   await steps(page, pageCdp, list)
   await page.waitForTimeout(300)
   const value = (await run('text.read')).text
-  const selection = await run('selection.get')
+  const selection = await run('select.get')
   return { value, anchor: selection.anchor, head: selection.focus }
 }
 

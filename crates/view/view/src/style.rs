@@ -990,7 +990,7 @@ impl Styles {
 
     /// The front matter as properties, always (Obsidian's live preview keeps the caret out of it):
     /// every line a [`Block::Property`] with its text hidden; the editor draws Obsidian's properties
-    /// block over them (`code` of `properties.view`), one row a key, edited in it.
+    /// block over them (`code` of `property.view`), one row a key, edited in it.
     fn properties(&mut self, text: &str) {
         // Front matter with nothing between its fences takes no room (Obsidian shows nothing).
         if let Some((body, close)) = kition_note_markdown::frontmatter::locate(text)

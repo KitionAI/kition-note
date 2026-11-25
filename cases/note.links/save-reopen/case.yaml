@@ -2,7 +2,7 @@ format: 1
 id: note.links/save-reopen
 feature: note.links
 intent: >-
-  A Markdown link updated, a link inserted and wikilinks retargeted survive a save and reopen: the same bytes and the same links.list.
+  A Markdown link updated, a link inserted and wikilinks retargeted survive a save and reopen: the same bytes and the same link.list.
 layer: gate
 source:
   kind: synthetic

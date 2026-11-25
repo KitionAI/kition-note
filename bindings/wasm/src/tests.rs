@@ -170,7 +170,7 @@ const GOALS: &str = "# Plan\n\nGoals here\n";
 /// A note with the caret after "Goals" and " x" typed there, the typing run still open.
 fn typed_note() -> NoteDocument {
     let mut doc = NoteDocument::open("plan.md", GOALS.as_bytes()).unwrap();
-    doc.execute("selection.set", json!({ "anchor": 13, "focus": 13 })).unwrap();
+    doc.execute("select.set", json!({ "anchor": 13, "focus": 13 })).unwrap();
     for typed in [" ", "x"] {
         kition_kit::tools::KitTools::text(&mut doc, typed, 1.0).unwrap();
     }
@@ -235,7 +235,7 @@ fn a_draft_made_before_the_person_typed_merges_with_the_typing_and_undoes_alone(
     let agent = Origin::agent("agent:test");
     draft.execute_as("comment.add", json!({ "quote": "Goals", "body": "Which ones?", "created": "2026-11-25T10:00:00Z" }), &agent).unwrap();
     let changes = kition_kit::session::__export_changes(&draft, &since).unwrap();
-    doc.execute("selection.set", json!({ "anchor": 13, "focus": 13 })).unwrap();
+    doc.execute("select.set", json!({ "anchor": 13, "focus": 13 })).unwrap();
     for typed in [" ", "x"] {
         kition_kit::tools::KitTools::text(&mut doc, typed, 1.0).unwrap();
     }

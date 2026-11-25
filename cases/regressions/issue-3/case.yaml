@@ -5,7 +5,7 @@ intent: >-
   The note's own render (thumbnails, previews, a host without the editor) draws the front matter
   as the properties block (heading, a row per key with its type's icon, its name and its value;
   tags as pills, a checkbox as a box), and tints the text each open comment thread is anchored to
-  (not a resolved one's). Once the editor asks for the block (properties.view) it draws it as its
+  (not a resolved one's). Once the editor asks for the block (property.view) it draws it as its
   overlay and the render leaves its room blank. Before, the block was 120 to 210 px of blank space
   and comment threads were not drawn. Mermaid diagrams still draw as code in the render.
 layer: gate

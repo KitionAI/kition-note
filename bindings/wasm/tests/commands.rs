@@ -67,8 +67,8 @@ fn calls(id: &str) -> Vec<Call> {
         "block.read" => on(json!({ "blockId": "intro" })),
         "property.list" => vec![(SAMPLE, json!({})), (ODD_PROPERTIES, json!({})), (BROKEN_PROPERTIES, json!({})), (PLAIN, json!({}))],
         "table.read" => vec![(SAMPLE, json!({})), (SAMPLE, json!({ "table": 0 })), (RICH, json!({ "table": 0 }))],
-        "links.list" => vec![(SAMPLE, json!({})), (RICH, json!({}))],
-        "tasks.list" => vec![(SAMPLE, json!({})), (RICH, json!({}))],
+        "link.list" => vec![(SAMPLE, json!({})), (RICH, json!({}))],
+        "task.list" => vec![(SAMPLE, json!({})), (RICH, json!({}))],
         "text.find" => vec![(SAMPLE, json!({ "find": "bold" })), (SAMPLE, json!({ "find": "t", "limit": 1 }))],
         "page.layout" => vec![(SAMPLE, json!({})), (RICH, json!({ "page": 1, "pageSize": "a4" }))],
         "file.export" => vec![
@@ -95,7 +95,7 @@ fn calls(id: &str) -> Vec<Call> {
         "property.set" => on(json!({ "key": "status", "value": ["a", "b"] })),
         "property.delete" => on(json!({ "key": "title" })),
         "property.rename" => on(json!({ "key": "title", "to": "name" })),
-        "table.create" => on(json!({ "columns": 2, "header": ["X", "Y"] })),
+        "table.add" => on(json!({ "columns": 2, "header": ["X", "Y"] })),
         "table.setCell" => on(json!({ "table": 0, "row": 1, "column": 0, "text": "9", "expected": "1" })),
         "table.insertRow" => on(json!({ "table": 0, "at": 1, "cells": ["5", "6"] })),
         "table.insertColumn" => on(json!({ "table": 0, "at": 1, "header": "C" })),
@@ -107,26 +107,26 @@ fn calls(id: &str) -> Vec<Call> {
         "table.format" => on(json!({ "table": 0 })),
         "link.insert" => on(json!({ "at": 0, "destination": "Plan" })),
         "link.update" => on(json!({ "line": 7, "index": 0, "destination": "Else" })),
-        "links.retarget" => on(json!({ "from": "Other", "to": "Renamed" })),
+        "link.retarget" => on(json!({ "from": "Other", "to": "Renamed" })),
         "comment.add" => vec![(SAMPLE, json!({ "body": "Hi", "quote": "bold" })), (SAMPLE, json!({ "body": "On the whole note" }))],
         "comment.reply" => on(json!({ "thread": "$thread", "body": "Re", "name": "Ann" })),
         "comment.resolve" => on(json!({ "thread": "$thread" })),
         "comment.move" => on(json!({ "thread": "$thread", "quote": "text" })),
         "comment.delete" => on(json!({ "thread": "$thread", "comment": "$comment" })),
         "file.setLineEndings" => on(json!({ "eol": "crlf", "bom": true })),
-        "selection.set" => on(json!({ "anchor": 0, "focus": 4 })),
+        "select.set" => on(json!({ "anchor": 0, "focus": 4 })),
         "diagram.set" => on(json!({ "source": "graph TD; A-->B", "width": 100, "height": 80 })),
-        "properties.view" => vec![(SAMPLE, json!({})), (PLAIN, json!({}))],
+        "property.view" => vec![(SAMPLE, json!({})), (PLAIN, json!({}))],
         "image.wanted" => vec![(SAMPLE, json!({})), (RICH, json!({}))],
         "image.set" => on(json!({ "name": "a.png", "data": "" })),
-        "selection.replace" => on(json!({ "text": "x" })),
+        "select.replace" => on(json!({ "text": "x" })),
         "view.width" => on(json!({ "width": 800, "height": 600 })),
         "view.scheme" => on(json!({ "scheme": "dark" })),
-        "selection.where" => on(json!({ "at": 0 })),
+        "select.where" => on(json!({ "at": 0 })),
         "view.blockAt" => on(json!({ "x": 10, "y": 10 })),
         "format.highlightColor" => on(json!({ "color": "red" })),
-        "selection.controlKey" => on(json!({ "key": "a" })),
-        "code.blocks" | "table.geometry" | "diagrams.view" => vec![(SAMPLE, json!({})), (RICH, json!({ "top": 0, "bottom": 100000 }))],
+        "select.controlKey" => on(json!({ "key": "a" })),
+        "code.blocks" | "table.geometry" | "diagram.view" => vec![(SAMPLE, json!({})), (RICH, json!({ "top": 0, "bottom": 100000 }))],
         "edit.undo" | "edit.redo" => vec![(SAMPLE, json!({})), (SAMPLE, json!({ "scope": "agent" }))],
         _ => on(json!({})),
     }
@@ -143,12 +143,12 @@ fn prepare(doc: &mut NoteDocument, id: &str) -> (String, String) {
     if id == "edit.redo" {
         doc.execute("edit.undo", json!({})).unwrap();
     }
-    if id == "diagrams.view" {
+    if id == "diagram.view" {
         // A sized diagram is drawn: its box is answered too.
         doc.execute("diagram.set", json!({ "source": "graph TD; A-->B", "width": 100, "height": 80 })).unwrap();
     }
-    if kition_note_kit::commands::is_editor(id) && id != "selection.set" {
-        doc.execute("selection.set", json!({ "anchor": 40, "focus": 44 })).unwrap();
+    if kition_note_kit::commands::is_editor(id) && id != "select.set" {
+        doc.execute("select.set", json!({ "anchor": 40, "focus": 44 })).unwrap();
     }
     (added["thread"].as_str().unwrap().to_owned(), added["comment"].as_str().unwrap().to_owned())
 }

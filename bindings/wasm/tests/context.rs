@@ -30,7 +30,7 @@ fn samples() -> Vec<(&'static str, Value)> {
         ("property.set", json!({ "key": "status", "value": "review" })),
         ("property.delete", json!({ "key": "status" })),
         ("property.rename", json!({ "key": "status", "to": "state" })),
-        ("table.create", json!({ "columns": 2 })),
+        ("table.add", json!({ "columns": 2 })),
         ("table.setCell", json!({ "table": 0, "row": 1, "column": 1, "text": "Alpha" })),
         ("table.insertRow", json!({ "table": 0, "at": 2 })),
         ("table.insertColumn", json!({ "table": 0, "at": 1 })),
@@ -50,7 +50,7 @@ fn samples() -> Vec<(&'static str, Value)> {
 /// A note opened with the person's editor somewhere: a selection, a fold, a width.
 fn opened(selection: Value) -> NoteDocument {
     let mut doc = NoteDocument::open("plan.md", NOTE.as_bytes()).unwrap();
-    doc.execute("selection.set", selection).unwrap();
+    doc.execute("select.set", selection).unwrap();
     doc
 }
 

@@ -18,18 +18,18 @@ const ITEMS: Array<{ key: string; command: string; words: string }> = [
   { key: 'slash.numbered', command: 'list.numbered', words: 'numbered list ol' },
   { key: 'slash.task', command: 'list.task', words: 'task todo checkbox' },
   { key: 'slash.quote', command: 'format.quote', words: 'quote blockquote' },
-  { key: 'slash.code', command: 'insert.codeBlock', words: 'code block fence' },
-  { key: 'slash.table', command: 'insert.table', words: 'table grid' },
-  { key: 'slash.callout', command: 'insert.callout', words: 'callout note tip' },
-  { key: 'slash.math', command: 'insert.mathBlock', words: 'math formula latex' },
-  { key: 'slash.divider', command: 'insert.rule', words: 'divider rule hr line' },
-  { key: 'slash.image', command: 'insert.image', words: 'image picture' },
+  { key: 'slash.code', command: 'codeBlock.insert', words: 'code block fence' },
+  { key: 'slash.table', command: 'table.insert', words: 'table grid' },
+  { key: 'slash.callout', command: 'callout.insert', words: 'callout note tip' },
+  { key: 'slash.math', command: 'mathBlock.insert', words: 'math formula latex' },
+  { key: 'slash.divider', command: 'rule.insert', words: 'divider rule hr line' },
+  { key: 'slash.image', command: 'image.insert', words: 'image picture' },
   { key: 'slash.link', command: 'format.link', words: 'link url' },
-  { key: 'slash.wikilink', command: 'insert.wikilink', words: 'wikilink note link' },
-  { key: 'slash.date', command: 'insert.date', words: 'date today' },
+  { key: 'slash.wikilink', command: 'wikilink.insert', words: 'wikilink note link' },
+  { key: 'slash.date', command: 'date.insert', words: 'date today' },
 ]
 
-/** What the engine's `selection.get` answers that the menu reads. */
+/** What the engine's `select.get` answers that the menu reads. */
 export type Caret = { focus: number; before: string }
 
 const SLASH = /(?:^|\s)\/([\p{L}\p{N}]*)$/u
@@ -52,7 +52,7 @@ export function SlashMenu({ caret, place, run, t, readOnly }: { caret: Caret | n
       if (!item) return
       try {
         // The caret now, not as last drawn: a key typed just before Enter may not have redrawn yet.
-        const at = await run<Caret>('selection.get', {})
+        const at = await run<Caret>('select.get', {})
         const typed = SLASH.exec(at.before)?.[1]
         if (typed === undefined) return
         await run('text.delete', { from: at.focus - [...typed].length - 1, to: at.focus })

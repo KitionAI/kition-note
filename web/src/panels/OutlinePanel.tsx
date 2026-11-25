@@ -29,7 +29,7 @@ export function OutlinePanel({ session, run, onShown, title, empty }: { session:
 
   const reveal = async (heading: Heading) => {
     // A column past the line's end puts the caret at its end.
-    await run('selection.set', { line: Math.max(1, heading.line), column: Number.MAX_SAFE_INTEGER })
+    await run('select.set', { line: Math.max(1, heading.line), column: Number.MAX_SAFE_INTEGER })
     onShown()
   }
 

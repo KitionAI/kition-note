@@ -361,19 +361,19 @@ const SCENARIOS = [
   ['heading 2 on heading 1', '# a‸', ['cmd:editor:set-heading-2|format.heading2']],
   ['heading 0', '## a‸', ['cmd:editor:set-heading-0|format.paragraph']],
   ['heading on a list item', '- a‸', ['cmd:editor:set-heading-1|format.heading1']],
-  ['insert code block', 'a\n‸', ['cmd:editor:insert-codeblock|insert.codeBlock']],
-  ['insert code block on text', 'a‸', ['cmd:editor:insert-codeblock|insert.codeBlock']],
-  ['insert code block over a selection', '‹a\nb›', ['cmd:editor:insert-codeblock|insert.codeBlock']],
-  ['insert rule', 'a\n‸', ['cmd:editor:insert-horizontal-rule|insert.rule']],
-  ['insert rule on text', 'a‸', ['cmd:editor:insert-horizontal-rule|insert.rule']],
-  ['insert math block', 'a\n‸', ['cmd:editor:insert-mathblock|insert.mathBlock']],
-  ['insert callout', 'a\n‸', ['cmd:editor:insert-callout|insert.callout']],
-  ['insert callout on text', 'a‸', ['cmd:editor:insert-callout|insert.callout']],
-  ['insert wikilink', 'a ‸', ['cmd:editor:insert-wikilink|insert.wikilink']],
-  ['insert wikilink over a selection', 'a ‹b›', ['cmd:editor:insert-wikilink|insert.wikilink']],
-  ['insert embed', 'a ‸', ['cmd:editor:insert-embed|insert.embed']],
-  ['insert tag', 'a ‸', ['cmd:editor:insert-tag|insert.tag']],
-  ['insert table', 'a\n‸', ['cmd:editor:insert-table|insert.table']],
+  ['insert code block', 'a\n‸', ['cmd:editor:insert-codeblock|codeBlock.insert']],
+  ['insert code block on text', 'a‸', ['cmd:editor:insert-codeblock|codeBlock.insert']],
+  ['insert code block over a selection', '‹a\nb›', ['cmd:editor:insert-codeblock|codeBlock.insert']],
+  ['insert rule', 'a\n‸', ['cmd:editor:insert-horizontal-rule|rule.insert']],
+  ['insert rule on text', 'a‸', ['cmd:editor:insert-horizontal-rule|rule.insert']],
+  ['insert math block', 'a\n‸', ['cmd:editor:insert-mathblock|mathBlock.insert']],
+  ['insert callout', 'a\n‸', ['cmd:editor:insert-callout|callout.insert']],
+  ['insert callout on text', 'a‸', ['cmd:editor:insert-callout|callout.insert']],
+  ['insert wikilink', 'a ‸', ['cmd:editor:insert-wikilink|wikilink.insert']],
+  ['insert wikilink over a selection', 'a ‹b›', ['cmd:editor:insert-wikilink|wikilink.insert']],
+  ['insert embed', 'a ‸', ['cmd:editor:insert-embed|embed.insert']],
+  ['insert tag', 'a ‸', ['cmd:editor:insert-tag|tag.insert']],
+  ['insert table', 'a\n‸', ['cmd:editor:insert-table|table.insert']],
   ['indent list command', '- a\n- b‸', ['cmd:editor:indent-list|edit.indent']],
   ['Cmd+K over a URL selection', 'a ‹https://x.com› b', [`${mod}+k`]],
   ['Cmd+K over two words', 'a ‹b c› d', [`${mod}+k`]],
@@ -425,23 +425,23 @@ const SCENARIOS = [
   ['\' over lines', '‹a\nb›', ['type:\'']],
   ['` over lines', '‹a\nb›', ['type:`']],
   ['= over lines', '‹a\nb›', ['type:=']],
-  ['code block on a list item', '- a‸', ['cmd:editor:insert-codeblock|insert.codeBlock']],
-  ['code block mid text', 'ab‸c\nd', ['cmd:editor:insert-codeblock|insert.codeBlock']],
-  ['code block with a selection in a line', 'a ‹b› c', ['cmd:editor:insert-codeblock|insert.codeBlock']],
-  ['rule on an empty first line', '‸', ['cmd:editor:insert-horizontal-rule|insert.rule']],
-  ['rule mid text', 'ab‸c', ['cmd:editor:insert-horizontal-rule|insert.rule']],
-  ['math block on text', 'a‸', ['cmd:editor:insert-mathblock|insert.mathBlock']],
-  ['math block over a selection', '‹a\nb›', ['cmd:editor:insert-mathblock|insert.mathBlock']],
-  ['math block empty first', '‸', ['cmd:editor:insert-mathblock|insert.mathBlock']],
-  ['callout empty first line', '‸', ['cmd:editor:insert-callout|insert.callout']],
-  ['callout over a selection', '‹a\nb›', ['cmd:editor:insert-callout|insert.callout']],
-  ['callout then typing', '‸', ['cmd:editor:insert-callout|insert.callout', 'type:tip']],
-  ['table empty first line', '‸', ['cmd:editor:insert-table|insert.table']],
-  ['table on text', 'a‸', ['cmd:editor:insert-table|insert.table']],
-  ['table then typing', '‸', ['cmd:editor:insert-table|insert.table', 'type:x', 'Tab', 'type:y']],
-  ['wikilink over a selection then typing', 'a ‹b›', ['cmd:editor:insert-wikilink|insert.wikilink', 'type:x']],
-  ['embed over a selection', 'a ‹b›', ['cmd:editor:insert-embed|insert.embed']],
-  ['tag over a selection', 'a ‹b›', ['cmd:editor:insert-tag|insert.tag']],
+  ['code block on a list item', '- a‸', ['cmd:editor:insert-codeblock|codeBlock.insert']],
+  ['code block mid text', 'ab‸c\nd', ['cmd:editor:insert-codeblock|codeBlock.insert']],
+  ['code block with a selection in a line', 'a ‹b› c', ['cmd:editor:insert-codeblock|codeBlock.insert']],
+  ['rule on an empty first line', '‸', ['cmd:editor:insert-horizontal-rule|rule.insert']],
+  ['rule mid text', 'ab‸c', ['cmd:editor:insert-horizontal-rule|rule.insert']],
+  ['math block on text', 'a‸', ['cmd:editor:insert-mathblock|mathBlock.insert']],
+  ['math block over a selection', '‹a\nb›', ['cmd:editor:insert-mathblock|mathBlock.insert']],
+  ['math block empty first', '‸', ['cmd:editor:insert-mathblock|mathBlock.insert']],
+  ['callout empty first line', '‸', ['cmd:editor:insert-callout|callout.insert']],
+  ['callout over a selection', '‹a\nb›', ['cmd:editor:insert-callout|callout.insert']],
+  ['callout then typing', '‸', ['cmd:editor:insert-callout|callout.insert', 'type:tip']],
+  ['table empty first line', '‸', ['cmd:editor:insert-table|table.insert']],
+  ['table on text', 'a‸', ['cmd:editor:insert-table|table.insert']],
+  ['table then typing', '‸', ['cmd:editor:insert-table|table.insert', 'type:x', 'Tab', 'type:y']],
+  ['wikilink over a selection then typing', 'a ‹b›', ['cmd:editor:insert-wikilink|wikilink.insert', 'type:x']],
+  ['embed over a selection', 'a ‹b›', ['cmd:editor:insert-embed|embed.insert']],
+  ['tag over a selection', 'a ‹b›', ['cmd:editor:insert-tag|tag.insert']],
   ['fold at a heading', '# H‸\nbody\n# I\nmore', ['cmd:editor:toggle-fold|view.fold']],
   ['fold from the body', '# H\nbo‸dy\n# I\nmore', ['cmd:editor:toggle-fold|view.fold']],
   ['fold then ArrowDown', '# H‸\nbody\n# I\nmore', ['cmd:editor:toggle-fold|view.fold', 'ArrowDown']],
@@ -855,7 +855,7 @@ async function inKition(before, keys) {
   await run('text.replace', { from: 0, to: now, text })
   // Folds are view state: none from the scenario before.
   await run('view.unfoldAll')
-  await run('selection.set', { anchor, focus })
+  await run('select.set', { anchor, focus })
   // The keyboard in the note (a scenario before may have left it in a field, as Mod+; does).
   await kit.getByTestId('kit-text-sink').focus()
   await page.waitForTimeout(100)
@@ -867,7 +867,7 @@ async function inKition(before, keys) {
   )
   await page.waitForTimeout(250)
   const value = (await run('text.read')).text
-  const selection = await run('selection.get')
+  const selection = await run('select.get')
   return { value, anchor: selection.anchor, head: selection.focus }
 }
 

@@ -1,6 +1,6 @@
 /**
  * Find, replace, and go to line over the engine (`text.find`, `text.findReplace`,
- * `selection.set`): Enter (and F3) selects the next match after the last one shown; Shift+Enter
+ * `select.set`): Enter (and F3) selects the next match after the last one shown; Shift+Enter
  * (Shift+F3) the one before. As in Obsidian, the bar opens with the selected text to find, and
  * replace takes the shown match (Enter in its field) or every match (Mod+Alt+Enter). Matches are
  * Unicode character ranges, as the engine counts. Steps run one after another, and closing waits for
@@ -41,7 +41,7 @@ export function FindBar({ mode, initial = '', run, t, onShown, onClose }: { mode
   }, [initial])
 
   const show = async (match: Match) => {
-    await run('selection.set', { anchor: match.from, focus: match.to })
+    await run('select.set', { anchor: match.from, focus: match.to })
     onShown()
   }
 
@@ -49,7 +49,7 @@ export function FindBar({ mode, initial = '', run, t, onShown, onClose }: { mode
     if (mode === 'line') {
       const line = Number.parseInt(query, 10)
       if (Number.isInteger(line) && line > 0) {
-        await run('selection.set', { line, column: 1 })
+        await run('select.set', { line, column: 1 })
         onShown()
         onClose()
       }
@@ -82,8 +82,8 @@ export function FindBar({ mode, initial = '', run, t, onShown, onClose }: { mode
       return
     }
     try {
-      await run('selection.set', { anchor: shown.from, focus: shown.to })
-      await run('selection.replace', { text: replacement })
+      await run('select.set', { anchor: shown.from, focus: shown.to })
+      await run('select.replace', { text: replacement })
       const answer = await run<{ matches: Match[] }>('text.find', { find: query, caseSensitive: false, limit: 1000 }).catch(() => ({ matches: [] }))
       const after = shown.from + [...replacement].length
       const index = answer.matches.findIndex((match) => match.from >= after)

@@ -2,7 +2,7 @@ format: 1
 id: note.tasks/save-reopen
 feature: note.tasks
 intent: >-
-  Tasks toggled with task.toggle and list.toggleCheckbox survive a Markdown save and reopen: the same bytes and the same tasks.list.
+  Tasks toggled with task.toggle and list.toggleCheckbox survive a Markdown save and reopen: the same bytes and the same task.list.
 layer: gate
 source:
   kind: synthetic

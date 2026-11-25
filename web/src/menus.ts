@@ -1,7 +1,7 @@
 /**
  * The note's menus: one catalog of rows, drawn by kit-editor's `EditorFrame` in every display
  * mode: drop-down menus in Menus, a generated row in Single line, the generated ribbon in Classic.
- * Rows that edit run as engine commands on the engine's selection (`format.bold`, `insert.table`;
+ * Rows that edit run as engine commands on the engine's selection (`format.bold`, `table.insert`;
  * their shortcuts are the engine's); `kit:` rows run here (panels, exports, find, AI).
  */
 import type { MenuRow } from '@kition/sdk/editor'
@@ -69,20 +69,20 @@ export const NOTE_MENUS: readonly MenuRow[] = [
   row(HEADING, 'Demote heading', 'format.headingDown'),
 
   row(INSERT, 'Link', 'format.link'),
-  row(INSERT, 'Wikilink', 'insert.wikilink'),
-  row(INSERT, 'Embed', 'insert.embed'),
-  row(INSERT, 'Image', 'insert.image'),
-  row(INSERT, 'Tag', 'insert.tag'),
+  row(INSERT, 'Wikilink', 'wikilink.insert'),
+  row(INSERT, 'Embed', 'embed.insert'),
+  row(INSERT, 'Image', 'image.insert'),
+  row(INSERT, 'Tag', 'tag.insert'),
   SEPARATOR(INSERT),
-  row(INSERT, 'Table', 'insert.table'),
-  row(INSERT, 'Code block', 'insert.codeBlock'),
-  row(INSERT, 'Math block', 'insert.mathBlock'),
-  row(INSERT, 'Callout', 'insert.callout'),
-  row(INSERT, 'Footnote', 'insert.footnote'),
-  row(INSERT, 'Divider', 'insert.rule'),
+  row(INSERT, 'Table', 'table.insert'),
+  row(INSERT, 'Code block', 'codeBlock.insert'),
+  row(INSERT, 'Math block', 'mathBlock.insert'),
+  row(INSERT, 'Callout', 'callout.insert'),
+  row(INSERT, 'Footnote', 'footnote.insert'),
+  row(INSERT, 'Divider', 'rule.insert'),
   SEPARATOR(INSERT),
-  row(INSERT, 'Date', 'insert.date'),
-  row(INSERT, 'Date and time', 'insert.timestamp'),
+  row(INSERT, 'Date', 'date.insert'),
+  row(INSERT, 'Date and time', 'timestamp.insert'),
 
   kit(VIEW, 'Outline', 'outline'),
   kit(VIEW, 'Comments', 'comments'),
@@ -111,7 +111,7 @@ export const FORMAT_TAB = 'Format'
 export const PRIMARY_ROWS: Readonly<Record<string, readonly string[]>> = {
   File: ['kit:export-html', 'kit:export-pdf', 'kit:print'],
   Edit: ['kit:find', 'text.findReplace', 'kit:goto-line', 'edit.selectSection', 'edit.moveLineUp', 'edit.moveLineDown', 'edit.deleteParagraph'],
-  Insert: ['format.link', 'insert.wikilink', 'insert.image', 'insert.table', 'insert.codeBlock', 'insert.mathBlock', 'insert.callout', 'insert.footnote', 'insert.rule'],
+  Insert: ['format.link', 'wikilink.insert', 'image.insert', 'table.insert', 'codeBlock.insert', 'mathBlock.insert', 'callout.insert', 'footnote.insert', 'rule.insert'],
   View: ['kit:outline', 'kit:comments', 'view.fold', 'view.foldAll', 'view.unfoldAll'],
   AI: ['kit:ai-improve', 'kit:ai-shorten', 'kit:ai-expand', 'kit:ai-agent', 'kit:ai-design'],
 }

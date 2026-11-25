@@ -30,8 +30,8 @@ fn every_key_a_command_reads_is_in_its_schema() {
     note.execute("note.write", json!({ "markdown": "# Plan\n\nWrite it.\n" })).unwrap();
     // text.insert checks `expected` against the empty range it inserts at.
     note.execute("text.insert", json!({ "at": 18, "text": "x", "expected": "" })).unwrap();
-    // selection.set: a line and column, or a document point, instead of anchor and focus.
-    note.execute("selection.set", json!({ "line": 3, "column": 2 })).unwrap();
+    // select.set: a line and column, or a document point, instead of anchor and focus.
+    note.execute("select.set", json!({ "line": 3, "column": 2 })).unwrap();
     // comment.move anchors a thread to a heading, as comment.add does.
     let added = note.execute("comment.add", json!({ "body": "Check", "quote": "Write" })).unwrap();
     let thread = added["thread"].as_str().unwrap().to_owned();

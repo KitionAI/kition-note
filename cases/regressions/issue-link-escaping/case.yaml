@@ -2,7 +2,7 @@ format: 1
 id: regressions/issue-link-escaping
 feature: note.links
 intent: >-
-  link.update and links.retarget wrote what they were given unescaped: a destination with ')' or
+  link.update and link.retarget wrote what they were given unescaped: a destination with ')' or
   '<' broke the link, and link text with ']' ended it early. They now write a destination in angle
   brackets with its own brackets escaped (or percent-encoded where the link is written that way)
   and escape brackets in link text, as link.insert does now too (it used to drop them); a wikilink,

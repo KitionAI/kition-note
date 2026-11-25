@@ -61,7 +61,7 @@ import { useColorScheme } from './colorScheme'
 
 type Strings = ReturnType<typeof createKitStrings>
 
-/** The engine's `selection.get`: Unicode character positions. */
+/** The engine's `select.get`: Unicode character positions. */
 type Selection = { from: number; to: number; text: string }
 
 /** What the engine's `openLink` request carries (a Cmd+click on a link). */
@@ -167,7 +167,7 @@ export function App({ host }: { host: HostConnection }) {
   /** The note's tags, for the tag menu (a read: it does not refresh the canvas). */
   const noteTags = useCallback(async () => {
     if (!doc) return []
-    const answer = JSON.parse(await doc.execute('links.list', { kinds: ['tag'] })) as { links: Array<{ name: string }> }
+    const answer = JSON.parse(await doc.execute('link.list', { kinds: ['tag'] })) as { links: Array<{ name: string }> }
     return answer.links.map((link) => link.name)
   }, [doc])
   /** The caret the last follow saw (in document pixels). */
@@ -186,7 +186,7 @@ export function App({ host }: { host: HostConnection }) {
     setCaretAt(caret)
     // The line before the caret, for the slash menu.
     void doc
-      .execute('selection.get', {})
+      .execute('select.get', {})
       .then((answer) => {
         const got = JSON.parse(answer) as { focus: number; to: number; from: number; before: string }
         setSlashCaret(got.from === got.to ? { focus: got.focus, before: got.before } : null)
@@ -297,8 +297,8 @@ export function App({ host }: { host: HostConnection }) {
   /** Mod+; (Obsidian's Add file property): a new property's key asked in the properties block. */
   const askProperty = useCallback(async () => {
     if (!properties) {
-      const at = await note.run<{ x: number; y: number }>('selection.where', { at: 0 })
-      const column = await note.run<{ column?: number }>('diagrams.view', { top: 0, bottom: 0 }).then((answer) => answer.column ?? 700)
+      const at = await note.run<{ x: number; y: number }>('select.where', { at: 0 })
+      const column = await note.run<{ column?: number }>('diagram.view', { top: 0, bottom: 0 }).then((answer) => answer.column ?? 700)
       setPendingProperties({ top: at.y - 8, bottom: at.y + 92, left: at.x, width: column, end: 0, rows: [] })
     }
     setAddProperty((count) => count + 1)
@@ -307,7 +307,7 @@ export function App({ host }: { host: HostConnection }) {
     if (!doc) return undefined
     let current = true
     void doc
-      .execute('properties.view', {})
+      .execute('property.view', {})
       .then((answer) => {
         if (!current) return
         const block = JSON.parse(answer) as PropertiesBlock | null
@@ -351,7 +351,7 @@ export function App({ host }: { host: HostConnection }) {
     if (!doc || !tableRange) return undefined
     let current = true
     void doc
-      .execute('diagrams.view', { top: tableRange[0], bottom: tableRange[1] })
+      .execute('diagram.view', { top: tableRange[0], bottom: tableRange[1] })
       .then((answer) => {
         if (current) setDiagrams(JSON.parse(answer) as DiagramsView)
       })
@@ -388,7 +388,7 @@ export function App({ host }: { host: HostConnection }) {
       for (const [index, file] of files.entries()) {
         try {
           const kept = await keepImage(host, file, index + 1)
-          await note.run('selection.replace', { text: imageMarkdown(host, kept, file) })
+          await note.run('select.replace', { text: imageMarkdown(host, kept, file) })
         } catch (error) {
           toast('error', t('imageFailed'), message(error))
         }
@@ -408,7 +408,7 @@ export function App({ host }: { host: HostConnection }) {
         text = kept.text
         if (kept.failed.length) toast('error', t('imagesNotKept', { count: kept.failed.length }), message(kept.failed[0]?.error))
       }
-      await note.run('selection.replace', { text })
+      await note.run('select.replace', { text })
     },
     [host, note, t],
   )
@@ -433,7 +433,7 @@ export function App({ host }: { host: HostConnection }) {
         if (!plain || !(target instanceof HTMLTextAreaElement) || !target.classList.contains('kui-text-sink')) return
         event.preventDefault()
         event.stopPropagation()
-        void note.run('selection.replace', { text: plain, paste: true }).catch((error: unknown) => toast('error', t('commandFailed'), message(error)))
+        void note.run('select.replace', { text: plain, paste: true }).catch((error: unknown) => toast('error', t('commandFailed'), message(error)))
         return
       }
       event.preventDefault()
@@ -453,7 +453,7 @@ export function App({ host }: { host: HostConnection }) {
       const surface = (event.currentTarget.querySelector('[data-testid="kit-canvas-surface"]') ?? event.currentTarget).getBoundingClientRect()
       const x = view.x + (event.clientX - surface.left) / view.zoom
       const y = view.y + (event.clientY - surface.top) / view.zoom
-      void note.run('selection.set', { x, y }).then(() => insertImages(files))
+      void note.run('select.set', { x, y }).then(() => insertImages(files))
     },
     [insertImages, note, readOnly],
   )
@@ -512,7 +512,7 @@ export function App({ host }: { host: HostConnection }) {
         const block = await note.run<{ callout?: boolean; active?: boolean }>('view.blockAt', { x, y }).catch(() => ({ callout: false, active: false }))
         if (block.callout && !block.active) return
         const selected = doc ? await doc.invoke<string>('selectedText').catch(() => '') : ''
-        if (!selected) await note.run('selection.set', { x, y }).catch(() => undefined)
+        if (!selected) await note.run('select.set', { x, y }).catch(() => undefined)
         setEditorMenu(at)
       })()
     },
@@ -533,7 +533,7 @@ export function App({ host }: { host: HostConnection }) {
       event.stopPropagation()
       if (event.key === 'Backspace' && !readOnly) {
         void note
-          .run('selection.controlKey', { key: 'h' })
+          .run('select.controlKey', { key: 'h' })
           .then(() => tools.refresh())
           .catch(() => undefined)
       }
@@ -562,7 +562,7 @@ export function App({ host }: { host: HostConnection }) {
       })
       .catch(() => setSelected(false))
     void (async () => {
-      const { from, to } = JSON.parse(await doc.execute('selection.get', {})) as Selection
+      const { from, to } = JSON.parse(await doc.execute('select.get', {})) as Selection
       const at = (offset: number) => ({ object: 'note', field: 'body', offset })
       const placed = JSON.parse(await doc.invoke<string>('presenceLocate', JSON.stringify([{ caret: at(to), anchor: at(from) }]))) as Array<{ rects?: Array<{ x: number; y: number; width: number; height: number }> }>
       setReadOnlyRects(placed[0]?.rects ?? [])
@@ -697,7 +697,7 @@ export function App({ host }: { host: HostConnection }) {
   /** The engine's selection, or `null` without one. */
   const selection = useCallback(async () => {
     try {
-      const answer = await note.run<Selection>('selection.get', {})
+      const answer = await note.run<Selection>('select.get', {})
       return answer.to > answer.from ? answer : null
     } catch {
       return null
@@ -831,7 +831,7 @@ export function App({ host }: { host: HostConnection }) {
       const letter = event.code.startsWith('Key') ? event.code.slice(3).toLowerCase() : event.key.toLowerCase()
       if (CONTROL_MOVES.has(letter) || (!readOnly && CONTROL_EDITS.has(letter))) {
         void note
-          .run('selection.controlKey', { key: letter })
+          .run('select.controlKey', { key: letter })
           .then(shown)
           .catch((error: unknown) => toast('error', t('commandFailed'), message(error)))
         return true
@@ -841,7 +841,7 @@ export function App({ host }: { host: HostConnection }) {
     // Obsidian; the frame does not hand them to the engine.
     if ((event.key === 'PageUp' || event.key === 'PageDown') && !event.metaKey && !event.ctrlKey && !event.altKey && doc) {
       void note
-        .run('selection.controlKey', { key: event.key === 'PageUp' ? 'pageUp' : 'pageDown', shift: event.shiftKey })
+        .run('select.controlKey', { key: event.key === 'PageUp' ? 'pageUp' : 'pageDown', shift: event.shiftKey })
         .then(shown)
         .catch((error: unknown) => toast('error', t('commandFailed'), message(error)))
       return true
@@ -853,7 +853,7 @@ export function App({ host }: { host: HostConnection }) {
     if ((undoSelection || groupBack) && doc && !(groupBack && readOnly)) {
       const key = groupBack ? 'groupH' : event.shiftKey ? 'redoSelection' : 'undoSelection'
       void note
-        .run('selection.controlKey', { key })
+        .run('select.controlKey', { key })
         .then(shown)
         .catch((error: unknown) => toast('error', t('commandFailed'), message(error)))
       return true

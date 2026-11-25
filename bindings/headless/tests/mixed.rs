@@ -65,7 +65,7 @@ fn change(kind: usize) -> Vec<(&'static str, Value)> {
         0 => vec![("text.findReplace", json!({ "find": "Some closing notes.", "replace": "Some closing remarks." }))],
         1 => vec![("section.insert", json!({ "heading": ["Launch plan", "Goals"], "position": "before", "markdown": "A new paragraph." }))],
         2 => vec![("table.setCell", json!({ "table": 1, "row": 1, "column": 1, "text": "150" }))],
-        3 => vec![("table.create", json!({ "heading": ["Launch plan", "Goals"], "position": "end", "columns": 2, "header": ["A", "B"] }))],
+        3 => vec![("table.add", json!({ "heading": ["Launch plan", "Goals"], "position": "end", "columns": 2, "header": ["A", "B"] }))],
         4 => vec![("task.toggle", json!({ "blockId": "draft" }))],
         5 => vec![("text.findReplace", json!({ "find": "## Tasks", "replace": "## To do" }))],
         6 => vec![("section.move", json!({ "heading": ["Launch plan", "Goals"], "toHeading": ["Launch plan", "Notes"], "position": "after" }))],

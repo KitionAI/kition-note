@@ -34,7 +34,7 @@ fn sync(a: &mut NoteDocument, b: &mut NoteDocument) {
 }
 
 fn select(doc: &mut NoteDocument, anchor: usize, focus: usize) {
-    doc.execute("selection.set", json!({ "anchor": anchor, "focus": focus })).unwrap();
+    doc.execute("select.set", json!({ "anchor": anchor, "focus": focus })).unwrap();
 }
 
 fn typing(doc: &mut NoteDocument, text: &str) {
@@ -43,9 +43,9 @@ fn typing(doc: &mut NoteDocument, text: &str) {
     }
 }
 
-/// The selection as `(from, to)` in Unicode characters, as `selection.get` answers it.
+/// The selection as `(from, to)` in Unicode characters, as `select.get` answers it.
 fn selection(doc: &mut NoteDocument) -> (u64, u64) {
-    let got = doc.execute("selection.get", json!({})).unwrap();
+    let got = doc.execute("select.get", json!({})).unwrap();
     (got["from"].as_u64().unwrap(), got["to"].as_u64().unwrap())
 }
 

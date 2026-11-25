@@ -1,7 +1,7 @@
 // The mouse as Obsidian takes it: the same clicks, double and triple clicks, Shift+click,
 // and drags on the same characters, in a running Obsidian and in the note editor. Fonts differ,
 // so each editor is asked where a character is drawn (Obsidian's `coordsAtPos`, the engine's
-// `selection.where`) and the pointer goes there; the outcomes (text and selection) are compared.
+// `select.where`) and the pointer goes there; the outcomes (text and selection) are compared.
 //
 //   OBSIDIAN_WS=ws://127.0.0.1:9333/devtools/browser/… node tests/compare-mouse.mjs [filter]
 //
@@ -165,7 +165,7 @@ async function inKition(text, actions) {
   const now = [...(await run('text.read')).text].length
   await run('text.replace', { from: 0, to: now, text })
   // At the last line's start, as Obsidian's caret is put.
-  await run('selection.set', { anchor: [...text].length - [...text.split('\n').at(-1)].length })
+  await run('select.set', { anchor: [...text].length - [...text.split('\n').at(-1)].length })
   await page.waitForTimeout(400)
   const box = await canvas.boundingBox()
   const [vx, vy, , , zoom] = (await kit.getByTestId('note-editor').getAttribute('data-view')).split(',').map(Number)
@@ -174,23 +174,23 @@ async function inKition(text, actions) {
     if (where === 'end') {
       const line = [...text].slice(0, index).join('').split('\n').length - 1
       const lineEnd = text.split('\n').slice(0, line + 1).join('\n').length
-      const end = await run('selection.where', { at: [...text.slice(0, lineEnd)].length })
+      const end = await run('select.where', { at: [...text.slice(0, lineEnd)].length })
       return screen(end.x + 60, end.y + end.height / 2)
     }
-    const at = await run('selection.where', { at: index })
-    const next = await run('selection.where', { at: index + 1 })
+    const at = await run('select.where', { at: index })
+    const next = await run('select.where', { at: index + 1 })
     const x = next.y === at.y ? (at.x + next.x) / 2 : at.x + 3
     if (index === 0 && text.startsWith('- [')) {
       // The task's box: drawn in its `[` (16 px, 7 px in at 16 px text).
-      const box = await run('selection.where', { at: 2 })
+      const box = await run('select.where', { at: 2 })
       return screen(box.x + 7 + 8, box.y + box.height / 2)
     }
     return screen(x, at.y + at.height / 2)
   }
-  await act(page, place, actions, (from, to) => run('selection.set', { anchor: from, focus: to }))
+  await act(page, place, actions, (from, to) => run('select.set', { anchor: from, focus: to }))
   await page.waitForTimeout(300)
   const value = (await run('text.read')).text
-  const selection = await run('selection.get')
+  const selection = await run('select.get')
   return { value, anchor: selection.anchor, head: selection.focus }
 }
 

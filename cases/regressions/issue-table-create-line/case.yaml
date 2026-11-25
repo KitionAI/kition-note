@@ -2,7 +2,7 @@ format: 1
 id: regressions/issue-table-create-line
 feature: note.tables
 intent: >-
-  table.create by line wrote the table at the start of whatever line it was given: inside a fenced
+  table.add by line wrote the table at the start of whatever line it was given: inside a fenced
   code block (where it became code and was still answered as a table), inside the front matter, or
   between the rows of another table. Such a line is refused as invalid-params now; a line that
   starts a block (an opening fence, a table's header, a paragraph) takes the table as before.

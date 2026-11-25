@@ -22,7 +22,7 @@ fn run(doc: &mut NoteDocument, command: &str, params: Value) -> Value {
 
 /// Puts the selection from `anchor` to `focus` (characters of the body).
 fn select(doc: &mut NoteDocument, anchor: usize, focus: usize) {
-    run(doc, "selection.set", json!({ "anchor": anchor, "focus": focus }));
+    run(doc, "select.set", json!({ "anchor": anchor, "focus": focus }));
 }
 
 /// Selects the first occurrence of `text` in the body.
@@ -40,8 +40,8 @@ fn reads(doc: &mut NoteDocument) -> Value {
         "outline": run(doc, "outline.read", json!({})),
         "properties": run(doc, "property.list", json!({})),
         "tables": each,
-        "links": run(doc, "links.list", json!({})),
-        "tasks": run(doc, "tasks.list", json!({})),
+        "links": run(doc, "link.list", json!({})),
+        "tasks": run(doc, "task.list", json!({})),
         "code": run(doc, "code.blocks", json!({})),
     })
 }
@@ -91,7 +91,7 @@ fn properties_survive_save_and_reopen() {
 #[test]
 fn tables_survive_save_and_reopen() {
     let mut doc = open(PLAN);
-    run(&mut doc, "table.create", json!({ "heading": ["Plan", "Owners"], "columns": 2, "header": ["Item", "Owner"] }));
+    run(&mut doc, "table.add", json!({ "heading": ["Plan", "Owners"], "columns": 2, "header": ["Item", "Owner"] }));
     run(&mut doc, "table.setCell", json!({ "table": 0, "row": 1, "column": 0, "text": "Ship" }));
     run(&mut doc, "table.setCell", json!({ "table": 0, "row": 1, "column": 1, "text": "Ann" }));
     run(&mut doc, "table.insertRow", json!({ "table": 0, "at": 2, "cells": ["Test", "Bo 中文"] }));
@@ -113,12 +113,12 @@ fn links_survive_save_and_reopen() {
     run(&mut doc, "link.update", json!({ "line": line, "index": 1, "destination": "docs/doc.md" }));
     let at = doc.text().chars().count() - 1;
     run(&mut doc, "link.insert", json!({ "at": at, "destination": "Owners", "text": "people" }));
-    run(&mut doc, "links.retarget", json!({ "from": "Plan", "to": "Road map" }));
-    let links = run(&mut doc, "links.list", json!({}));
+    run(&mut doc, "link.retarget", json!({ "from": "Plan", "to": "Road map" }));
+    let links = run(&mut doc, "link.list", json!({}));
     let shown = links.to_string();
     assert!(shown.contains("docs/doc.md") && shown.contains("Road map") && shown.contains("Owners"), "{shown}");
     let mut back = round_trip(&mut doc);
-    assert_eq!(run(&mut back, "links.list", json!({})), links);
+    assert_eq!(run(&mut back, "link.list", json!({})), links);
 }
 
 #[test]
@@ -127,10 +127,10 @@ fn tasks_survive_save_and_reopen() {
     run(&mut doc, "task.toggle", json!({ "blockId": "t1" }));
     select_text(&mut doc, "Budget");
     run(&mut doc, "list.toggleCheckbox", json!({}));
-    let tasks = run(&mut doc, "tasks.list", json!({}));
+    let tasks = run(&mut doc, "task.list", json!({}));
     assert!(doc.text().contains("- [x] Hire ^t1") && doc.text().contains("- [ ] Budget"), "{}", doc.text());
     let mut back = round_trip(&mut doc);
-    assert_eq!(run(&mut back, "tasks.list", json!({})), tasks);
+    assert_eq!(run(&mut back, "task.list", json!({})), tasks);
 }
 
 #[test]
@@ -158,7 +158,7 @@ fn inline_and_block_formatting_survive_save_and_reopen() {
 fn inserted_blocks_survive_save_and_reopen() {
     let mut doc = open("# Plan\n\nEnd.\n");
     let end = doc.body().chars().count();
-    for command in ["insert.rule", "insert.codeBlock", "insert.callout", "insert.mathBlock", "insert.footnote", "insert.table"] {
+    for command in ["rule.insert", "codeBlock.insert", "callout.insert", "mathBlock.insert", "footnote.insert", "table.insert"] {
         select(&mut doc, end, end);
         run(&mut doc, command, json!({}));
     }

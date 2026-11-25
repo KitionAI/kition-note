@@ -90,7 +90,7 @@ for (const name of names) {
   await page.evaluate(async ([file, body]) => window.devHost.open(file, new TextEncoder().encode(body).buffer), [name, text])
   await page.waitForFunction((file) => document.getElementById('status')?.textContent?.includes(`${file} open in`), name, { timeout: 90000 })
   await page.waitForTimeout(1500)
-  await run('selection.set', { anchor: 1e9 })
+  await run('select.set', { anchor: 1e9 })
   await run(process.env.FOLD ? 'view.foldAll' : 'view.unfoldAll')
   await page.waitForTimeout(600)
   const kit = []
@@ -99,7 +99,7 @@ for (const name of names) {
       kit.push(null)
       continue
     }
-    const where = await run('selection.where', { at: [...text.slice(0, offset)].length })
+    const where = await run('select.where', { at: [...text.slice(0, offset)].length })
     kit.push(where && where.height > 0 ? { x: where.x, y: where.y } : null)
   }
   // Compare: distances between consecutive shown lines, and x from the first paragraph's.

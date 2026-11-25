@@ -397,7 +397,7 @@ pub fn resolve(params: &Value, state: &Snapshot) -> Result<Value, String> {
         let Some(value) = params.get(*name).filter(|value| !value.is_null()) else { continue };
         let id = value.as_str().and_then(Id::parse).filter(|id| id.kind == *kind).ok_or_else(|| {
             format!(
-                "invalid-params: {name} is a {noun} id such as \"{noun}:1\" (outline.read and tasks.list list them), not {value}",
+                "invalid-params: {name} is a {noun} id such as \"{noun}:1\" (outline.read and task.list list them), not {value}",
                 noun = kind.noun()
             )
         })?;
@@ -405,7 +405,7 @@ pub fn resolve(params: &Value, state: &Snapshot) -> Result<Value, String> {
             return Err(format!("invalid-params: give {name} or {both}, not both"));
         }
         let found = state.find(id).ok_or_else(|| {
-            format!("not-found: the note has no {id} now: it was deleted, or no id this session gave (outline.read and tasks.list list the ids)")
+            format!("not-found: the note has no {id} now: it was deleted, or no id this session gave (outline.read and task.list list the ids)")
         })?;
         if let Some(object) = out.as_object_mut() {
             object.remove(*name);

@@ -44,11 +44,11 @@ export function TagMenu({ caret, place, run, tags, t, readOnly }: { caret: Caret
       if (!name) return
       try {
         // The caret now, not as last drawn: a key typed just before Enter may not have redrawn yet.
-        const at = await run<Caret>('selection.get', {})
+        const at = await run<Caret>('select.get', {})
         const typed = TAG.exec(at.before)?.[1]
         if (typed === undefined) return
-        await run('selection.set', { anchor: at.focus - [...typed].length, focus: at.focus })
-        await run('selection.replace', { text: `${name} ` })
+        await run('select.set', { anchor: at.focus - [...typed].length, focus: at.focus })
+        await run('select.replace', { text: `${name} ` })
       } catch (error) {
         toast('error', t('commandFailed'), message(error))
       }

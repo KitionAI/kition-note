@@ -154,7 +154,7 @@ async function setKition(text, anchor, focus) {
   const now = [...(await run('text.read')).text].length
   await run('text.replace', { from: 0, to: now, text })
   await run('view.unfoldAll')
-  await run('selection.set', { anchor, focus })
+  await run('select.set', { anchor, focus })
   await page.waitForTimeout(100)
   const starts = []
   let top = null
@@ -164,7 +164,7 @@ async function setKition(text, anchor, focus) {
       top = null
       continue
     }
-    const where = await run('selection.where', { at })
+    const where = await run('select.where', { at })
     if (top !== null && where.y > top + 2) starts.push(at)
     top = where.y
   }
@@ -176,7 +176,7 @@ async function inKition(text, anchor, focus, keys) {
   await act(page, keys)
   await page.waitForTimeout(250)
   const value = (await run('text.read')).text
-  const selection = await run('selection.get')
+  const selection = await run('select.get')
   return { value, anchor: selection.anchor, head: selection.focus }
 }
 

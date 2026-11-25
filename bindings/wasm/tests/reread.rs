@@ -12,7 +12,7 @@ use serde_json::{Value, json};
 const NOTE: &str = "# Plan\n\nFirst point.\nSecond point.\n\n## Tasks\n\n- [ ] Draft the post\n- [ ] Book the room\n";
 
 fn selection(doc: &mut NoteDocument) -> (Value, Value) {
-    let got = doc.execute("selection.get", json!({})).unwrap();
+    let got = doc.execute("select.get", json!({})).unwrap();
     (got["anchor"].clone(), got["focus"].clone())
 }
 
@@ -37,7 +37,7 @@ fn an_outside_change_keeps_both_undo_histories_and_the_selection() {
     let saved = String::from_utf8(doc.save(None).unwrap()).unwrap();
     doc.mark_saved();
     let at = saved.find("Second").unwrap();
-    doc.execute("selection.set", json!({ "anchor": at, "focus": at + 6 })).unwrap();
+    doc.execute("select.set", json!({ "anchor": at, "focus": at + 6 })).unwrap();
     let (anchor, focus) = selection(&mut doc);
     // Another program adds a line above the selection.
     let outside = saved.replace("# Plan\n", "# Plan\n\nAdded outside.\n");
@@ -87,7 +87,7 @@ fn a_thread_and_its_id_stay_through_a_reread_with_or_without_history() {
 fn a_note_without_history_read_again_keeps_its_selection() {
     let mut doc = NoteDocument::open("plan.md", NOTE.as_bytes()).unwrap();
     let at = NOTE.find("Book").unwrap();
-    doc.execute("selection.set", json!({ "anchor": at })).unwrap();
+    doc.execute("select.set", json!({ "anchor": at })).unwrap();
     let mut fresh = NoteDocument::open("plan.md", NOTE.replace("# Plan\n", "# Plan, renamed\n").as_bytes()).unwrap();
     fresh.carry_replica_objects(&doc).unwrap();
     fresh.restore_editor_state(&doc.editor_state()).unwrap();
@@ -112,7 +112,7 @@ fn an_editor_state_that_does_not_resolve_is_refused() {
 fn restoring_after_a_write_keeps_the_selection_the_write_moved() {
     let mut doc = NoteDocument::open("plan.md", NOTE.as_bytes()).unwrap();
     let at = NOTE.find("Book").unwrap();
-    doc.execute("selection.set", json!({ "anchor": at })).unwrap();
+    doc.execute("select.set", json!({ "anchor": at })).unwrap();
     let state = doc.editor_state();
     doc.execute_as("text.insert", json!({ "at": 0, "text": "Top.\n" }), &Origin::agent("agent:a")).unwrap();
     let moved = selection(&mut doc);

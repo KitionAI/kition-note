@@ -32,7 +32,7 @@ fn steps_on_a_large_note() {
     let _ = KitTools::tools(&doc);
     let _ = KitTools::select_tool(&mut doc, "text", 1.0);
     time("tools and select", started);
-    for read in ["table.geometry", "code.blocks", "properties.view", "diagrams.view", "image.wanted"] {
+    for read in ["table.geometry", "code.blocks", "property.view", "diagram.view", "image.wanted"] {
         let started = Instant::now();
         let _ = doc.execute(read, serde_json::json!({ "top": 0, "bottom": 3000 }));
         time(&format!("after open: {read}"), started);
@@ -83,7 +83,7 @@ fn steps_on_a_large_note() {
     }
     // A keystroke in the middle, with what the editor asks after it (its overlays' reads).
     let middle = String::from_utf8_lossy(&bytes).find("## Section 1000").map_or(0, |at| String::from_utf8_lossy(&bytes)[..at].chars().count());
-    doc.execute("selection.set", serde_json::json!({ "anchor": middle })).unwrap();
+    doc.execute("select.set", serde_json::json!({ "anchor": middle })).unwrap();
     for round in 0..3 {
         let started = Instant::now();
         KitTools::text(&mut doc, "y", 1.0).unwrap();
@@ -91,7 +91,7 @@ fn steps_on_a_large_note() {
         let started = Instant::now();
         let _ = doc.revision();
         time(&format!("middle {round}: revision"), started);
-        for read in ["code.blocks", "diagrams.view", "properties.view", "table.geometry", "image.wanted", "selection.get"] {
+        for read in ["code.blocks", "diagram.view", "property.view", "table.geometry", "image.wanted", "select.get"] {
             let started = Instant::now();
             let _ = doc.execute(read, serde_json::json!({ "top": 0, "bottom": 3000 }));
             time(&format!("middle {round}: {read}"), started);

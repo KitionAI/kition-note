@@ -120,7 +120,7 @@ fn table_structure_commands_and_undo() {
         run(&mut doc, "edit.undo", json!({}));
     }
     assert_eq!(doc.text(), NOTE);
-    run(&mut doc, "table.create", json!({ "heading": ["Plan", "Owners"], "columns": 2, "header": ["A", "B"] }));
+    run(&mut doc, "table.add", json!({ "heading": ["Plan", "Owners"], "columns": 2, "header": ["A", "B"] }));
     assert!(doc.text().contains("Ann \u{1F600} and Bo.\n\n| A | B |\n| --- | --- |\n|  |  |\n"), "{}", doc.text());
     assert_eq!(run(&mut doc, "table.read", json!({}))["tables"], 2);
 }
@@ -176,13 +176,13 @@ fn blocks_tasks_and_links() {
     let toggled = run(&mut doc, "task.toggle", json!({ "blockId": "t1" }));
     assert_eq!(toggled["done"], true);
     assert!(doc.text().contains("- [x] Hire ^t1"));
-    let tasks = run(&mut doc, "tasks.list", json!({ "heading": ["Plan", "Risks"] }));
+    let tasks = run(&mut doc, "task.list", json!({ "heading": ["Plan", "Risks"] }));
     assert_eq!(tasks["tasks"][0]["text"], "Hire");
     assert_eq!(tasks["tasks"][0]["blockId"], "t1");
     run(&mut doc, "block.setId", json!({ "line": 26, "id": "owners" }));
     run(&mut doc, "block.append", json!({ "markdown": "The end." }));
     assert!(doc.text().ends_with("Bo. ^owners\n\nThe end.\n"), "{}", doc.text());
-    let links = run(&mut doc, "links.list", json!({}));
+    let links = run(&mut doc, "link.list", json!({}));
     let kinds: Vec<&str> = links["links"].as_array().unwrap().iter().map(|link| link["kind"].as_str().unwrap()).collect();
     assert_eq!(kinds, vec!["wikilink", "markdown", "tag", "blockId", "blockId", "blockId", "tag"]);
     assert_eq!(links["links"][0]["state"], "unknown");
@@ -191,7 +191,7 @@ fn blocks_tasks_and_links() {
     let at = doc.text().chars().count();
     run(&mut doc, "link.insert", json!({ "at": at, "destination": "Owners", "text": "people" }));
     assert!(doc.text().ends_with("The end.\n[[Owners|people]]"));
-    run(&mut doc, "links.retarget", json!({ "from": "Plan", "to": "Road map" }));
+    run(&mut doc, "link.retarget", json!({ "from": "Plan", "to": "Road map" }));
     assert!(doc.text().contains("[[Road map#Risks]]"));
 }
 

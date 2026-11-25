@@ -3,7 +3,7 @@
 // Needs the engine and fonts built into public/ (pnpm run engine). Run it with no HTTP proxy set.
 //
 // Enter in the Find field selects the next match once the engine has found it (`text.find`, then
-// `selection.set`). Escape right after Enter must not hand the keyboard back to the note before
+// `select.set`). Escape right after Enter must not hand the keyboard back to the note before
 // that match is selected: keys typed next would land where the caret was before Find. Every
 // `text.find` reaching the engine is held back here for a moment, so Escape always comes first.
 import { chromium, webkit } from 'playwright'

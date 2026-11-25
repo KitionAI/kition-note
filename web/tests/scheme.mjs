@@ -162,7 +162,7 @@ async function shoot(name) {
   await page.waitForTimeout(600)
 }
 
-const where = () => page.evaluate(async () => (await window.devHost.connection().ai.run([{ command: 'selection.where', params: { at: 200 } }], false)).completed[0].result)
+const where = () => page.evaluate(async () => (await window.devHost.connection().ai.run([{ command: 'select.where', params: { at: 200 } }], false)).completed[0].result)
 
 try {
   await page.goto(`${origin}/dev.html?locale=en-US&scheme=dark`)

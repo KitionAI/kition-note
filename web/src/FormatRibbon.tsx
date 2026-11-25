@@ -89,12 +89,12 @@ export function FormatRibbon() {
         <RibbonStack>
           <CommandButton command="format.quote" primary icon={QuoteIcon} label={p('Quote')} />
           <CommandButton command="format.link" primary icon={LinkIcon} label={p('Link')} />
-          <CommandButton command="insert.image" icon={ImageIcon} label={p('Image')} />
+          <CommandButton command="image.insert" icon={ImageIcon} label={p('Image')} />
         </RibbonStack>
         <RibbonStack>
-          <CommandButton command="insert.table" primary icon={TableIcon} label={p('Table')} />
-          <CommandButton command="insert.codeBlock" primary icon={CodeXmlIcon} label={p('Code block')} />
-          <CommandButton command="insert.rule" icon={MinusIcon} label={p('Divider')} />
+          <CommandButton command="table.insert" primary icon={TableIcon} label={p('Table')} />
+          <CommandButton command="codeBlock.insert" primary icon={CodeXmlIcon} label={p('Code block')} />
+          <CommandButton command="rule.insert" icon={MinusIcon} label={p('Divider')} />
         </RibbonStack>
       </RibbonGroup>
     </>

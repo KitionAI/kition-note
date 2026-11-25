@@ -161,7 +161,7 @@ fn comparable(file: &str) -> String {
     file.to_lowercase()
 }
 
-/// `links.retarget`: every wikilink, Markdown link and embed to `from` points at `to`, keeping its
+/// `link.retarget`: every wikilink, Markdown link and embed to `from` points at `to`, keeping its
 /// anchor and text. Answers the edits and how many links changed.
 pub fn retarget(text: &str, ix: &Index, from: &str, to: &str) -> Result<(Vec<Edit>, usize)> {
     check_destination(from)?;

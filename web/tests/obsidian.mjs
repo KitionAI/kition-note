@@ -52,7 +52,7 @@ function parse(marked) {
 /** The note now, marked as `parse` reads it. */
 async function marked() {
   const text = [...(await run('text.read')).text]
-  const selection = await run('selection.get')
+  const selection = await run('select.get')
   const [from, to] = [Math.min(selection.anchor, selection.focus), Math.max(selection.anchor, selection.focus)]
   if (from === to) return [...text.slice(0, from), '|', ...text.slice(from)].join('')
   return [...text.slice(0, from), '‹', ...text.slice(from, to), '›', ...text.slice(to)].join('')
@@ -183,7 +183,7 @@ try {
   {
     await set('alpha beta gamma|')
     const at = async (index) => {
-      const where = await run('selection.where', { at: index })
+      const where = await run('select.where', { at: index })
       const [vx, vy, , , zoom] = (await kit().getByTestId('note-editor').getAttribute('data-view')).split(',').map(Number)
       return { x: box.x + (where.x - vx) * zoom + 0.5, y: box.y + (where.y + where.height / 2 - vy) * zoom }
     }
@@ -243,7 +243,7 @@ try {
     for (let index = 0; index < 50; index += 1) await page.keyboard.press('ArrowDown')
     await page.waitForTimeout(400)
     const gap = async () => {
-      const selection = await run('selection.get')
+      const selection = await run('select.get')
       const [, y, , height] = (await kit().getByTestId('note-editor').getAttribute('data-view')).split(',').map(Number)
       return { below: Math.round(y + height - (selection.caret.y + selection.caret.height)), above: Math.round(selection.caret.y - y) }
     }
@@ -275,7 +275,7 @@ try {
     const flair = kit().getByTestId('note-code-flair')
     await page.mouse.move(1, 1)
     step('a callout\'s code block shows no label away from the pointer', await until(async () => (await flair.count()) === 0), String(await flair.count()))
-    const at = await run('selection.where', { at: '# Code\n\n> [!note] Callout\n> ```python\n> pri'.length })
+    const at = await run('select.where', { at: '# Code\n\n> [!note] Callout\n> ```python\n> pri'.length })
     const [vx, vy, , , zoom] = (await kit().getByTestId('note-editor').getAttribute('data-view')).split(',').map(Number)
     await page.mouse.move(box.x + (at.x - vx) * zoom, box.y + (at.y + at.height / 2 - vy) * zoom)
     step('under the pointer it shows the copy button only', await until(async () => (await flair.count()) === 1 && (await flair.innerText()).trim() === '' && (await flair.locator('svg').count()) === 1), String(await flair.count()))
@@ -286,7 +286,7 @@ try {
   {
     await set('# Heading\n\nSee [[Plan]] here\n\nend|')
     const where = async (index) => {
-      const at = await run('selection.where', { at: index })
+      const at = await run('select.where', { at: index })
       const [vx, vy, , , zoom] = (await kit().getByTestId('note-editor').getAttribute('data-view')).split(',').map(Number)
       return { x: box.x + (at.x - vx) * zoom, y: box.y + (at.y + at.height / 2 - vy) * zoom, zoom, at, vx, vy }
     }
@@ -312,7 +312,7 @@ try {
   // Right-click: the editor's menu, with Format, Paragraph, and Insert, as Obsidian's.
   {
     await set('make ‹this› bold')
-    const at = await run('selection.where', { at: 6 })
+    const at = await run('select.where', { at: 6 })
     const [vx, vy, , , zoom] = (await kit().getByTestId('note-editor').getAttribute('data-view')).split(',').map(Number)
     await page.mouse.click(box.x + (at.x - vx) * zoom + 2, box.y + (at.y + at.height / 2 - vy) * zoom, { button: 'right' })
     const menu = kit().getByTestId('note-context-menu')
@@ -339,7 +339,7 @@ try {
     step('Highlight > Red highlights in red', await until(async () => (await run('text.read')).text === 'some ==🔴text== here'), (await run('text.read')).text)
     // A right click in a callout drawn as one opens no menu, as in Obsidian.
     await set('> [!note] Title\n> body text\n\nend|')
-    const body = await run('selection.where', { at: 22 })
+    const body = await run('select.where', { at: 22 })
     await page.mouse.click(box.x + (body.x - vx) * zoom + 2, box.y + (body.y + body.height / 2 - vy) * zoom, { button: 'right' })
     await page.waitForTimeout(500)
     step('a right click in a callout opens no menu', (await menu.count()) === 0)
@@ -371,7 +371,7 @@ try {
     await page.keyboard.press('Escape')
     const before = (await run('text.read')).text
     const height = async () => {
-      const shown = await run('properties.view')
+      const shown = await run('property.view')
       return shown.bottom - shown.top
     }
     const open = await height()
@@ -448,13 +448,13 @@ try {
     const drawn = async (label) => (await diagram.count()) === 1 && (await diagram.locator('.note-diagram-svg > svg').textContent()).includes(label)
     step('a mermaid block away from the caret draws its diagram', await until(() => drawn('Start'), 120), String(await diagram.count()))
     const code = [...'intro\n\n```mermaid\n'].length
-    step('its source takes no room', (await run('selection.where', { at: code })).height === 0)
+    step('its source takes no room', (await run('select.where', { at: code })).height === 0)
     const shape = await diagram.boundingBox()
     await page.mouse.click(shape.x + 40, shape.y + 40)
-    step('a click on the diagram leaves the caret', (await run('selection.get')).anchor === 5 && (await diagram.count()) === 1, JSON.stringify(await run('selection.get')))
+    step('a click on the diagram leaves the caret', (await run('select.get')).anchor === 5 && (await diagram.count()) === 1, JSON.stringify(await run('select.get')))
     await page.mouse.move(shape.x + 200, shape.y + 40)
     await kit().getByTestId('note-diagram-edit').click()
-    step('its edit button puts the caret at its code', await until(async () => (await run('selection.get')).anchor === code && (await diagram.count()) === 0), JSON.stringify(await run('selection.get')))
+    step('its edit button puts the caret at its code', await until(async () => (await run('select.get')).anchor === code && (await diagram.count()) === 0), JSON.stringify(await run('select.get')))
     await page.keyboard.type('%% a comment\n')
     step('the editor keeps the keyboard', await until(async () => (await run('text.read')).text.includes('```mermaid\n%% a comment\ngraph TD')), (await run('text.read')).text.slice(0, 60))
     const text = (await run('text.read')).text

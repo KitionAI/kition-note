@@ -376,7 +376,7 @@ pub fn block_place(ix: &Index, at: usize, line: usize) -> Result<()> {
     Ok(())
 }
 
-/// `table.create`: a new table at a line start, with blank lines around it as Markdown needs.
+/// `table.add`: a new table at a line start, with blank lines around it as Markdown needs.
 pub fn create(at: usize, text: &str, columns: usize, rows: usize, header: &[String]) -> Result<Vec<Edit>> {
     if columns == 0 || columns > 64 {
         return Err(invalid("columns must be 1 to 64"));

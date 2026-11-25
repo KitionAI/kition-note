@@ -41,26 +41,26 @@ Commands by namespace (the part of the id before the first dot):
 | `code` | 1 | 0 | 0 | `code.blocks` |
 | `comment` | 6 | 5 | 4 | `comment.threads`, `comment.add`, `comment.reply` |
 | `diagram` | 1 | 0 | 0 | `diagram.set` |
-| `diagrams` | 1 | 0 | 0 | `diagrams.view` |
+| `diagrams` | 1 | 0 | 0 | `diagram.view` |
 | `edit` | 12 | 10 | 2 | `edit.selectAll`, `edit.cut`, `edit.indent` |
 | `file` | 2 | 1 | 2 | `file.export`, `file.setLineEndings` |
 | `format` | 20 | 20 | 0 | `format.math`, `format.highlightColor`, `format.clear` |
 | `heading` | 1 | 1 | 1 | `heading.setLevel` |
 | `image` | 2 | 0 | 0 | `image.wanted`, `image.set` |
-| `insert` | 12 | 12 | 0 | `insert.wikilink`, `insert.embed`, `insert.image` |
+| `insert` | 12 | 12 | 0 | `wikilink.insert`, `embed.insert`, `image.insert` |
 | `link` | 2 | 2 | 2 | `link.insert`, `link.update` |
-| `links` | 2 | 1 | 1 | `links.list`, `links.retarget` |
+| `links` | 2 | 1 | 1 | `link.list`, `link.retarget` |
 | `list` | 4 | 4 | 0 | `list.bullet`, `list.numbered`, `list.task` |
 | `note` | 1 | 1 | 1 | `note.write` |
 | `outline` | 1 | 0 | 1 | `outline.read` |
 | `page` | 1 | 0 | 1 | `page.layout` |
-| `properties` | 1 | 0 | 0 | `properties.view` |
+| `properties` | 1 | 0 | 0 | `property.view` |
 | `property` | 4 | 3 | 4 | `property.list`, `property.set`, `property.delete` |
 | `section` | 5 | 4 | 5 | `section.read`, `section.replace`, `section.insert` |
-| `selection` | 5 | 2 | 0 | `selection.get`, `selection.set`, `selection.replace` |
-| `table` | 12 | 10 | 11 | `table.read`, `table.create`, `table.setCell` |
+| `selection` | 5 | 2 | 0 | `select.get`, `select.set`, `select.replace` |
+| `table` | 12 | 10 | 11 | `table.read`, `table.add`, `table.setCell` |
 | `task` | 1 | 1 | 1 | `task.toggle` |
-| `tasks` | 1 | 0 | 1 | `tasks.list` |
+| `tasks` | 1 | 0 | 1 | `task.list` |
 | `template` | 1 | 0 | 1 | `template.expand` |
 | `text` | 6 | 4 | 6 | `text.read`, `text.find`, `text.insert` |
 | `view` | 10 | 0 | 0 | `view.width`, `view.hoverOut`, `view.blockAt` |
@@ -72,13 +72,13 @@ offer.
 
 - **Lines count from 1.** `task.toggle {line}`, `heading.setLevel {line}`, and the outline in
   `note_inspect` all use the line as the file shows it. Lines move when you insert text above them:
-  read them again (`tasks.list`, `text.find`) after an edit instead of adding up.
+  read them again (`task.list`, `text.find`) after an edit instead of adding up.
 - **Text positions count from 0**, in Unicode scalar values by default (`unit: "scalar"`). Get them
   from `text.find {find}`, which answers `from`, `to` and `line` for each match; do not count
   characters yourself.
 - **Headings are paths** of their plain text from the top: `["Launch plan", "Tasks"]` is the
   `## Tasks` under `# Launch plan`. Use the path, or `line`, in `section.*`, `block.append`,
-  `tasks.list`, `table.create`.
+  `task.list`, `table.add`.
 - **Tables count from 0** in the note (`table: 0` is the first). Inside a table, `row` and `column`
   count from 0 and **row 0 is the header**, so the first body row is `row: 1`. `table.read` answers
   the header and the body rows separately; `table.insertRow {at}` uses the same numbering.
@@ -147,7 +147,7 @@ schema says which.
 | Parameter | Values | Used by |
 | --- | --- | --- |
 | `align` | `left`, `center`, `right`, `none` | `table.align`, `table.insertColumn` |
-| `kinds` | `wikilink`, `markdown`, `embed`, `image`, `url`, `tag`, `blockId` | `links.list` |
+| `kinds` | `wikilink`, `markdown`, `embed`, `image`, `url`, `tag`, `blockId` | `link.list` |
 | `style` | `atx` | `heading.setLevel` |
 | `style` | `wikilink`, `markdown` | `link.insert` |
 | `unit` | `scalar`, `utf16` | `block.read`, `comment.add`, `comment.move`, `comment.threads` and 7 more |

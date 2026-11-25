@@ -116,10 +116,10 @@ async fn s4_an_insertion_before_an_index_refuses_and_after_it_applies() {
     let f = Fixture::new();
     let cell = step("table.setCell", json!({ "table": 1, "row": 1, "column": 1, "text": "120" }));
     let basis = f.observe().await;
-    f.colleague(&[("table.create", json!({ "heading": ["Launch plan", "Goals"], "position": "end", "columns": 2, "header": ["A", "B"] }))]);
+    f.colleague(&[("table.add", json!({ "heading": ["Launch plan", "Goals"], "position": "end", "columns": 2, "header": ["A", "B"] }))]);
     assert_eq!(reasons(&f.run(&basis, cell.clone()).await.unwrap_err()), "relocated");
     let basis = f.observe().await;
-    f.colleague(&[("table.create", json!({ "columns": 2, "header": ["C", "D"] }))]);
+    f.colleague(&[("table.add", json!({ "columns": 2, "header": ["C", "D"] }))]);
     // The colleague's first table made the Budget table the third.
     let cell = step("table.setCell", json!({ "table": 2, "row": 1, "column": 1, "text": "120" }));
     f.run(&basis, cell).await.unwrap();

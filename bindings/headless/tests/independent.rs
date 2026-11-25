@@ -165,12 +165,12 @@ async fn a_section_rests_on_the_heading_that_ends_it() {
 #[tokio::test(flavor = "multi_thread")]
 async fn links_rest_on_the_links_they_count() {
     let update = ("link.update", json!({ "line": 8, "index": 0, "destination": "schedule" }));
-    let retarget = ("links.retarget", json!({ "from": "timeline", "to": "schedule" }));
+    let retarget = ("link.retarget", json!({ "from": "timeline", "to": "schedule" }));
     let wrong = run(vec![
         probe("link.update, a link added before on the line", vec![find_replace("Intro text with a", "Intro [[plan]] with a")], update.clone(), true),
         probe("link.update, another line edited", vec![find_replace("Some closing notes.", "Other notes.")], update, false),
-        probe("links.retarget, a link to it added", vec![find_replace("Some closing notes.", "See [[timeline]].")], retarget.clone(), true),
-        probe("links.retarget, text edited", vec![find_replace("Some closing notes.", "Other notes.")], retarget, false),
+        probe("link.retarget, a link to it added", vec![find_replace("Some closing notes.", "See [[timeline]].")], retarget.clone(), true),
+        probe("link.retarget, text edited", vec![find_replace("Some closing notes.", "Other notes.")], retarget, false),
     ])
     .await;
     assert!(wrong.is_empty(), "{wrong:#?}");

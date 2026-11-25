@@ -6,7 +6,7 @@ intent: >-
   the parameter it resembles and the ones the command takes (platform rule E7a), instead of
   running without it; every key a command reads is in its schema, so a valid call still runs.
   Before, 70 of the 119 schema'd commands ran with an unknown key and 49 refused it without
-  naming it, and three schemas left out keys their commands read (selection.set's line, column,
+  naming it, and three schemas left out keys their commands read (select.set's line, column,
   x and y; text.insert's expected; comment.move's heading and line).
 layer: gate
 source:

@@ -118,7 +118,7 @@ async function open(height = 900) {
   const canvas = () => kit.locator('[data-testid="note-canvas"] canvas').first()
   /** Where the engine draws Unicode character `index`, in the page's pixels (a query: it moves nothing). */
   const point = async (index) => {
-    const where = await run('selection.where', { at: index })
+    const where = await run('select.where', { at: index })
     const [x, y, , , zoom] = (await kit.getByTestId('note-editor').getAttribute('data-view')).split(',').map(Number)
     const box = await canvas().boundingBox()
     return { x: box.x + (where.x - x) * zoom, y: box.y + (where.y - y + (where.height ?? 20) / 2) * zoom, top: box.y }

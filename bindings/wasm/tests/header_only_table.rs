@@ -1,5 +1,5 @@
 //! Regression: a row inserted into a table that has only its header
-//! (`table.create {rows: 0}`) goes after the delimiter row, so the table stays a table.
+//! (`table.add {rows: 0}`) goes after the delimiter row, so the table stays a table.
 #![allow(clippy::unwrap_used, clippy::panic, clippy::indexing_slicing)]
 
 use kition_kit::KitDocument;
@@ -13,7 +13,7 @@ fn text(doc: &NoteDocument) -> String {
 #[test]
 fn a_row_goes_after_the_delimiter_of_a_header_only_table() {
     let mut doc = NoteDocument::open("plan.md", b"# Plan\n").unwrap();
-    doc.execute("table.create", json!({ "columns": 2, "rows": 0, "header": ["Task", "Owner"] })).unwrap();
+    doc.execute("table.add", json!({ "columns": 2, "rows": 0, "header": ["Task", "Owner"] })).unwrap();
     doc.execute("table.insertRow", json!({ "table": 0, "at": 1, "cells": ["Book venue", "Ana"] })).unwrap();
     doc.execute("table.insertRow", json!({ "table": 0, "at": 2, "cells": ["Order food", "Raj"] })).unwrap();
     let text = text(&doc);

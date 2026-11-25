@@ -44,7 +44,7 @@ const markers = () => kit().getByTestId('note-thread-marker')
 const rangeBoxes = async () => Promise.all((await kit().getByTestId('note-thread-range').all()).map((range) => range.boundingBox()))
 /** Where the engine draws Unicode character `index`, in the frame's pixels. */
 async function charBox(index) {
-  const at = await run('selection.where', { at: index })
+  const at = await run('select.where', { at: index })
   const [x, y, , , zoom] = (await kit().getByTestId('note-editor').getAttribute('data-view')).split(',').map(Number)
   const box = await kit().locator('[data-testid="note-canvas"] canvas').first().boundingBox()
   return { x: box.x + (at.x - x) * zoom, y: box.y + (at.y - y) * zoom }
@@ -134,7 +134,7 @@ try {
 
   // The shortcut and the context menu start a thread too.
   await select('Closing words')
-  step('the keyboard still selects after a marker click', await until(async () => (await run('selection.get')).text === 'Closing words'), JSON.stringify(await run('selection.get')))
+  step('the keyboard still selects after a marker click', await until(async () => (await run('select.get')).text === 'Closing words'), JSON.stringify(await run('select.get')))
   await page.keyboard.press(`${MOD}+Alt+KeyM`)
   step('Mod+Alt+M sends comment.create', await until(async () => (await hostState()).created.length === 2))
   step('on the selection', (await hostState()).created[1]?.anchor.quote === 'Closing words', JSON.stringify((await hostState()).created[1]))
@@ -186,7 +186,7 @@ try {
     let polls = 0
     const poller = (async () => {
       while (polling) {
-        await run('selection.get').catch(() => undefined)
+        await run('select.get').catch(() => undefined)
         polls += 1
       }
     })()
@@ -203,15 +203,15 @@ try {
       JSON.stringify(anchor) === JSON.stringify({ ids: ['note'], range: { start: end - 200, end }, quote: line.slice(-200) }),
       JSON.stringify({ anchor, polls }),
     )
-    const selected = await run('selection.get')
+    const selected = await run('select.get')
     step('the selection is 200 characters', selected.text === line.slice(-200), JSON.stringify(selected))
   }
 
   // A commenter (read-only, may comment) starts threads; a viewer is offered none.
   step('opens the note as a commenter', await open('commenter'))
   await dragSelect('Goals for the quarter')
-  step('a commenter selects with the mouse, and sees the selection', await until(async () => (await run('selection.get')).text === 'Goals for the quarter' && (await kit().getByTestId('note-readonly-selection').count()) === 1))
-  step('a commenter is offered Comment', await until(async () => (await kit().getByTestId('note-comment-add').count()) === 1), JSON.stringify(await run('selection.get')))
+  step('a commenter selects with the mouse, and sees the selection', await until(async () => (await run('select.get')).text === 'Goals for the quarter' && (await kit().getByTestId('note-readonly-selection').count()) === 1))
+  step('a commenter is offered Comment', await until(async () => (await kit().getByTestId('note-comment-add').count()) === 1), JSON.stringify(await run('select.get')))
   await kit().getByTestId('note-comment-add').click()
   step('a commenter’s Comment sends comment.create', await until(async () => (await hostState()).created.length === 1))
   step('opens the note as a viewer', await open('viewer'))
@@ -221,7 +221,7 @@ try {
   }, { ...stored, anchor: { ids: ['note'], range: { start: charsBefore(NOTE, 'Closing'), end: charsBefore(NOTE, 'Closing') + 13 }, quote: 'Closing words' } })
   step('a viewer sees the threads marked', await until(async () => (await markers().count()) === 1))
   await dragSelect('Goals for the quarter')
-  step('a viewer selects text', await until(async () => (await run('selection.get')).text === 'Goals for the quarter'), JSON.stringify(await run('selection.get')))
+  step('a viewer selects text', await until(async () => (await run('select.get')).text === 'Goals for the quarter'), JSON.stringify(await run('select.get')))
   await page.waitForTimeout(400)
   step('a viewer is offered no Comment on a selection', (await kit().getByTestId('note-comment-add').count()) === 0)
   const sent = (await hostState()).created.length
