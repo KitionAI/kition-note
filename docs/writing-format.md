@@ -38,32 +38,37 @@ Commands by namespace (the part of the id before the first dot):
 | Namespace | Commands | Change the document | Open to the agent | Examples |
 | --- | ---: | ---: | ---: | --- |
 | `block` | 4 | 3 | 4 | `block.read`, `block.replace`, `block.append` |
+| `callout` | 1 | 1 | 0 | `callout.insert` |
 | `code` | 1 | 0 | 0 | `code.blocks` |
+| `codeBlock` | 1 | 1 | 0 | `codeBlock.insert` |
 | `comment` | 6 | 5 | 4 | `comment.threads`, `comment.add`, `comment.reply` |
-| `diagram` | 1 | 0 | 0 | `diagram.set` |
-| `diagrams` | 1 | 0 | 0 | `diagram.view` |
+| `date` | 1 | 1 | 0 | `date.insert` |
+| `diagram` | 2 | 0 | 0 | `diagram.view`, `diagram.set` |
 | `edit` | 12 | 10 | 2 | `edit.selectAll`, `edit.cut`, `edit.indent` |
+| `embed` | 1 | 1 | 0 | `embed.insert` |
 | `file` | 2 | 1 | 2 | `file.export`, `file.setLineEndings` |
+| `footnote` | 1 | 1 | 0 | `footnote.insert` |
 | `format` | 20 | 20 | 0 | `format.math`, `format.highlightColor`, `format.clear` |
 | `heading` | 1 | 1 | 1 | `heading.setLevel` |
-| `image` | 2 | 0 | 0 | `image.wanted`, `image.set` |
-| `insert` | 12 | 12 | 0 | `wikilink.insert`, `embed.insert`, `image.insert` |
-| `link` | 2 | 2 | 2 | `link.insert`, `link.update` |
-| `links` | 2 | 1 | 1 | `link.list`, `link.retarget` |
+| `image` | 3 | 1 | 0 | `image.wanted`, `image.set`, `image.insert` |
+| `link` | 4 | 3 | 3 | `link.list`, `link.insert`, `link.update` |
 | `list` | 4 | 4 | 0 | `list.bullet`, `list.numbered`, `list.task` |
+| `mathBlock` | 1 | 1 | 0 | `mathBlock.insert` |
 | `note` | 1 | 1 | 1 | `note.write` |
 | `outline` | 1 | 0 | 1 | `outline.read` |
 | `page` | 1 | 0 | 1 | `page.layout` |
-| `properties` | 1 | 0 | 0 | `property.view` |
-| `property` | 4 | 3 | 4 | `property.list`, `property.set`, `property.delete` |
+| `property` | 5 | 3 | 4 | `property.list`, `property.set`, `property.delete` |
+| `rule` | 1 | 1 | 0 | `rule.insert` |
 | `section` | 5 | 4 | 5 | `section.read`, `section.replace`, `section.insert` |
-| `selection` | 5 | 2 | 0 | `select.get`, `select.set`, `select.replace` |
-| `table` | 12 | 10 | 11 | `table.read`, `table.add`, `table.setCell` |
-| `task` | 1 | 1 | 1 | `task.toggle` |
-| `tasks` | 1 | 0 | 1 | `task.list` |
+| `select` | 5 | 2 | 0 | `select.get`, `select.set`, `select.replace` |
+| `table` | 13 | 11 | 11 | `table.read`, `table.add`, `table.setCell` |
+| `tag` | 1 | 1 | 0 | `tag.insert` |
+| `task` | 2 | 1 | 2 | `task.list`, `task.toggle` |
 | `template` | 1 | 0 | 1 | `template.expand` |
 | `text` | 6 | 4 | 6 | `text.read`, `text.find`, `text.insert` |
+| `timestamp` | 1 | 1 | 0 | `timestamp.insert` |
 | `view` | 10 | 0 | 0 | `view.width`, `view.hoverOut`, `view.blockAt` |
+| `wikilink` | 1 | 1 | 0 | `wikilink.insert` |
 
 The 71 commands in `kit.json` `agent.exclude` are editor commands the agent tools do not
 offer.

@@ -63,21 +63,24 @@ fn writes() -> Vec<KitCommand> {
         .into_iter()
         .filter(|command| command.mutates && command.schema.is_some())
         .filter(|command| {
-            ![
-                "selection.",
-                "edit.cut",
-                "edit.indent",
-                "edit.outdent",
-                "edit.move",
-                "edit.delete",
-                "edit.sort",
-                "edit.trim",
-                "format.",
-                "list.",
-                "insert.",
-            ]
-            .iter()
-            .any(|prefix| command.id.starts_with(prefix))
+            !["select.", "edit.cut", "edit.indent", "edit.outdent", "edit.move", "edit.delete", "edit.sort", "edit.trim", "format.", "list."]
+                .iter()
+                .any(|prefix| command.id.starts_with(prefix))
+                && ![
+                    "wikilink.insert",
+                    "embed.insert",
+                    "image.insert",
+                    "tag.insert",
+                    "table.insert",
+                    "mathBlock.insert",
+                    "callout.insert",
+                    "footnote.insert",
+                    "date.insert",
+                    "timestamp.insert",
+                    "codeBlock.insert",
+                    "rule.insert",
+                ]
+                .contains(&command.id.as_str())
         })
         .collect()
 }

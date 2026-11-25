@@ -2082,13 +2082,24 @@ fn replace_schema() -> Value {
 
 /// Whether the editor runs `id` itself, on its selection.
 pub fn is_editor(id: &str) -> bool {
-    id.starts_with("selection.")
+    id.starts_with("select.")
         || id.starts_with("format.")
         || id.starts_with("list.")
-        || id.starts_with("insert.")
         || matches!(
             id,
-            "edit.selectAll"
+            "wikilink.insert"
+                | "embed.insert"
+                | "image.insert"
+                | "tag.insert"
+                | "table.insert"
+                | "mathBlock.insert"
+                | "callout.insert"
+                | "footnote.insert"
+                | "date.insert"
+                | "timestamp.insert"
+                | "codeBlock.insert"
+                | "rule.insert"
+                | "edit.selectAll"
                 | "edit.cut"
                 | "edit.selectSection"
                 | "edit.sortLines"

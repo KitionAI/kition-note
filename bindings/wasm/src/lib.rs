@@ -667,7 +667,7 @@ impl KitSessionDocument for NoteDocument {
         // the person's typing run, so it is an undo step of its own. Reads do not: the editor's
         // overlays ask after every keystroke (code blocks, diagrams, properties, tables), and a run
         // they broke would undo a character at a time.
-        let reads = !commands::mutates(command) && (!command.starts_with("selection.") || matches!(command, "select.get" | "select.where"));
+        let reads = !commands::mutates(command) && (!command.starts_with("select.") || matches!(command, "select.get" | "select.where"));
         let reads = reads && !matches!(command, "view.fold" | "view.foldAll" | "view.unfoldAll" | "view.width" | "view.scheme");
         // The editor's own commands take the undo step as Obsidian's do (a Cmd+B joins the word
         // typed before it).
@@ -676,7 +676,7 @@ impl KitSessionDocument for NoteDocument {
         }
         if commands::is_editor(command) {
             let answer = self.run_editor(command, &params);
-            if command.starts_with("selection.") && command != "select.get" && command != "select.where" {
+            if command.starts_with("select.") && command != "select.get" && command != "select.where" {
                 self.unfold_at_caret();
             }
             return answer;

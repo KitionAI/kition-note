@@ -204,7 +204,7 @@ Verified by the editor's co-editing tests (`bindings/wasm/src/coedit_tests.rs`, 
 | `edit.undo` | `scope?` (`person`, `agent`) | | yes | In the undo scope `scope` names, else the scope of the origin it runs as: the person's Undo keeps the agent's steps, and an agent's undo takes back only its own |
 | `edit.redo` | `scope?` (`person`, `agent`) | | yes | Like `edit.undo` |
 
-The editor has further commands of its own that act on the selection or the view (`selection.*`, `format.*`, `list.*`, `insert.*`, most `edit.*`, `view.*`, and the table and diagram geometry it draws from); `kit.json` excludes them from agents. Tags, callouts and plain lists have no document commands of their own: tags are listed by `link.list` (`kind: tag`, also the `tags` property) and counted with callouts by `note_inspect`; list items are added with `block.append` or `section.insert` and checked with `task.toggle`.
+The editor has further commands of its own that act on the selection or the view (`select.*`, `format.*`, `list.*`, the `*.insert` commands of the Insert menu such as `callout.insert`, most `edit.*`, `view.*`, and the table and diagram geometry it draws from); `kit.json` excludes them from agents. Tags, callouts and plain lists have no document commands of their own: tags are listed by `link.list` (`kind: tag`, also the `tags` property) and counted with callouts by `note_inspect`; list items are added with `block.append` or `section.insert` and checked with `task.toggle`.
 
 Not commands: selection, viewport and fold state (the editor's own state, reported to the host as text ranges); link resolution for embeds (the binding asks the host for a handle and the engine reads it through the lent file); the links answer for the host's link index (`linksOf()`, an engine extra declared in `kit.json` `extras`).
 
@@ -341,7 +341,7 @@ The engine lays out, draws, and edits the note; `web/` is kit-editor's frame aro
   follow other people's edits). One `text` tool: click, drag, double click, keys, typed and
   pasted text, all through `text.replace` as the local person; a typing run is one undo group,
   multi-line edits are one step. The editor's own commands act on the selection and are kept
-  from agents (`selection.*`, `format.*`, `list.*`, `insert.*`, `edit.*`).
+  from agents (`select.*`, `format.*`, `list.*`, the Insert menu's `*.insert`, `edit.*`).
 - **Line separator.** A `mixed` note keeps its `\r` characters in `body`; they draw nothing, the
   caret at a line's end stays before a trailing `\r`, and Enter there breaks after it.
 - **Units.** The editor's commands count Unicode characters (the engine's unit); `utf16` stays

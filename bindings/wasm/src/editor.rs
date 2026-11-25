@@ -1,7 +1,7 @@
 //! Editing the note on the engine's own view (Word's model): the selection, the one `text` tool
 //! (a click places the caret, a drag selects, a double click selects a word), editing keys, typed
 //! and pasted text, and the commands that act on the selection (`format.*`, `list.*`,
-//! `selection.*`). Every change is a `text.replace` transaction of the replica, run as the local
+//! `select.*`, the `*.insert` commands). Every change is a `text.replace` transaction of the replica, run as the local
 //! person; typing runs in one undo group until something else happens, so Undo takes back what
 //! was typed in one go.
 //!
