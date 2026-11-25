@@ -138,7 +138,7 @@ fn an_unchanged_note_saves_its_bytes_and_reopens_with_the_same_ids() {
 }
 
 #[test]
-fn a_merged_draft_is_taken_in_and_one_undo_of_its_scope_takes_it_back() {
+fn a_merged_draft_is_taken_in_and_one_undo_of_the_person_takes_it_back() {
     let mut doc = plan();
     // `doc.editor_text()` is read first so a stale editor would show the old text.
     assert_eq!(doc.editor_text().as_ref(), PLAN);
@@ -156,8 +156,12 @@ fn a_merged_draft_is_taken_in_and_one_undo_of_its_scope_takes_it_back() {
     assert_eq!(doc.editor_text().as_ref(), merged, "the editor shows the merged draft");
     assert!(doc.revision() > revision);
     assert!(doc.dirty());
-    assert_eq!(doc.execute("edit.undo", json!({ "scope": "agent" })).unwrap()["done"], true);
-    assert_eq!(doc.text(), PLAN, "one Undo in the draft's scope takes it back");
+    // The person approved the draft: the merge is one step of the person's Undo, never the
+    // agent's (kition-sdk `Replica::merge_changes`, M12a).
+    assert_eq!(doc.execute("edit.undo", json!({ "scope": "agent" })).unwrap()["done"], false);
+    assert_eq!(doc.text(), merged);
+    assert_eq!(doc.execute("edit.undo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.text(), PLAN, "one Undo takes the merged draft back");
     assert_eq!(doc.editor_text().as_ref(), PLAN);
 }
 
