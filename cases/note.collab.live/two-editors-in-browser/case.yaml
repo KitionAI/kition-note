@@ -4,8 +4,8 @@ feature: note.collab.live
 intent: >-
   Two editors of one note in one browser page, their replicas and presence relayed as a co-editing
   host relays them: what one types shows in the other at once, the other's caret stays on its
-  word while text comes in before it, both typing in one paragraph converge with every word
-  whole and save that text, and each shows the other person's caret (with their name) and
+  word while text comes in before it, typing in one paragraph after the other's change reaches
+  both and is the saved text, and each shows the other person's caret (with their name) and
   selection.
 layer: gate
 dimension: collab

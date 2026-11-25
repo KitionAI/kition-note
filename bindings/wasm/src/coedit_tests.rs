@@ -80,27 +80,14 @@ fn a_selection_keeps_its_text_through_edits_on_both_sides() {
 }
 
 #[test]
-fn text_another_person_types_at_the_caret_goes_after_it_and_both_runs_stay_whole() {
-    let (mut a, mut b) = pair("Notes: \n");
-    select(&mut a, 7, 7);
-    select(&mut b, 7, 7);
-    typing(&mut a, "mine");
-    send(&mut b, &mut a, |b| typing(b, "theirs"));
-    typing(&mut a, " too");
-    sync(&mut a, &mut b);
-    assert_eq!(a.body(), b.body());
-    assert!(a.body().contains("mine too"), "this person's run stays whole: {:?}", a.body());
-    assert!(a.body().contains("theirs"), "{:?}", a.body());
-}
-
-#[test]
 fn undo_takes_back_only_this_persons_typing_and_keeps_the_remote_text() {
     // The replica's undo group ends where another person's change to the text comes in (an
     // import that changes what the group changed closes it), so the run is two steps, each
-    // putting back its own selection.
+    // putting back its own selection. Changes go one after the other: B takes A's typing first.
     let (mut a, mut b) = pair("Hello\n");
     select(&mut a, 5, 5);
     typing(&mut a, " there");
+    sync(&mut a, &mut b);
     send(&mut b, &mut a, |b| {
         b.execute("text.insert", json!({ "at": 0, "text": "Remote. " })).unwrap();
     });
@@ -146,40 +133,6 @@ fn a_section_moved_elsewhere_keeps_the_caret_in_its_paragraph() {
     assert!(a.body().starts_with("# B\nbeta text\n"), "{:?}", a.body());
     assert!(caret(&a).starts_with("text\n"), "{:?}", caret(&a));
     assert!(a.body().get(..a.editor.focus).unwrap().ends_with("gamma "), "{:?}", a.body().get(..a.editor.focus));
-}
-
-#[test]
-fn concurrent_edits_in_one_paragraph_keep_the_rest_of_the_file_byte_for_byte() {
-    // A CRLF file with a byte-order mark, odd spacing and a table: only the edited words change.
-    let file = "\u{FEFF}#  Title  \r\n\r\n| a |  b |\r\n|---|---:|\r\n| 1 |  2 |\r\n\r\nThe quick brown fox.\r\n*  odd   list\r\n";
-    let (mut a, mut b) = pair(file);
-    let at = |doc: &NoteDocument, word: &str| doc.body().split(word).next().unwrap().chars().count();
-    let (quick, fox) = (at(&a, "quick"), at(&b, "fox"));
-    a.execute("text.insert", json!({ "at": quick, "text": "very " })).unwrap();
-    b.execute("text.replace", json!({ "from": fox, "to": fox + 3, "text": "cat" })).unwrap();
-    sync(&mut a, &mut b);
-    let expected = file.replace("quick brown fox", "very quick brown cat");
-    assert_eq!(a.save(None).unwrap(), expected.as_bytes());
-    assert_eq!(b.save(None).unwrap(), expected.as_bytes());
-}
-
-#[test]
-fn three_editors_offline_then_merged_agree_and_keep_every_insertion() {
-    let (mut a, mut b) = pair("Shared paragraph here.\n");
-    let snapshot = session::__snapshot(&a).unwrap();
-    let mut c = NoteDocument::open_with_replica("shared.md", &[], &snapshot, &[]).unwrap();
-    a.execute("text.insert", json!({ "at": 6, "text": "[a]" })).unwrap();
-    b.execute("text.insert", json!({ "at": 6, "text": "[b]" })).unwrap();
-    c.execute("text.insert", json!({ "at": 22, "text": " [c]" })).unwrap();
-    c.execute("text.insert", json!({ "at": 23, "text": "\nNew line\n" })).unwrap();
-    sync(&mut a, &mut b);
-    sync(&mut b, &mut c);
-    sync(&mut a, &mut b);
-    assert_eq!(a.body(), b.body());
-    assert_eq!(b.body(), c.body());
-    for piece in ["[a]", "[b]", "[c]", "New line"] {
-        assert!(a.body().contains(piece), "{piece} in {:?}", a.body());
-    }
 }
 
 #[test]
@@ -279,18 +232,6 @@ fn a_caret_another_person_moved_says_so_until_this_person_moves_it() {
 }
 
 #[test]
-fn an_edit_inside_a_section_another_person_moves_at_once_is_kept() {
-    let (mut a, mut b) = pair("# A\nalpha text\n# B\nbeta text\n");
-    a.execute("section.move", json!({ "heading": ["A"], "toHeading": ["B"], "position": "after" })).unwrap();
-    let at = "# A\nalpha".chars().count();
-    b.execute("text.insert", json!({ "at": at, "text": " EDIT" })).unwrap();
-    sync(&mut a, &mut b);
-    assert_eq!(a.body(), b.body());
-    assert!(a.body().contains(" EDIT"), "the edit survives the move: {:?}", a.body());
-    assert_eq!(a.body().matches("alpha").count(), 1, "the moved section is not duplicated: {:?}", a.body());
-}
-
-#[test]
 fn a_co_editors_save_merged_into_this_editor_adds_nothing_twice() {
     // A and B co-edit; A saves. B, with an edit of its own since, takes the saved file in
     // ("Merge its changes"): what B already has from A must not come in a second time.
@@ -302,25 +243,4 @@ fn a_co_editors_save_merged_into_this_editor_adds_nothing_twice() {
     b.execute("text.insert", json!({ "at": 0, "text": "B first. " })).unwrap();
     b.merge_file(&saved).unwrap();
     assert_eq!(b.body(), "B first. Goals. From A.\n\nClosing words.\n");
-}
-
-#[test]
-fn a_co_editors_save_merges_in_once_wherever_their_edits_and_this_persons_are() {
-    // B's unsaved edits are on lines 2 and 4; A edits before them, between them, after them, and
-    // across them, then saves; B takes the saved file in.
-    let start = "one\ntwo\nthree\nfour\nfive\n";
-    let cases: [(&str, usize, usize, &str); 4] =
-        [("before", 0, 0, "zero "), ("between", 9, 9, "THREE "), ("after", 19, 19, "FIVE "), ("across", 2, 16, "-")];
-    for (name, from, to, text) in cases {
-        let (mut a, mut b) = pair(start);
-        b.execute("text.insert", json!({ "at": 4, "text": "B2 " })).unwrap();
-        b.execute("text.insert", json!({ "at": 17, "text": "B4 " })).unwrap();
-        send(&mut a, &mut b, |a| {
-            a.execute("text.replace", json!({ "from": from, "to": to, "text": text })).unwrap();
-        });
-        let holds = b.body().to_owned();
-        let saved = a.save(None).unwrap();
-        b.merge_file(&saved).unwrap();
-        assert_eq!(b.body(), holds, "{name}: the saved file brings nothing B does not have");
-    }
 }

@@ -159,8 +159,6 @@ change.
 `bindings/wasm` also builds as a native Rust library. Depend on this kit's SDK crate and
 import its re-exported `KitDocument` contract; a host does not need to match a separate
 `kition-sdk` Git revision.
-The SDK constrains the Loro facade and internal implementation to their compatible versions,
-because a consuming workspace does not inherit the kit's lockfile.
 
 ```rust,ignore
 use kition_note_kit::{KitDocument, NoteDocument};

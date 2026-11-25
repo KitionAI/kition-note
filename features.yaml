@@ -112,13 +112,15 @@ features:
     dimension: [collab, function, data-safety]
     priority: P1
     status: has
-    paths: [bindings/wasm/src/lib.rs, bindings/wasm/src/editor.rs, bindings/wasm/src/collab.rs, bindings/wasm/src/coedit_tests.rs, bindings/wasm/tests/convergence.rs, web/src/Presence.tsx, web/src/App.tsx, web/src/main.tsx, kit.json]
+    paths: [bindings/wasm/src/lib.rs, bindings/wasm/src/editor.rs, bindings/wasm/src/collab.rs, bindings/wasm/src/coedit_tests.rs, web/src/Presence.tsx, web/src/App.tsx, web/src/main.tsx, kit.json]
     gap: >-
       A typing run is one undo step only until another person's change to the text comes in (the
       replica's undo group ends at an import that touches the same text); the run then undoes in
       two steps. Peers' carets are placed in this person's own layout (their active line's
-      Markdown syntax is not shown here).
-    cases: [note.collab.live/converges, note.collab.live/editor-follows-remote, note.collab.live/two-editors-in-browser, regressions/issue-coedit-save-merged-twice]
+      Markdown syntax is not shown here). Changes are taken in order (kition-sdk plain model): two
+      editors that change the note at once are not merged; the later one's changes are refused as
+      stale.
+    cases: [note.collab.live/editor-follows-remote, note.collab.live/two-editors-in-browser, regressions/issue-coedit-save-merged-twice]
     since: "2026-11-16"
   - id: note.text.edit
     title: "Read, find, insert, delete and replace text; write the whole note"

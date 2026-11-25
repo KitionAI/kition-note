@@ -3,11 +3,10 @@ id: note.collab.live/editor-follows-remote
 feature: note.collab.live
 intent: >-
   Another person's changes come into an open note while this person has a caret, a selection, an
-  open typing run and folds: each stays on its text (edits on both sides at once, wide
-  characters, a moved section), text typed at the caret by the other goes after it, Undo takes
-  back only this person's typing, concurrent edits in one paragraph leave the rest of the file
-  byte for byte, three editors offline then merged agree, and presence positions shared by one
-  editor are placed by another where its own caret would be.
+  open typing run and folds, the changes taken in order: each stays on its text (edits before
+  and after it, wide characters, a moved section), Undo takes back only this person's typing,
+  and presence positions shared by one editor are placed by another where its own caret would
+  be.
 layer: gate
 dimension: collab
 source:

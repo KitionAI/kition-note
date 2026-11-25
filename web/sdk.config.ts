@@ -11,8 +11,8 @@ export const tessera = path.resolve(process.env.KITION_TESSERA ?? path.join(repo
 
 /**
  * With KITION_LINK=1 (.pnpmfile.cjs), @kition/sdk and @kition/tessera are the checkouts' built
- * packages, outside node_modules. Their bare imports (React, Loro, Tessera) resolve as if they were
- * made here, so the page has one React, one Tessera, and one Loro, and the build never needs the
+ * packages, outside node_modules. Their bare imports (React, Tessera) resolve as if they were made
+ * here, so the page has one React and one Tessera, and the build never needs the
  * checkouts' node_modules.
  */
 export function dependenciesFromHere(): Plugin {

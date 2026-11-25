@@ -97,20 +97,20 @@ Positions are Unicode scalars in Rust and UTF-16 code units in TypeScript. Agent
 
 ### 2.7 Live co-editing
 
-The note co-edits through the Kit UI protocol's `replica` and `presence` capabilities, so any host that relays replica changes gets live co-editing. Nothing here is note-specific in the protocol; what the note adds is how its one text field behaves.
+The note co-edits through the Kit UI protocol's `replica` and `presence` capabilities, so any host that relays replica changes gets live co-editing. Nothing here is note-specific in the protocol; what the note adds is how its one text field behaves. The KDM is a plain object store with an ordered change log (kition-sdk data model 6): a replica takes another's changes only in order, one line of changes after the other, and refuses changes that do not follow its version (`stale`); concurrent edits are not merged (Kition Desktop is for one person; collaboration comes later with server-ordered changes).
 
 | Concern | How the note does it |
 |---|---|
 | Local edits as KDM changes | Every edit (typing, a command, a section move) is text inserts and deletes on `Note.body` (scalar indices), `eol`/`bom` register writes, or comment objects; kit-editor sends `replica/changed` after each, and the host pulls them with `replica/export` |
 | Remote changes, live | `replica/import` goes to the engine worker (`import_changes`); kit-editor repaints the canvas and re-asks the text tool's overlays, so the other person's text shows at once |
-| Text runs, blocks, marks | All are Markdown source in `body`: a paragraph is a run of characters, a block boundary is `\n`, a mark is its delimiters (`**`, `[[`, `|`). They merge as text (Loro's text CRDT): concurrent insertions are all kept and ordered by actor, a deletion takes only the characters it saw. A block move (`section.move`) is a delete plus an insert of the section's text, so a concurrent edit inside the moved section stays at the old place (the delete removes only what the mover saw) |
-| The file stays what people wrote | The merged text is the file: nothing is regenerated, so only edited spans differ from the original bytes (`coedit_tests::concurrent_edits_in_one_paragraph_keep_the_rest_of_the_file_byte_for_byte`). Concurrent Markdown edits can still produce syntax neither person typed (two people closing one `**` at once); `note_check` reports it like any other note |
+| Text runs, blocks, marks | All are Markdown source in `body`: a paragraph is a run of characters, a block boundary is `\n`, a mark is its delimiters (`**`, `[[`, `|`). A change is text inserts and deletes at character positions; a block move (`section.move`) is a delete plus an insert of the section's text |
+| The file stays what people wrote | The text is the file: nothing is regenerated, so only edited spans differ from the original bytes |
 | Caret, selection, folds | `Editor::follow_remote` diffs the text before and after an import (common start and end skipped, the middle diffed with the file merge's line-then-character diff) and moves every byte offset the editor keeps through those edits: the caret, the anchor, folds, the open typing step's ranges, the undo records' selections and the selection history. Text inserted at the caret goes after it (each person's typing run stays whole); an offset inside replaced text goes to the replacement's end |
 | Undo | The person's Undo takes back only their own changes (KDM undo scope). The replica's undo group ends where an import changes the same text, so the editor ends its typing step there too, and a run that another person's change interrupted undoes in two steps (each restoring its own selection) |
 | Scrolling | A caret moved by another person's change is not scrolled to (`caretRect`'s `remote`): one in view stays where it is on screen, one out of view is left alone |
 | Presence | The engine shares `{ caret, anchor }` as `{ object: "note", field: "body", offset }` (Unicode characters, the same on every replica) and `["note"]` as the selection when text is selected (`presenceCaret`); the editor sends it with `presence/set`. Each peer's caret and selection are placed in this person's layout (`presenceLocate`) and drawn over the canvas in the peer's color with their name (`web/src/Presence.tsx`) |
 
-Verified by the convergence suite (`bindings/wasm/tests/convergence.rs`, case `note.collab.live/converges`), the editor's co-editing tests (`bindings/wasm/src/coedit_tests.rs`, `note.collab.live/editor-follows-remote`) and two editors in a browser (`web/tests/workspace.mjs`, `note.collab.live/two-editors-in-browser`).
+Verified by the editor's co-editing tests (`bindings/wasm/src/coedit_tests.rs`, `note.collab.live/editor-follows-remote`) and two editors in a browser (`web/tests/workspace.mjs`, `note.collab.live/two-editors-in-browser`).
 
 ## 3. Commands
 

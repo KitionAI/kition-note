@@ -2,6 +2,15 @@
 
 Changes to Kition Note, newest first. A version is the kit package version in `kit.json`.
 
+## Unreleased
+
+- The engine runs on kition-sdk's plain document model (no CRDT, kition-sdk 91cf510): a note's
+  replica takes other replicas' changes only in order and refuses changes that do not follow its
+  version (`stale`); concurrent edits are no longer merged. A stored replica opens whatever the
+  file's stamp and takes the file's difference in as one import change, as before. Loro is no
+  longer bundled or linked. A merged draft and a restored earlier state (`mergeChanges`,
+  `restoreState`) are taken in by the editor as a command's change is.
+
 ## 0.1.5
 
 - The same kit as 0.1.4, built on kition-sdk 6672663 (the replica's undo passes over an undo group whose changes came to nothing): the 0.1.4 package was built on kition-sdk 6b4d471.

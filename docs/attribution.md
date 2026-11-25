@@ -6,9 +6,8 @@ headless `kition-note` executable.
 
 | Library | License | Through |
 |---|---|---|
-| Kition SDK (`kition-sdk`, `kition-kdm`, `kition-headless`, `kition-kit-server`, `kition-convergence`, `kition-kits`, `kition-env`) | Apache-2.0 | direct, pinned by commit in `Cargo.toml` |
+| Kition SDK (`kition-sdk`, `kition-kdm`, `kition-headless`, `kition-kit-server`, `kition-kits`, `kition-env`) | Apache-2.0 | direct, pinned by commit in `Cargo.toml` |
 | Kition Tessera icons (`kition-tessera-icons`) | Apache-2.0; its `lucide:` icons are Lucide path data (ISC, Feather-derived ones MIT), see [NOTICE](../NOTICE) | direct, pinned by commit in `Cargo.toml` |
-| Loro (`loro`) | MIT | `kition-kdm` (the KDM's replication engine) |
 | serde, serde_json | MIT OR Apache-2.0 | direct |
 | latex-rust 2.1.1 | MIT OR Apache-2.0 | direct (math formulas), vendored in `vendor/latex-rust` with its license files and NOTICE; changed by the Kition authors to take its dvips color names from a table of our own (`src/color.rs`) in place of its data file derived from the LaTeX graphics bundle |
 | STIX Two Math 2.13 | SIL Open Font License 1.1 (text below) | the math face, unmodified, as latex-rust ships it (`vendor/latex-rust/fonts/stix-two-math/`, with its `OFL.txt`); Copyright 2001-2021 The STIX Fonts Project Authors. STIX Fonts is a trademark of The Institute of Electrical and Electronics Engineers, Inc. |

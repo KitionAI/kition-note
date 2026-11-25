@@ -3,7 +3,7 @@
 
 use std::time::Instant;
 
-use kition_kit::kdm::comment::{AnchorRange, CommentAnchor, NewComment, add_thread, delete_comment, reply, threads};
+use kition_kit::kdm::comment::{AnchorRange, CommentAnchor, NewComment, add_thread, reply, threads};
 use kition_kit::kdm::comment::{COMMENT_THREAD_TYPE_JSON, COMMENT_TYPE_JSON};
 use kition_kit::session::{KitSession, MemoryBlobs};
 
@@ -144,58 +144,26 @@ fn said(body: &str) -> NewComment {
     NewComment { author: "user:ada".into(), name: None, body: body.into(), created: "2026-01-01T00:00:00.000Z".into() }
 }
 
-/// A note with one thread of `count` comments, and a second replica of it.
-fn two_replicas(count: usize) -> (KitSession<NoteModel>, KitSession<NoteModel>, ObjectId, Vec<ObjectId>) {
-    let mut first = import(b"# Plan\n\nGoals\n");
+/// A note with one thread of `count` comments.
+fn with_thread(count: usize) -> KitSession<NoteModel> {
+    let mut session = import(b"# Plan\n\nGoals\n");
     let anchor = CommentAnchor {
         field: Some(BODY.into()),
         range: Some(AnchorRange { start: 8, end: 13 }),
         quote: Some("Goals".into()),
         ..CommentAnchor::object(&root_id())
     };
-    let ((thread, comment), _) = first.execute(&person(), |_, tx| Ok(add_thread(tx, &anchor, &said("Which quarter?"))?)).unwrap();
-    let mut comments = vec![comment];
+    let ((thread, _), _) = session.execute(&person(), |_, tx| Ok(add_thread(tx, &anchor, &said("Which quarter?"))?)).unwrap();
     for index in 1..count {
-        let (reply_id, _) = first.execute(&person(), |_, tx| Ok(reply(tx, &thread, &said(&format!("Reply {index}")))?)).unwrap();
-        comments.push(reply_id);
+        session.execute(&person(), |_, tx| Ok(reply(tx, &thread, &said(&format!("Reply {index}")))?)).unwrap();
     }
-    let second = KitSession::<NoteModel>::open_snapshot(&first.snapshot().unwrap(), Box::new(MemoryBlobs::default()), ActorId::random()).unwrap();
-    (first, second, thread, comments)
-}
-
-fn exchange(a: &mut KitSession<NoteModel>, b: &mut KitSession<NoteModel>) {
-    for _ in 0..3 {
-        b.import_changes(&a.export_changes(&b.version()).unwrap()).unwrap();
-        a.import_changes(&b.export_changes(&a.version()).unwrap()).unwrap();
-    }
+    session
 }
 
 #[test]
 fn repair_leaves_whole_threads_alone() {
-    let (mut first, ..) = two_replicas(2);
+    let mut first = with_thread(2);
     let (repaired, _) = first.execute(&Origin::system("repair"), |_, tx| Ok(repair_comment_threads(tx)?)).unwrap();
     assert!(!repaired);
     assert_eq!(threads(first.replica()).unwrap()[0].comments.len(), 2);
-}
-
-#[test]
-fn a_thread_whose_comments_two_people_deleted_at_once_is_deleted() {
-    let (mut first, mut second, thread, comments) = two_replicas(2);
-    first.execute(&person(), |_, tx| Ok(delete_comment(tx, &thread, &comments[0])?)).unwrap();
-    second.execute(&person(), |_, tx| Ok(delete_comment(tx, &thread, &comments[1])?)).unwrap();
-    exchange(&mut first, &mut second);
-    assert!(threads(first.replica()).unwrap().is_empty());
-    assert_eq!(first.state_hash().unwrap(), second.state_hash().unwrap());
-}
-
-#[test]
-fn a_reply_to_a_thread_someone_deleted_meanwhile_is_deleted() {
-    let (mut first, mut second, thread, comments) = two_replicas(1);
-    first.execute(&person(), |_, tx| Ok(delete_comment(tx, &thread, &comments[0])?)).unwrap();
-    second.execute(&person(), |_, tx| Ok(reply(tx, &thread, &said("Q3"))?)).unwrap();
-    exchange(&mut first, &mut second);
-    assert!(first.replica().objects_of_type("Comment").is_empty());
-    assert!(second.replica().objects_of_type("Comment").is_empty());
-    assert_eq!(first.state_hash().unwrap(), second.state_hash().unwrap());
-    assert_eq!(first.model().body(), "# Plan\n\nGoals\n");
 }

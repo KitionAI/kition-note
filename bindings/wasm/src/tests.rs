@@ -104,24 +104,6 @@ fn undo_takes_back_only_its_own_scope() {
 }
 
 #[test]
-fn two_replicas_converge_through_their_changes() {
-    let mut a = plan();
-    let snapshot = kition_kit::session::__snapshot(&a).unwrap();
-    let mut b = NoteDocument::open_with_replica("plan.md", &[], &snapshot, &[]).unwrap();
-    assert_eq!(a.doc_id(), b.doc_id());
-    let (va, vb) = (kition_kit::session::__version(&a), kition_kit::session::__version(&b));
-    a.execute("text.insert", json!({ "at": 0, "text": "A" })).unwrap();
-    b.execute_as("text.insert", json!({ "at": PLAN.chars().count(), "text": "B" }), &Origin::agent("agent:test")).unwrap();
-    let from_a = kition_kit::session::__export_changes(&a, &va).unwrap();
-    let from_b = kition_kit::session::__export_changes(&b, &vb).unwrap();
-    KitSessionDocument::import_changes(&mut a, &from_b).unwrap();
-    KitSessionDocument::import_changes(&mut b, &from_a).unwrap();
-    assert_eq!(a.text(), b.text());
-    assert_eq!(a.text(), format!("A{PLAN}B"));
-    assert_eq!(a.session.state_hash().unwrap(), b.session.state_hash().unwrap());
-}
-
-#[test]
 fn a_stored_replica_takes_the_file_as_one_import() {
     let a = plan();
     let snapshot = kition_kit::session::__snapshot(&a).unwrap();
@@ -134,6 +116,25 @@ fn a_stored_replica_takes_the_file_as_one_import() {
     assert_eq!(NoteDocument::open_with_replica("plan.md", changed.as_bytes(), b"junk", &[]).unwrap().text(), changed);
     assert!(NoteDocument::open_with_replica("plan.md", &[], b"junk", &[]).is_err());
     assert!(NoteDocument::open_with_replica("plan.md", &[], &snapshot, b"x").is_err());
+}
+
+#[test]
+fn an_unchanged_note_saves_its_bytes_and_reopens_with_the_same_ids() {
+    let mut doc = plan();
+    let added = doc.execute("comment.add", json!({ "quote": "Goals", "body": "Which ones?", "created": "2026-11-24T10:00:00Z" })).unwrap();
+    let thread = added["thread"].as_str().unwrap().to_owned();
+    let saved = doc.save(None).unwrap();
+    assert_eq!(saved, PLAN.as_bytes(), "the comment stays out of the file");
+    assert_eq!(doc.save(None).unwrap(), saved, "saving again writes the same bytes");
+    let snapshot = kition_kit::session::__snapshot(&doc).unwrap();
+    let mut reopened = NoteDocument::open_with_replica("plan.md", &saved, &snapshot, &[]).unwrap();
+    assert_eq!(reopened.save(None).unwrap(), saved);
+    assert_eq!(reopened.doc_id(), doc.doc_id());
+    assert_eq!(kition_kit::session::__version(&reopened), kition_kit::session::__version(&doc), "the same file is no import change");
+    assert_eq!(reopened.session.state_hash().unwrap(), doc.session.state_hash().unwrap());
+    let threads = reopened.execute("comment.threads", json!({})).unwrap();
+    assert_eq!(threads["threads"][0]["id"], json!(thread));
+    assert_eq!(threads["threads"][0]["comments"][0]["id"], doc.execute("comment.threads", json!({})).unwrap()["threads"][0]["comments"][0]["id"]);
 }
 
 #[test]

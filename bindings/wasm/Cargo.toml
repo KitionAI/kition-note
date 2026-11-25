@@ -28,8 +28,6 @@ image = { workspace = true }
 base64 = { workspace = true }
 
 [dev-dependencies]
-# The Kition platform convergence suite (L6), on the same kition-sdk revision.
-kition-convergence = { workspace = true }
 # The declaration comparison (tests/declarations_independent.rs).
 regex = { workspace = true }
 # The corpus files' pinned hashes (tests/saved.rs, tools/xtask/corpus.json).

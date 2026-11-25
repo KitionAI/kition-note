@@ -2,9 +2,10 @@
  * The open note's session: kit-editor's `useKitSession` over the engine, which holds the note and
  * draws it. What the note adds is how a change of its file on disk comes in:
  *
- * - A stored replica opens whatever the file's stamp (`replicaMergesFile`): the engine merges
- *   what the file holds that the replica does not (`openWithReplica`, design 2.5), so a note
- *   changed on disk while it was closed keeps its comments and history.
+ * - The host hands over the stored replica whatever the file's stamp (Kit UI protocol UI-R1): the
+ *   engine takes in what the file holds that the replica does not as one import change
+ *   (`openWithReplica`, design 2.5), so a note changed on disk while it was closed keeps its
+ *   comments and history.
  * - A change on disk while the note has no unsaved edits merges into the open note
  *   (`followFile`), keeping its undo history and the caret; with unsaved edits kit-editor raises
  *   `conflict` and the person chooses (`mergeFromDisk`, `keepMine`).
@@ -22,7 +23,6 @@ export const message = (error: unknown) => (error instanceof Error ? error.messa
 export class NoteSessionBridge {
   followFile: ((engine: KitEngine) => Promise<boolean>) | null = null
   readonly options: KitSessionOptions = {
-    replicaMergesFile: true,
     followFile: (engine) => (this.followFile ? this.followFile(engine) : false),
   }
 }
