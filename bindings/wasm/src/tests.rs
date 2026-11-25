@@ -138,6 +138,50 @@ fn an_unchanged_note_saves_its_bytes_and_reopens_with_the_same_ids() {
 }
 
 #[test]
+fn a_merged_draft_is_taken_in_and_one_undo_of_its_scope_takes_it_back() {
+    let mut doc = plan();
+    // `doc.editor_text()` is read first so a stale editor would show the old text.
+    assert_eq!(doc.editor_text().as_ref(), PLAN);
+    let snapshot = kition_kit::session::__snapshot(&doc).unwrap();
+    let since = kition_kit::session::__version(&doc);
+    let mut draft = NoteDocument::open_with_replica("plan.md", &[], &snapshot, &[]).unwrap();
+    draft.execute("text.insert", json!({ "at": 6, "text": " ahead" })).unwrap();
+    let changes = kition_kit::session::__export_changes(&draft, &since).unwrap();
+    let revision = doc.revision();
+    let agent = Origin::agent("agent:test");
+    let damage = KitSessionDocument::merge_changes(&mut doc, &changes, &agent).unwrap();
+    assert_ne!(damage, kition_kit::session::Damage::None);
+    let merged = "# Plan ahead\n\nGoals \u{1F600} here\n";
+    assert_eq!(doc.text(), merged);
+    assert_eq!(doc.editor_text().as_ref(), merged, "the editor shows the merged draft");
+    assert!(doc.revision() > revision);
+    assert!(doc.dirty());
+    assert_eq!(doc.execute("edit.undo", json!({ "scope": "agent" })).unwrap()["done"], true);
+    assert_eq!(doc.text(), PLAN, "one Undo in the draft's scope takes it back");
+    assert_eq!(doc.editor_text().as_ref(), PLAN);
+}
+
+#[test]
+fn a_restored_state_is_taken_in_and_one_undo_takes_it_back() {
+    let mut doc = plan();
+    let earlier = kition_kit::session::__snapshot(&doc).unwrap();
+    doc.execute("text.insert", json!({ "at": 0, "text": "Draft. " })).unwrap();
+    let edited = doc.text().to_owned();
+    assert_eq!(doc.editor_text().as_ref(), edited);
+    let revision = doc.revision();
+    KitSessionDocument::restore_state(&mut doc, &earlier, &Origin::person("user:test")).unwrap();
+    assert_eq!(doc.text(), PLAN);
+    assert_eq!(doc.editor_text().as_ref(), PLAN, "the editor shows the restored state");
+    assert!(doc.revision() > revision);
+    assert_eq!(doc.execute("edit.undo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.text(), edited, "one Undo takes the restore back");
+    // Another document's state is refused, changing nothing.
+    let other = kition_kit::session::__snapshot(&plan()).unwrap();
+    assert!(KitSessionDocument::restore_state(&mut doc, &other, &Origin::person("user:test")).is_err());
+    assert_eq!(doc.text(), edited);
+}
+
+#[test]
 fn the_object_model_is_served_over_the_change_exchange() {
     let mut doc = plan();
     let snapshot = kition_kit::session::__snapshot(&doc).unwrap();
