@@ -1,15 +1,17 @@
 // An agent's draft and a restored version in the note's editor (Kit UI protocol sections 7d and
 // 7m), through the development host with the replica and checkpoints kept, on the sample note:
 // the person types, an agent's draft inserts a sentence and is compared (the preview lists it, the
-// note does not change), the person types again meanwhile, and the draft is accepted: the editor
-// shows all three. One Undo (the editor's own button) takes back the draft only, Redo brings it
-// back. A labelled checkpoint, a later edit, the checkpoint restored through the host: the note
-// shows the checkpoint's text, and one Undo brings the later edit back.
+// note does not change), the person comments in the panel meanwhile, and the draft is accepted:
+// the editor shows the typing, the comment and the sentence. One Undo (the editor's own button)
+// takes back the draft only, Redo brings it back. A draft that writes the text while the person
+// types into it is refused with the reason (plain model, rule D5) and changes nothing. A labelled
+// checkpoint, a later edit, the checkpoint restored through the host: the note shows the
+// checkpoint's text, and one Undo brings the later edit back.
 // node tests/drafts.mjs [chromium|webkit]
 // Prints PASS or FAIL per step; exits 1 on any FAIL. Needs the engine built into public/engine.
 import { chromium, webkit } from 'playwright'
 import { createServer } from 'vite'
-import { canvasReady, caretAfter, focusCanvas, kitFrame } from './canvasHelpers.mjs'
+import { canvasReady, caretAfter, focusCanvas, kitFrame, selectText } from './canvasHelpers.mjs'
 
 const which = process.argv[2] ?? 'chromium'
 const server = await createServer({ configFile: new URL('../vite.config.ts', import.meta.url).pathname, server: { port: 0, host: '127.0.0.1' }, logLevel: 'error' })
@@ -59,10 +61,14 @@ const press = async (id) => {
   await until(() => kit().getByTestId(id).isEnabled())
   await kit().getByTestId(id).click()
 }
+/** Whether the comments panel shows the person's comment. */
+const commented = () => until(async () => (await kit().getByTestId('note-comment-panel').innerText()).includes(COMMENT))
 const version = () => page.evaluate((path) => window.devHost.files.get(path)?.version ?? 0, PATH)
 
 const MINE = ' Mine first.'
 const MEANWHILE = ' Typed meanwhile.'
+const COMMENT = 'Is this callout needed?'
+const CLASH = 'From a colliding draft.\n\n'
 const DRAFTED = 'Drafted by the agent. '
 const LATER = ' After the checkpoint.'
 
@@ -72,43 +78,61 @@ try {
   await until(async () => (await canvasReady(page)) && (await engineText()).includes('# Sample note'), 300)
 
   // a. The person types; the agent's draft inserts a sentence before "A note is"; the comparison
-  // lists it and changes nothing; the person types again; the draft is accepted.
+  // lists it and changes nothing; meanwhile the person comments in the panel; the draft is accepted.
   await typeAfter('They stay as you wrote them.', MINE)
   const draftText = await engineText(true)
-  const at = [...draftText.slice(0, draftText.indexOf('A note is'))].length
-  await run('text.insert', { at, text: DRAFTED }, { draft: true })
+  await run('text.insert', { at: [...draftText.slice(0, draftText.indexOf('A note is'))].length, text: DRAFTED }, { draft: true })
   step('the draft holds the agent\'s sentence', (await engineText(true)).includes(`${DRAFTED}A note is`))
   step('the note does not, yet', !(await engineText()).includes(DRAFTED) && (await shows([MINE], [DRAFTED])))
   const compared = await page.evaluate(() => window.devHost.connection().draft.compare())
   const listed = compared.summary.texts.some((change) => change.after.includes(DRAFTED) && !change.before.includes(DRAFTED))
   step('the comparison lists the draft\'s sentence', listed, JSON.stringify(compared.summary).slice(0, 400))
   step('and the comparison changes nothing in the note', !(await engineText()).includes(DRAFTED) && (await shows([MINE], [DRAFTED])))
-  await typeAfter('Open the note', MEANWHILE)
+  await focusCanvas(page)
+  await selectText(page, run, engineText, 'Callouts')
+  await kit().getByTestId('note-comments-toggle').click()
+  await kit().getByTestId('note-comments-new').click()
+  const composer = kit().locator('[data-testid="note-comment-panel"] textarea').first()
+  await composer.fill(COMMENT)
+  await composer.press('ControlOrMeta+Enter')
+  step('the person\'s comment shows in the panel', await commented())
   const merged = await page.evaluate(() => window.devHost.connection().draft.merge({ kind: 'agent', principal: 'agent:test' }))
   step('the draft merges', merged.merged === true, JSON.stringify(merged).slice(0, 300))
-  step('the editor shows the person\'s two edits and the draft\'s', await shows([MINE, MEANWHILE, `${DRAFTED}A note is`]), (await shown()).slice(0, 400))
+  step('the editor shows the person\'s edits and the draft\'s', (await shows([MINE, `${DRAFTED}A note is`])) && (await commented()), (await shown()).slice(0, 400))
   const withDraft = await engineText()
 
   // b. One Undo takes back the draft's sentence only; Redo brings it back.
   await press('note-undo')
-  step('one Undo takes back the draft only', await shows([MINE, MEANWHILE], [DRAFTED]), (await shown()).slice(0, 400))
-  step('the note is the person\'s two edits', (await engineText()) === withDraft.replace(DRAFTED, ''))
+  step('one Undo takes back the draft only', (await shows([MINE], [DRAFTED])) && (await commented()), (await shown()).slice(0, 400))
+  step('the note is the person\'s text', (await engineText()) === withDraft.replace(DRAFTED, ''))
   await press('note-redo')
-  step('Redo brings the draft back', await shows([MINE, MEANWHILE, `${DRAFTED}A note is`]))
+  step('Redo brings the draft back', (await shows([MINE, `${DRAFTED}A note is`])) && (await commented()))
   step('the note is as merged', (await engineText()) === withDraft)
+
+  // c. A draft that writes the text the person also typed into meanwhile is refused, saying why
+  // (rule D5), and changes nothing; the person discards it.
+  const conflictText = await engineText(true)
+  await run('text.insert', { at: [...conflictText.slice(0, conflictText.indexOf('## Tasks'))].length, text: CLASH }, { draft: true })
+  await typeAfter('Open the note', MEANWHILE)
+  const typed = await engineText()
+  const refused = await page.evaluate(() => window.devHost.connection().draft.merge({ kind: 'agent', principal: 'agent:test' }).then(() => 'merged', (error) => String(error?.message ?? error)))
+  step('a draft colliding with the person\'s typing is refused, saying why', /collides/.test(refused) && /D5/.test(refused), refused)
+  step('and the note is unchanged', (await engineText()) === typed && (await shows([MEANWHILE, MINE, DRAFTED], [CLASH])) && (await commented()))
+  await page.evaluate(() => window.devHost.connection().draft.discard())
 
   // d. A labelled checkpoint of the saved note; a later edit; the checkpoint restored; Undo.
   const before = await version()
   await page.evaluate(() => window.devHost.connection().save())
   await until(async () => (await version()) > before)
   await until(() => page.evaluate((path) => window.devHost.history.replica(path) !== null, PATH))
+  const saved = await engineText()
   const checkpoint = await page.evaluate(() => window.devHost.recordCheckpoint({ origin: 'kit', label: 'Before review' }))
   step('a labelled checkpoint is recorded', Boolean(checkpoint?.id), JSON.stringify(checkpoint))
   await typeAfter('Edit one cell of the table', LATER)
   const later = await engineText()
   await page.evaluate((id) => window.devHost.restoreCheckpoint(id), checkpoint.id)
   step('the restore shows the checkpoint\'s note', await shows([MINE, MEANWHILE, DRAFTED], [LATER]), (await shown()).slice(0, 400))
-  step('the note is the checkpoint\'s text', (await engineText()) === withDraft)
+  step('the note is the checkpoint\'s text', (await engineText()) === saved)
   await press('note-undo')
   step('one Undo brings the later edit back', await shows([LATER, DRAFTED]))
   step('the note is as before the restore', (await engineText()) === later)

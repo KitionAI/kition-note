@@ -4,10 +4,12 @@ feature: note.agent.draft
 intent: >-
   Through the real editor under the development host (replica and checkpoints kept), on the sample
   note: the person types, an agent's draft inserts a sentence, its comparison lists the sentence
-  and changes nothing, the person types again meanwhile, and the accepted draft shows in the
-  editor with both of the person's edits. One Undo with the editor's button takes back the draft
-  only and Redo brings it back. A labelled checkpoint, a later edit, the checkpoint restored
-  through the host: the editor shows the checkpoint's text, and one Undo brings the later edit back.
+  and changes nothing, the person adds a comment in the panel meanwhile, and the accepted draft
+  shows in the editor with the person's typing and comment. One Undo with the editor's button
+  takes back the draft only and Redo brings it back. A draft writing the text while the person
+  types into it is refused with the reason (rule D5) and leaves the note unchanged. A labelled
+  checkpoint, a later edit, the checkpoint restored through the host: the editor shows the
+  checkpoint's text, and one Undo brings the later edit back.
 layer: gate
 dimension: collab
 source:
