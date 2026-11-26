@@ -120,7 +120,7 @@ features:
       Markdown syntax is not shown here). Changes are taken in order (kition-sdk plain model): two
       editors that change the note at once are not merged; the later one's changes are refused as
       stale.
-    cases: [note.collab.live/editor-follows-remote, note.collab.live/two-editors-in-browser, regressions/issue-coedit-save-merged-twice, regressions/issue-merge-follows-draft, regressions/issue-repair-after-draft]
+    cases: [note.collab.live/editor-follows-remote, note.collab.live/two-editors-in-browser, regressions/issue-coedit-save-merged-twice, regressions/issue-merge-follows-draft, regressions/issue-repair-after-draft, regressions/issue-merge-changing-nothing]
     since: "2026-11-16"
   - id: note.text.edit
     title: "Read, find, insert, delete and replace text; write the whole note"

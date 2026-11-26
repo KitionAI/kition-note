@@ -1,0 +1,27 @@
+format: 1
+id: regressions/issue-merge-changing-nothing
+feature: note.collab.live
+intent: >-
+  A merged draft that changes nothing records nothing (kition-sdk 6a57d68): the person deletes a
+  comment while an agent's draft deletes the same one (the same change, rules D6 and D8), and the
+  repair writes nothing. The merge answers no scope and no damage; the state, the version, the
+  person's undo depth, the revision and the editor's undo records stay, so the editor never takes
+  a record of the merge for the step below. The person's next Undo takes back their deletion: the
+  comment is back and the selection is the one the deletion's step leaves; Redo deletes it again.
+  The note's repair cannot take back a draft whole: a draft replying to a thread the person deleted
+  is refused by the merge (D8).
+layer: unit
+dimension: collab
+source:
+  kind: issue
+  from: kition-sdk 6a57d68 alignment (schema-freeze, 2026-11-26)
+  license: owned
+input: []
+steps:
+  - cargo-test:
+      package: kition-note-kit
+      filter: tests::a_merge_that_changes_nothing_records_no_step_and_undo_takes_back_the_persons_deletion
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-26"
+timeout_s: 300

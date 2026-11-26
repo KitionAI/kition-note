@@ -311,6 +311,60 @@ fn a_thread_the_merge_empties_is_deleted_in_the_merge_step_and_one_undo_brings_i
 }
 
 #[test]
+fn a_merge_that_changes_nothing_records_no_step_and_undo_takes_back_the_persons_deletion() {
+    // The person deletes a comment while an agent's draft deletes the same one: the merge takes
+    // nothing in (data model 6.6 D6, D8: both removing one item, both deleting one object, are
+    // the same change) and the repair writes nothing, so it records nothing (kition-sdk 6a57d68):
+    // no scope, no damage, the state, the version, the undo depth, the revision and the editor's
+    // undo records stay. The person's next Undo takes back their own deletion: the comment is back
+    // and the selection is the one the deletion's step leaves (a comment command keeps no editor
+    // record, so the selection stays where the person had it). Before, a merge that changed
+    // nothing was a step of its own, and the editor took its record for the step below. (The note's
+    // repair cannot take back a draft whole: a draft replying to a thread the person deleted is
+    // refused by the merge, D8, so the draft here cancels against the person's own deletion.)
+    let mut doc = plan();
+    let added = doc.execute("comment.add", json!({ "quote": "Goals", "body": "Which ones?", "created": "2026-11-25T10:00:00Z" })).unwrap();
+    let thread = added["thread"].as_str().unwrap().to_owned();
+    let replied = doc.execute("comment.reply", json!({ "thread": thread, "body": "These.", "created": "2026-11-25T10:01:00Z" })).unwrap();
+    let second = replied["comment"].as_str().unwrap().to_owned();
+    doc.execute("select.set", json!({ "anchor": 8, "focus": 13 })).unwrap();
+    let both = doc.execute("comment.threads", json!({})).unwrap();
+    let both_state = doc.session.state_hash().unwrap();
+    let since = kition_kit::session::__version(&doc);
+    let mut draft = NoteDocument::open_with_replica("plan.md", &[], &kition_kit::session::__snapshot(&doc).unwrap(), &[]).unwrap();
+    let agent = Origin::agent("agent:test");
+    draft.execute_as("comment.delete", json!({ "thread": thread, "comment": second }), &agent).unwrap();
+    let changes = kition_kit::session::__export_changes(&draft, &since).unwrap();
+
+    doc.execute("comment.delete", json!({ "thread": thread, "comment": second })).unwrap();
+    let one = doc.execute("comment.threads", json!({})).unwrap();
+    assert_eq!(one["threads"][0]["comments"].as_array().map(Vec::len), Some(1));
+    let selection = (doc.editor.anchor, doc.editor.focus);
+    let (deleted, version, revision) = (doc.session.state_hash().unwrap(), doc.session.version(), doc.revision());
+    let depth = doc.session.undo_depth(kition_kit::kdm::UndoScope::Person);
+    let records = (doc.editor.done.len(), doc.editor.undone.len(), doc.next_record(true).is_some());
+
+    let (scope, damage) = KitSessionDocument::merge_changes(&mut doc, &changes, &agent).unwrap();
+    assert_eq!(scope, None, "no step was recorded");
+    assert_eq!(damage, kition_kit::session::Damage::None);
+    assert_eq!(doc.session.state_hash().unwrap(), deleted, "the merge changes nothing");
+    assert_eq!(doc.session.version(), version, "no change is logged");
+    assert_eq!(doc.session.undo_depth(kition_kit::kdm::UndoScope::Person), depth, "the merge records no step");
+    assert_eq!(doc.revision(), revision);
+    assert_eq!((doc.editor.done.len(), doc.editor.undone.len(), doc.next_record(true).is_some()), records, "the editor records no step either");
+    assert_eq!((doc.editor.anchor, doc.editor.focus), selection);
+    assert_eq!(doc.execute("comment.threads", json!({})).unwrap(), one);
+
+    assert_eq!(doc.execute("edit.undo", json!({})).unwrap()["done"], true, "the person's Undo takes back their deletion");
+    assert_eq!(doc.session.state_hash().unwrap(), both_state, "exactly the state before the deletion");
+    assert_eq!(doc.execute("comment.threads", json!({})).unwrap(), both, "the deleted comment is back");
+    assert_eq!((doc.editor.anchor, doc.editor.focus), selection, "the selection the deletion's step leaves");
+    assert_eq!(doc.text(), PLAN);
+    assert_eq!(doc.execute("edit.redo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.session.state_hash().unwrap(), deleted, "Redo deletes the comment again");
+}
+
+#[test]
 fn a_restored_state_is_taken_in_and_one_undo_takes_it_back() {
     let mut doc = plan();
     let earlier = kition_kit::session::__snapshot(&doc).unwrap();
