@@ -1,0 +1,24 @@
+format: 1
+id: regressions/issue-draft-preview-repaired
+feature: note.collab.live
+intent: >-
+  A draft's preview runs the note's comment repair, as accepting the draft does: an agent's draft
+  deleting one comment of a two-comment thread while the person deletes the other leaves an empty
+  thread the repair deletes. The comparison and the merged state (kition-sdk
+  KitSession::compare_changes and merged_state, the engine member compareChanges) show the thread
+  gone, change nothing, and equal the state and the changes after the merge.
+layer: unit
+dimension: collab
+source:
+  kind: issue
+  from: kition-sdk regressions/issue-draft-preview-repaired (2026-11-26)
+  license: owned
+input: []
+steps:
+  - cargo-test:
+      package: kition-note-kdm
+      filter: the_preview_of_a_draft_that_empties_a_thread_shows_the_thread_gone
+expected:
+  - { actual: "out:steps", compare: exit, value: 0 }
+since: "2026-11-26"
+timeout_s: 300

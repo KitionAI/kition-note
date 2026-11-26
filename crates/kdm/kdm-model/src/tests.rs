@@ -204,6 +204,34 @@ fn a_draft_and_the_person_deleting_the_two_comments_of_a_thread_leave_no_empty_t
 }
 
 #[test]
+fn the_preview_of_a_draft_that_empties_a_thread_shows_the_thread_gone() {
+    // The same draft as above, previewed before it is accepted: the comparison and the merged
+    // state run the note's repair on their copy (kition-sdk `KitSession::compare_changes`,
+    // `merged_state`), so the preview shows the emptied thread deleted, changes nothing, and is
+    // exactly what merging gives.
+    let mut doc = with_thread(2);
+    let (thread, comments) = thread_ids(&doc);
+    let (mut draft, since) = draft_of(&doc);
+    draft.execute(&agent(), |_, tx| Ok(delete_comment(tx, &thread, &comments[0])?)).unwrap();
+    doc.execute(&person(), |_, tx| Ok(delete_comment(tx, &thread, &comments[1])?)).unwrap();
+    let changes = draft.export_changes(&since).unwrap();
+    let (before, version) = (doc.state_hash().unwrap(), doc.version());
+
+    let compared = doc.compare_changes(&changes).unwrap().to_json();
+    let preview = doc.merged_state(&changes).unwrap();
+    assert_eq!((doc.state_hash().unwrap(), doc.version()), (before, version.clone()), "a preview changes nothing");
+    assert_eq!(thread_ids(&doc), (thread.clone(), vec![comments[0].clone()]));
+    let deleted: Vec<&Value> = compared["deleted"].as_array().unwrap().iter().map(|deleted| &deleted["id"]).collect();
+    assert!(deleted.contains(&&json!(thread.to_string())), "the preview deletes the emptied thread: {compared}");
+    assert!(deleted.contains(&&json!(comments[0].to_string())), "and the comment the draft deleted: {compared}");
+
+    doc.merge_changes(&changes, &agent()).unwrap();
+    assert_eq!(doc.replica().objects_of_type(COMMENT_THREAD_TYPE), Vec::<ObjectId>::new());
+    assert_eq!(doc.replica().state_json().unwrap(), preview, "the preview is the merge");
+    assert_eq!(doc.replica().diff_since(&version).unwrap().to_json(), compared, "the comparison is what the merge changed");
+}
+
+#[test]
 fn a_draft_replying_to_a_thread_the_person_deleted_meanwhile_is_refused() {
     // The reply would be a comment in no thread: the merge refuses it (D8, the draft writes the
     // thread's list; the document deleted the thread) and changes nothing.
