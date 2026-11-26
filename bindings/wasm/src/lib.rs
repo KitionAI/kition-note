@@ -721,13 +721,14 @@ impl KitSessionDocument for NoteDocument {
     /// the revision moves; the selection follows each place the draft changed and the editor
     /// records the step (`took_in`), so one Undo takes back the merge and puts the selection back;
     /// the projection's ids follow the text.
-    fn merge_changes(&mut self, bytes: &[u8], origin: &Origin) -> Result<Damage, String> {
+    fn merge_changes(&mut self, bytes: &[u8], origin: &Origin) -> Result<(Option<UndoScope>, Damage), String> {
         self.stop_typing();
         let before = (self.editor.anchor, self.editor.focus);
-        let damage = self.session.merge_changes(bytes, origin)?;
-        self.took_in(&damage, before, UndoScope::of(origin.kind).is_some());
+        // The kit's repair of the merged state (an emptied thread deleted) is part of the step.
+        let (scope, damage) = self.session.merge_changes(bytes, origin)?;
+        self.took_in(&damage, before, scope == Some(UndoScope::Person));
         drop(self.ids());
-        Ok(damage)
+        Ok((scope, damage))
     }
 
     /// An earlier state written over the note (`restoreState`, Kit UI protocol `replica/restore`),

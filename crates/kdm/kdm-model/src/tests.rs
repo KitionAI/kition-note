@@ -188,7 +188,7 @@ fn thread_ids(session: &KitSession<NoteModel>) -> (ObjectId, Vec<ObjectId>) {
 fn a_draft_and_the_person_deleting_the_two_comments_of_a_thread_leave_no_empty_thread() {
     // An agent's draft deletes the first comment while the person deletes the second: each leaves
     // the thread one comment, and the list merge (data model 6.6, D6) takes both removals in. The
-    // repair after the merge deletes the thread left with none.
+    // repair, part of the merge's step, deletes the thread left with none.
     let mut doc = with_thread(2);
     let (thread, comments) = thread_ids(&doc);
     let (mut draft, since) = draft_of(&doc);

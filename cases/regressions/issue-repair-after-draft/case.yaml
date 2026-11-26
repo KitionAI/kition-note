@@ -5,8 +5,10 @@ intent: >-
   The comment-thread repair lost its only tests that make it change anything when the two-replica
   tests went. The states it repairs still arise on one line of changes: an agent's draft deleting
   one comment of a thread while the person deletes the other leaves it empty through the list
-  merge (the repair deletes it), and the person's Undo of a thread leaves the reply an agent added
-  since in no thread (the repair deletes it). A draft replying to a thread the person deleted
+  merge (the repair deletes it, in the merge's one undo step: one Undo of the person gives back
+  the exact state before the merge, the thread with the comment the person kept), and the
+  person's Undo of a thread leaves the reply an agent added since in no thread (the repair
+  deletes it). A draft replying to a thread the person deleted
   meanwhile is refused by the merge (rule D8) and changes nothing.
 layer: unit
 dimension: collab
@@ -22,6 +24,9 @@ steps:
   - cargo-test:
       package: kition-note-kdm
       test: undoing_a_thread_takes_the_reply_an_agent_added_since_with_it
+  - cargo-test:
+      package: kition-note-kit
+      filter: tests::a_thread_the_merge_empties_is_deleted_in_the_merge_step_and_one_undo_brings_it_back
 expected:
   - { actual: "out:steps", compare: exit, value: 0 }
 since: "2026-11-25"

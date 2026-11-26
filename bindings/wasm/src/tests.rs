@@ -149,7 +149,8 @@ fn a_merged_draft_is_taken_in_and_one_undo_of_the_person_takes_it_back() {
     let changes = kition_kit::session::__export_changes(&draft, &since).unwrap();
     let revision = doc.revision();
     let agent = Origin::agent("agent:test");
-    let damage = KitSessionDocument::merge_changes(&mut doc, &changes, &agent).unwrap();
+    let (scope, damage) = KitSessionDocument::merge_changes(&mut doc, &changes, &agent).unwrap();
+    assert_eq!(scope, Some(kition_kit::kdm::UndoScope::Person));
     assert_ne!(damage, kition_kit::session::Damage::None);
     let merged = "# Plan ahead\n\nGoals \u{1F600} here\n";
     assert_eq!(doc.text(), merged);
@@ -259,6 +260,54 @@ fn a_draft_made_before_the_person_typed_merges_with_the_typing_and_undoes_alone(
     assert_eq!(doc.execute("edit.undo", json!({})).unwrap()["done"], true);
     assert_eq!(doc.text(), GOALS);
     assert_eq!((doc.editor.anchor, doc.editor.focus), (13, 13));
+}
+
+#[test]
+fn a_thread_the_merge_empties_is_deleted_in_the_merge_step_and_one_undo_brings_it_back() {
+    // An agent's draft deletes one comment of a two-comment thread while the person deletes the
+    // other: the merge takes both removals in and the repair deletes the thread left with none,
+    // inside the merge's one step (kition-sdk `KitSession::merge_changes`, data model 6.6 D9).
+    // The person's one Undo gives back the exact state before the merge (the thread with the
+    // comment the person kept), the next one the person's deletion; Redo the repaired state.
+    let mut doc = plan();
+    let added = doc.execute("comment.add", json!({ "quote": "Goals", "body": "Which ones?", "created": "2026-11-25T10:00:00Z" })).unwrap();
+    let thread = added["thread"].as_str().unwrap().to_owned();
+    let first = added["comment"].as_str().unwrap().to_owned();
+    let replied = doc.execute("comment.reply", json!({ "thread": thread, "body": "These.", "created": "2026-11-25T10:01:00Z" })).unwrap();
+    let second = replied["comment"].as_str().unwrap().to_owned();
+    let both = doc.execute("comment.threads", json!({})).unwrap();
+    let both_state = doc.session.state_hash().unwrap();
+    let since = kition_kit::session::__version(&doc);
+    let mut draft = NoteDocument::open_with_replica("plan.md", &[], &kition_kit::session::__snapshot(&doc).unwrap(), &[]).unwrap();
+    let agent = Origin::agent("agent:test");
+    draft.execute_as("comment.delete", json!({ "thread": thread, "comment": first }), &agent).unwrap();
+    let changes = kition_kit::session::__export_changes(&draft, &since).unwrap();
+    doc.execute("comment.delete", json!({ "thread": thread, "comment": second })).unwrap();
+    let one = doc.execute("comment.threads", json!({})).unwrap();
+    assert_eq!(one["threads"][0]["id"], json!(thread), "the person's delete leaves the thread");
+    assert_eq!(one["threads"][0]["comments"].as_array().map(Vec::len), Some(1));
+    let before = doc.session.state_hash().unwrap();
+
+    let (scope, damage) = KitSessionDocument::merge_changes(&mut doc, &changes, &agent).unwrap();
+    assert_eq!(scope, Some(kition_kit::kdm::UndoScope::Person));
+    assert_ne!(damage, kition_kit::session::Damage::None);
+    assert_eq!(doc.execute("comment.threads", json!({})).unwrap()["threads"], json!([]), "no empty thread");
+    assert_eq!(doc.text(), PLAN);
+    let merged = doc.session.state_hash().unwrap();
+
+    assert_eq!(doc.execute("edit.undo", json!({ "scope": "agent" })).unwrap()["done"], false);
+    assert_eq!(doc.execute("edit.undo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.session.state_hash().unwrap(), before, "one Undo: exactly the state before the merge");
+    assert_eq!(doc.execute("comment.threads", json!({})).unwrap(), one, "the thread is back with the comment the person kept");
+    assert_eq!(doc.execute("edit.redo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.session.state_hash().unwrap(), merged, "Redo: exactly the repaired merge");
+    assert_eq!(doc.execute("comment.threads", json!({})).unwrap()["threads"], json!([]));
+    // Undo again, then the person's own deletion is the next step.
+    assert_eq!(doc.execute("edit.undo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.session.state_hash().unwrap(), before);
+    assert_eq!(doc.execute("edit.undo", json!({})).unwrap()["done"], true);
+    assert_eq!(doc.session.state_hash().unwrap(), both_state);
+    assert_eq!(doc.execute("comment.threads", json!({})).unwrap(), both);
 }
 
 #[test]
