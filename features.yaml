@@ -34,7 +34,7 @@ features:
     priority: P1
     status: has
     requirements: [AX13]
-    cases: [note.agent.draft/new-task]
+    cases: [note.agent.draft/new-task, note.agent.draft/editor-accept-undo-restore]
     since: "2026-11-16"
   - id: note.agent.preview
     title: "An agent's preview of a note is drawn by the engine with the fonts the kit ships (note_inspect preview: true)"

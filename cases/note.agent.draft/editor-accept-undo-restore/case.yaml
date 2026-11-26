@@ -1,0 +1,24 @@
+format: 1
+id: note.agent.draft/editor-accept-undo-restore
+feature: note.agent.draft
+intent: >-
+  Through the real editor under the development host (replica and checkpoints kept), on the sample
+  note: the person types, an agent's draft inserts a sentence, its comparison lists the sentence
+  and changes nothing, the person types again meanwhile, and the accepted draft shows in the
+  editor with both of the person's edits. One Undo with the editor's button takes back the draft
+  only and Redo brings it back. A labelled checkpoint, a later edit, the checkpoint restored
+  through the host: the editor shows the checkpoint's text, and one Undo brings the later edit back.
+layer: gate
+dimension: collab
+source:
+  kind: synthetic
+  from: web/tests/drafts.mjs
+  license: owned
+input: []
+steps:
+  - exec:
+      cmd: [node, web/tests/drafts.mjs, chromium]
+expected:
+  - { actual: "out:exec", compare: exit, value: 0 }
+since: "2026-11-26"
+timeout_s: 300
