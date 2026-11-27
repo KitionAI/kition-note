@@ -2,8 +2,8 @@
 //! (`kition-note-kit`), served headless over the Kit Protocol by `kition-headless`, as the kit's
 //! `kit.json` declares it, with the object model (`model.describe`, `model.batch`) and the replica
 //! methods (`model.open`, `model.import`, `model.export`, `model.save`) over the document's change
-//! exchange (engine contract 2), and the identity a file carries (`document.identity`,
-//! `document.fork`): a `.md` file is the note's text and embeds no replica, so it carries none.
+//! exchange (engine contract 2), and the identity a file carries (`file.identity`,
+//! `file.fork`): a `.md` file is the note's text and embeds no replica, so it carries none.
 
 use kition_headless::{FileIdentity, Headless, KitInfo};
 

@@ -1,4 +1,4 @@
-//! `document.identity` and `document.fork` (Kit Process Protocol section 5.6, KitModel M7a)
+//! `file.identity` and `file.fork` (Kit Process Protocol section 5.6, KitModel M7a)
 //! through the real `kition-note` process: a `.md` file is the note's text and nothing else (the
 //! replica, and the comments in it, are the host's, design "the file is the text"), so it embeds no
 //! replica and carries no document id. Opening it makes a new replica each time. A host learns that
@@ -42,7 +42,7 @@ async fn a_note_file_embeds_no_replica_so_it_carries_no_identity_and_forks_uncha
     let bytes = note();
     std::fs::write(dir.join("Plan.md"), &bytes).unwrap();
     let kit = launch(&dir).await;
-    assert!(kit.serves("document.identity"), "{}", kit.capabilities());
+    assert!(kit.serves("file.identity"), "{}", kit.capabilities());
 
     // A note, a byte copy of it and an empty note (made for the kit before it saved one) carry no
     // identity: the file is the text.

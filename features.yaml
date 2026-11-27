@@ -100,7 +100,7 @@ features:
     cases: [note.platform.color-scheme/follows-host, regressions/issue-dark-first-frame]
     since: "2026-11-18"
   - id: note.platform.document-identity
-    title: "A host asks a note file for its document id and forks it (document.identity, document.fork; Kit Process Protocol 5.6): a .md embeds no replica, so it carries none and forks unchanged"
+    title: "A host asks a note file for its document id and forks it (file.identity, file.fork; Kit Process Protocol 5.6): a .md embeds no replica, so it carries none and forks unchanged"
     dimension: [platform, data-safety]
     priority: P1
     status: has

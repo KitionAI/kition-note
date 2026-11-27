@@ -26,14 +26,14 @@ kition-note-view = { path = "crates/view/view" }
 kition-tessera-icons = { git = "https://github.com/KitionAI/kition-tessera", rev = "832f61a5e4b4ac1a5083620bfdeeb92a86560694" }
 # kition-sdk (public, https://github.com/KitionAI/kition-sdk), pinned by commit: one revision
 # for every crate of it.
-kition-kit = { git = "https://github.com/KitionAI/kition-sdk", rev = "d2b39aaf423d4082382781dd75a0e2a454a8d332", features = ["session"] }
-kition-headless = { git = "https://github.com/KitionAI/kition-sdk", rev = "d2b39aaf423d4082382781dd75a0e2a454a8d332" }
-kition-kit-server = { git = "https://github.com/KitionAI/kition-sdk", rev = "d2b39aaf423d4082382781dd75a0e2a454a8d332" }
-# A host of kit processes (`HeadlessKit`), for the `document.identity` tests.
-kition-kit-host = { git = "https://github.com/KitionAI/kition-sdk", rev = "d2b39aaf423d4082382781dd75a0e2a454a8d332" }
+kition-kit = { git = "https://github.com/KitionAI/kition-sdk", rev = "94c488a33b2cabf255c67d2d63167cd85b37c835", features = ["session"] }
+kition-headless = { git = "https://github.com/KitionAI/kition-sdk", rev = "94c488a33b2cabf255c67d2d63167cd85b37c835" }
+kition-kit-server = { git = "https://github.com/KitionAI/kition-sdk", rev = "94c488a33b2cabf255c67d2d63167cd85b37c835" }
+# A host of kit processes (`HeadlessKit`), for the `file.identity` tests.
+kition-kit-host = { git = "https://github.com/KitionAI/kition-sdk", rev = "94c488a33b2cabf255c67d2d63167cd85b37c835" }
 # The kits' MCP server's tools (kition-kits-mcp), for the headless kit's tests of writes with a basis.
-kition-kits = { git = "https://github.com/KitionAI/kition-sdk", rev = "d2b39aaf423d4082382781dd75a0e2a454a8d332" }
-kition-env = { git = "https://github.com/KitionAI/kition-sdk", rev = "d2b39aaf423d4082382781dd75a0e2a454a8d332" }
+kition-kits = { git = "https://github.com/KitionAI/kition-sdk", rev = "94c488a33b2cabf255c67d2d63167cd85b37c835" }
+kition-env = { git = "https://github.com/KitionAI/kition-sdk", rev = "94c488a33b2cabf255c67d2d63167cd85b37c835" }
 
 # Markdown (pulldown-cmark for CommonMark, GFM and wikilinks; saphyr only reads YAML)
 pulldown-cmark = { version = "0.13.5", default-features = false }
